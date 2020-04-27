@@ -3,18 +3,27 @@ export type Uuid = string & { readonly _: unique symbol };
 
 export interface GameState {
   game: Game;
-  piles: Piles;
   players: Player[];
   rounds: Round[];
 }
 
+export type FullGameState = GameState & {
+  piles: Piles;
+};
+
 export type PackId = string;
 export type PackDescription = string;
+
+export enum GameStatus {
+  Created = 'created',
+  Running = 'running',
+  Ended = 'ended',
+}
 
 export interface Game {
   id: Uuid;
   requiresPassword: boolean;
-  status: 'created' | 'running' | 'ended';
+  status: GameStatus;
   packs: Record<PackId, PackDescription>;
   timeouts: {
     playing: number;
@@ -31,10 +40,10 @@ export interface Game {
 }
 
 export interface Piles {
-  black: BlackCard[];
-  white: WhiteCard[];
-  discardedBlack: BlackCard[];
-  discardedWhite: WhiteCard[];
+  challenges: ChallengeCard[];
+  responses: ResponseCard[];
+  discardedChallenges: ChallengeCard[];
+  discardedResponses: ResponseCard[];
 }
 
 export enum CardType {
@@ -42,7 +51,7 @@ export enum CardType {
   Text = 'text',
 }
 
-export interface BlackCard {
+export interface ChallengeCard {
   type: CardType;
   value: string;
   draw: number;
@@ -50,7 +59,7 @@ export interface BlackCard {
   pack: PackId;
 }
 
-export interface WhiteCard {
+export interface ResponseCard {
   type: CardType;
   value: string;
   pack: PackId;
@@ -58,23 +67,34 @@ export interface WhiteCard {
 
 export interface Player {
   id: Uuid;
-  isAI: boolean;
   nickname: string;
-  deck: WhiteCard[];
   points: number;
+  isAI: boolean;
+  isActive: boolean;
   isHost: boolean;
+}
+
+export type FullPlayer = Player & {
+  deck: ResponseCard[];
+};
+
+export enum RoundStatus {
+  Created = 'created',
+  Played = 'played',
+  Revealed = 'revealed',
+  Ended = 'ended',
 }
 
 export interface Round {
   judge: Player['id'];
-  status: 'started' | 'played' | 'revealed' | 'ended';
+  status: RoundStatus;
   timeouts: {
     playing: Date;
     revealing?: Date;
     judging?: Date;
     betweenRounds?: Date;
   };
-  challenge: BlackCard;
+  challenge: ChallengeCard;
   submissions: RoundSubmission[];
   discard: RoundSubmission[];
 }
@@ -82,7 +102,7 @@ export interface Round {
 export interface RoundSubmission {
   player: Player['id'];
   timestamp: Date;
-  cards: WhiteCard[];
+  cards: ResponseCard[];
   pointsChange: number;
   isRevealed: boolean;
 }
