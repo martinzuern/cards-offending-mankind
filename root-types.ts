@@ -40,9 +40,9 @@ export interface Game {
 }
 
 export interface Piles {
-  challenges: ChallengeCard[];
+  prompts: PromptCard[];
   responses: ResponseCard[];
-  discardedChallenges: ChallengeCard[];
+  discardedPrompts: PromptCard[];
   discardedResponses: ResponseCard[];
 }
 
@@ -51,7 +51,7 @@ export enum CardType {
   Text = 'text',
 }
 
-export interface ChallengeCard {
+export interface PromptCard {
   type: CardType;
   value: string;
   draw: number;
@@ -94,7 +94,7 @@ export interface Round {
     judging?: Date;
     betweenRounds?: Date;
   };
-  challenge: ChallengeCard;
+  prompt: PromptCard;
   submissions: RoundSubmission[];
   discard: RoundSubmission[];
 }
