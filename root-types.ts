@@ -11,8 +11,11 @@ export type FullGameState = GameState & {
   piles: Piles;
 };
 
-export type PackId = string;
-export type PackDescription = string;
+export type Pack = {
+  abbr: string;
+  name: string;
+  icon?: string;
+};
 
 export enum GameStatus {
   Created = 'created',
@@ -24,7 +27,7 @@ export interface Game {
   id: Uuid;
   requiresPassword: boolean;
   status: GameStatus;
-  packs: Record<PackId, PackDescription>;
+  packs: Pack[];
   timeouts: {
     playing: number;
     revealing: number;
@@ -56,13 +59,13 @@ export interface PromptCard {
   value: string;
   draw: number;
   pick: number;
-  pack: PackId;
+  pack: Pack;
 }
 
 export interface ResponseCard {
   type: CardType;
   value: string;
-  pack: PackId;
+  pack: Pack;
 }
 
 export interface Player {
