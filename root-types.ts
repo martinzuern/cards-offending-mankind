@@ -23,6 +23,19 @@ export enum GameStatus {
   Ended = 'ended',
 }
 
+type SpecialRuleRandoCardrissio = {
+  type: 'RandoCardrissio';
+  players: number;
+};
+
+type SpecialRuleComdeyWriter = {
+  type: 'ComdeyWriter';
+  allCards: boolean;
+  numberOfCards: number;
+};
+
+export type SpecialRule = SpecialRuleRandoCardrissio | SpecialRuleComdeyWriter;
+
 export interface Game {
   id: Uuid;
   requiresPassword: boolean;
@@ -34,12 +47,9 @@ export interface Game {
     judging: number;
     betweenRounds: number;
   };
-  rules: {
-    handSize: number;
-    winnerPoints: number;
-    randoCardrissianPlayers: number;
-    comedyWriter: number;
-  };
+  handSize: number;
+  winnerPoints: number | false;
+  specialRules: SpecialRule[];
 }
 
 export interface Piles {
