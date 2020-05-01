@@ -4,69 +4,68 @@ info:
   description: Cards-Offending-Mankind Backend
   version: 1.0.0
 servers:
-- url: /api/v1
+  - url: /api/v1
 tags:
-- name: Examples
-  description: Simple example endpoints
-- name: Specification
-  description: The swagger API specification
+  - name: Examples
+    description: Simple example endpoints
+  - name: Specification
+    description: The swagger API specification
 paths:
-  /examples:
-    get:
-      tags:
-      - Examples
-      description: Fetch all examples
-      responses:
-        200:
-          description: Returns all examples
-          content: {}
-    post:
-      tags:
-      - Examples
-      description: Create a new example
-      requestBody:
-        description: an example
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ExampleBody'
-        required: true
-      responses:
-        200:
-          description: Returns all examples
-          content: {}
-  /examples/{id}:
-    get:
-      tags:
-      - Examples
-      parameters:
-      - name: id
-        in: path
-        description: The id of the example to retrieve
-        required: true
-        schema:
-          type: integer
-      responses:
-        200:
-          description: Return the example with the specified id
-          content: {}
-        404:
-          description: Example not found
-          content: {}
   /spec:
     get:
       tags:
       - Specification
       responses:
-        200:
+        '200':
           description: Return the API specification
           content: {}
+  /packs:
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: Pack
+                  properties:
+                    abbr:
+                      type: string
+                    name:
+                      type: string
+                    icon:
+                      type: string
+                    description:
+                      type: string
+                    official:
+                      type: boolean
+              examples:
+                Example:
+                  value:
+                    - description: '- placeholder -'
+                      official: true
+                      name: Green Box Expansion
+                      icon: square
+                      abbr: greenbox
+                    - description: 'Cards Against Humanity: Family Edition is a new fill-in-the-blank comedy game that’s just like Cards Against Humanity, but it’s written for kids and adults to play together.'
+                      official: true
+                      name: Family Edition (BETA)
+                      icon: child
+                      abbr: family
+          headers: {}
+      operationId: get-packs
+      description: Returns a list of all packs
 components:
   schemas:
     ExampleBody:
       title: example
       required:
-      - name
+        - name
       type: object
       properties:
         name:
