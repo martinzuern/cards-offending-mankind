@@ -8,7 +8,7 @@ import { GameState, Pack, Game } from '../../../root-types';
 import L from '../../common/logger';
 
 export class GameService {
-  getAvailableDecks(): Pack[] {
+  getAvailablePacks(): Pack[] {
     return Object.entries(CardDecks.metadata).map(([abbr, entry]) => ({
       ...entry,
       abbr,
