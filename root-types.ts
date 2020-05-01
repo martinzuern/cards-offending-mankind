@@ -9,12 +9,15 @@ export interface GameState {
 
 export type FullGameState = GameState & {
   piles: Piles;
+  players: FullPlayer[];
 };
 
 export type Pack = {
   abbr: string;
   name: string;
-  icon?: string;
+  icon: string;
+  description: string;
+  official: boolean;
 };
 
 export enum GameStatus {
@@ -69,13 +72,13 @@ export interface PromptCard {
   value: string;
   draw: number;
   pick: number;
-  pack: Pack;
+  packAbbr: Pack['abbr'];
 }
 
 export interface ResponseCard {
   type: CardType;
   value: string;
-  pack: Pack;
+  packAbbr: Pack['abbr'];
 }
 
 export interface Player {
@@ -100,7 +103,7 @@ export enum RoundStatus {
 }
 
 export interface Round {
-  judge: Player['id'];
+  judgeId: Player['id'];
   status: RoundStatus;
   timeouts: {
     playing: Date;
@@ -114,7 +117,7 @@ export interface Round {
 }
 
 export interface RoundSubmission {
-  player: Player['id'];
+  playerId: Player['id'];
   timestamp: Date;
   cards: ResponseCard[];
   pointsChange: number;
