@@ -33,9 +33,11 @@ export class DBService {
     L.info(`update game with id ${id}`);
     const lock = await redlock.lock(`lock:game:${id}`, LOCK_TIMEOUT);
     const previousGame = await this.getGame(id);
-    
+
+    assert(previousGame);
     const newGame = await updateFn(previousGame);
-    
+    assert(newGame);
+
     await this.writeGame(newGame);
     await lock.unlock();
     L.info(`update game with id ${id} completed`);
