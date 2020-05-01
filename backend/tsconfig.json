@@ -5,6 +5,7 @@
     "module": "commonjs",
     "esModuleInterop": true,
     "sourceMap": true,
+    "resolveJsonModule": true,
     "moduleResolution": "node",
     "outDir": "dist",
     "typeRoots": ["node_modules/@types"]
