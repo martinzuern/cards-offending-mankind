@@ -41,7 +41,7 @@ export type SpecialRule = SpecialRuleRandoCardrissio | SpecialRuleComdeyWriter;
 
 export interface Game {
   id: Uuid;
-  requiresPassword: boolean;
+  password?: string;
   status: GameStatus;
   packs: Pack[];
   timeouts: {
