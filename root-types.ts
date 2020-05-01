@@ -89,6 +89,7 @@ export interface Player {
 
 export type FullPlayer = Player & {
   deck: ResponseCard[];
+  token: string;
 };
 
 export enum RoundStatus {
