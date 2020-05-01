@@ -1731,6 +1731,10 @@ js-yaml@3.13.1, js-yaml@^3.13.1:
     argparse "^1.0.7"
     esprima "^4.0.0"
 
+json-against-humanity@crhallberg/json-against-humanity:
+  version "0.0.0"
+  resolved "https://codeload.github.com/crhallberg/json-against-humanity/tar.gz/a0b056eae8ec3ef56365b5f4b708ee63975c5614"
+
 json-buffer@3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/json-buffer/-/json-buffer-3.0.0.tgz#5b1f397afc75d677bde8bcfc0e47e1f9a3d9a898"

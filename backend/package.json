@@ -19,6 +19,7 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-openapi-validator": "^3.12.7",
+    "json-against-humanity": "crhallberg/json-against-humanity",
     "pino": "^6.2.1",
     "redis": "^3.0.2",
     "redlock": "^4.1.0"
