@@ -8,7 +8,8 @@ export interface GameState {
 }
 
 export type FullGameState = GameState & {
-  piles: Piles;
+  game: FullGame;
+  piles?: Piles;
   players: FullPlayer[];
 };
 
@@ -41,7 +42,7 @@ export type SpecialRule = SpecialRuleRandoCardrissio | SpecialRuleComdeyWriter;
 
 export interface Game {
   id: Uuid;
-  hasPasswords: boolean;
+  hasPassword: boolean;
   status: GameStatus;
   packs: Pack[];
   timeouts: {

@@ -4,6 +4,8 @@ import bodyParser from 'body-parser';
 import http from 'http';
 import os from 'os';
 import cookieParser from 'cookie-parser';
+import socketIo from 'socket.io'
+
 import l from './logger';
 
 import installValidator from './openapi';
@@ -14,6 +16,8 @@ const exit = process.exit;
 
 export default class ExpressServer {
   private routes: (app: Application) => void;
+  private sockets: (io: socketIo.Server) => void;
+
   constructor() {
     const root = path.normalize(__dirname + '/../..');
     app.set('appPath', root + 'client');
@@ -28,6 +32,11 @@ export default class ExpressServer {
     this.routes = routes;
     return this;
   }
+  
+  socket(sockets: (io: socketIo.Server) => void): ExpressServer {
+    this.sockets = sockets;
+    return this;
+  }
 
   listen(port: number): Application {
     const welcome = (p: number) => () =>
@@ -37,7 +46,12 @@ export default class ExpressServer {
       );
 
     installValidator(app, this.routes).then(() => {
-      http.createServer(app).listen(port, welcome(port));
+      const server = http.createServer(app)
+      if(this.sockets) {
+        const io = socketIo(server);
+        this.sockets(io)
+      }      
+      server.listen(port, welcome(port));
     }).catch(e => {
       l.error(e);
       exit(1)
