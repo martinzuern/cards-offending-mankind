@@ -13,6 +13,7 @@ import {
   FullPlayer,
   GameState,
   Game,
+  PackInformation,
 } from '../../../root-types';
 import L from '../../common/logger';
 import { HttpError } from '../middlewares/error.handler';
@@ -25,10 +26,7 @@ const CardDecks = _.mapValues(CardDecksRaw.metadata, (value, abbr) => ({
 }));
 
 export class GameService {
-  getAvailablePacks(): (Pack & {
-    promptsCount: number;
-    responsesCount: number;
-  })[] {
+  getAvailablePacks(): PackInformation[] {
     return _.chain(CardDecks)
       .values()
       .map((el) =>
