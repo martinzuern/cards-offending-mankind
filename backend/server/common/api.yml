@@ -203,6 +203,10 @@ components:
           type: string
         isOfficial:
           type: boolean
+        promptsCount:
+          type: integer
+        responsesCount:
+          type: integer
     Game:
       title: Game
       type: object
