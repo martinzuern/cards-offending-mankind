@@ -7,7 +7,7 @@ import L from '../../common/logger';
 
 const LOCK_TIMEOUT = 3000;
 
-const client = createHandyClient();
+const client = createHandyClient({ url: process.env.REDIS_URL });
 const redlock = new Redlock([client.redis]);
 
 export class DBService {
