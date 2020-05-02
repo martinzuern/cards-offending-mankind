@@ -1,0 +1,27 @@
+# DEV environment
+
+version: '3'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    image: 'cards-offending-mankind/backend:dev'
+    ports:
+      - 3000:3000
+    environment:
+      NODE_ENV: development
+      REDIS_URL: redis://redis:6379/
+    volumes:
+      - ./backend:/opt/app
+      - /opt/app/node_modules
+    depends_on:
+      - redis
+
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - /data
