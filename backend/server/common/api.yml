@@ -26,19 +26,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  description: Pack
-                  properties:
-                    abbr:
-                      type: string
-                    name:
-                      type: string
-                    icon:
-                      type: string
-                    description:
-                      type: string
-                    official:
-                      type: boolean
+                  $ref: '#/components/schemas/Pack'
               examples: {}
           headers: {}
       operationId: get-packs
@@ -53,14 +41,29 @@ paths:
           content: {}
       operationId: get-openapi-spec
       description: ''
+      summary: OpenAPI specification
   /games:
     post:
       summary: Create Game
       operationId: post-games
       responses:
-        '200':
-          description: OK
-      description: 'Creates '
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  game:
+                    $ref: '#/components/schemas/Game'
+                  player:
+                    $ref: '#/components/schemas/FullPlayer'
+                required:
+                  - game
+                  - player
+        '400':
+          description: Bad Request
+      description: Creates a new Game.
       tags:
         - Games
       requestBody:
@@ -68,6 +71,184 @@ paths:
           application/json:
             schema:
               type: object
-              properties: {}
+              properties:
+                game:
+                  $ref: '#/components/schemas/Game'
+                player:
+                  type: object
+                  required:
+                    - nickname
+                  properties:
+                    nickname:
+                      type: string
+                      minLength: 3
+              required:
+                - game
+                - player
+  '/games/{GameID}':
+    parameters:
+      - schema:
+          type: string
+          format: uuid
+        name: GameID
+        in: path
+        required: true
+    get:
+      summary: Retrieve Game Information
+      tags:
+        - Games
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  game:
+                    $ref: '#/components/schemas/Game'
+                required:
+                  - game
+        '404':
+          description: Not Found
+      operationId: get-games-gameId
+      description: ''
+  '/games/{GameID}/join':
+    parameters:
+      - schema:
+          type: string
+          format: uuid
+        name: GameID
+        in: path
+        required: true
+    post:
+      summary: Join Game
+      operationId: post-games-gameId-join
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  player:
+                    $ref: '#/components/schemas/FullPlayer'
+                required:
+                  - player
+        '400':
+          description: Bad Request
+        '403':
+          description: Forbidden
+      tags:
+        - Games
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nickname:
+                  type: string
+                  minLength: 3
+                password:
+                  type: string
+              required:
+                - nickname
+        description: ''
 components:
-  schemas: {}
+  schemas:
+    FullPlayer:
+      title: FullPlayer
+      type: object
+      properties:
+        id:
+          type: string
+        nickname:
+          type: string
+        points:
+          type: integer
+        isAI:
+          type: boolean
+        isActive:
+          type: boolean
+        isHost:
+          type: boolean
+        deck:
+          type: array
+          items:
+            type: object
+        token:
+          type: string
+      required:
+        - id
+        - nickname
+        - points
+        - isAI
+        - isActive
+        - isHost
+        - deck
+        - token
+    Pack:
+      title: Pack
+      type: object
+      properties:
+        abbr:
+          type: string
+        name:
+          type: string
+        icon:
+          type: string
+        description:
+          type: string
+        isOfficial:
+          type: boolean
+    Game:
+      title: Game
+      type: object
+      properties:
+        timeouts:
+          type: object
+          properties:
+            playing:
+              type: integer
+              default: 120
+              minimum: 5
+            revealing:
+              type: integer
+              default: 60
+              minimum: 5
+            judging:
+              type: integer
+              default: 120
+              minimum: 5
+            betweenRounds:
+              type: integer
+              default: 30
+              minimum: 5
+        specialRules:
+          type: array
+          items: {}
+        winnerPoints:
+          oneOf:
+            - type: integer
+              default: 20
+              minimum: 1
+            - type: boolean
+              enum:
+                - 'false'
+        handSize:
+          type: integer
+          default: 10
+          minimum: 2
+        password:
+          type: string
+        hasPassword:
+          type: boolean
+        status:
+          type: string
+          default: created
+          enum:
+            - created
+            - running
+            - ended

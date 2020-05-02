@@ -15,6 +15,7 @@ import {
   Game,
 } from '../../../root-types';
 import L from '../../common/logger';
+import { HttpError } from '../middlewares/error.handler';
 
 export class GameService {
   getAvailablePacks(): Pack[] {
@@ -60,7 +61,10 @@ export class GameService {
     if (!game.password) {
       return;
     }
-    assert(await bcrypt.compare(password, game.password));
+    assert(
+      await bcrypt.compare(password, game.password),
+      new HttpError('Game password incorrect', 403)
+    );
   }
 
   initPlayer(player: Partial<Player>): FullPlayer {
