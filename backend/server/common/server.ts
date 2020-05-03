@@ -1,5 +1,6 @@
 import express, { Application } from 'express';
 import path from 'path';
+import cors from 'cors';
 import bodyParser from 'body-parser';
 import http from 'http';
 import os from 'os';
@@ -20,6 +21,7 @@ export default class ExpressServer {
 
   constructor() {
     const root = path.normalize(__dirname + '/../..');
+    app.use(cors);
     app.set('appPath', root + 'client');
     app.use(bodyParser.json({ limit: process.env.REQUEST_LIMIT || '100kb' }));
     app.use(bodyParser.urlencoded({ extended: true, limit: process.env.REQUEST_LIMIT || '100kb' }));
@@ -32,7 +34,7 @@ export default class ExpressServer {
     this.routes = routes;
     return this;
   }
-  
+
   socket(sockets: (io: socketIo.Server) => void): ExpressServer {
     this.sockets = sockets;
     return this;
@@ -50,7 +52,7 @@ export default class ExpressServer {
       if(this.sockets) {
         const io = socketIo(server);
         this.sockets(io)
-      }      
+      }
       server.listen(port, welcome(port));
     }).catch(e => {
       l.error(e);
