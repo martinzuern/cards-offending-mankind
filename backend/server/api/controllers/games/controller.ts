@@ -3,8 +3,8 @@ import assert from 'assert';
 
 import GameService from '../../services/game.service';
 import DBService from '../../services/db.service';
-import L from '../../../common/logger';
 import { HttpError } from '../../middlewares/error.handler';
+// import L from '../../../common/logger';
 
 export class Controller {
   async createGame(req: Request, res: Response): Promise<void> {

@@ -29,12 +29,7 @@ export class DBService {
     assert(id);
     const payload = JSON.stringify(data);
     const key = `game:${id}`;
-    await client.set(
-      key,
-      payload,
-      ['EX', GAME_EXPIRATION],
-      create ? 'NX' : 'XX'
-    );
+    await client.set(key, payload, ['EX', GAME_EXPIRATION], create ? 'NX' : 'XX');
     return data;
   }
 

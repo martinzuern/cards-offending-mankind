@@ -7,7 +7,6 @@ import CardDecksRaw from 'json-against-humanity/full.md.json';
 
 import {
   FullGameState,
-  Pack,
   FullGame,
   Player,
   FullPlayer,
@@ -15,8 +14,8 @@ import {
   Game,
   PackInformation,
 } from '../../../root-types';
-import L from '../../common/logger';
 import { HttpError } from '../middlewares/error.handler';
+// import L from '../../common/logger';
 
 const CardDecks = _.mapValues(CardDecksRaw.metadata, (value, abbr) => ({
   ...value,
@@ -67,14 +66,10 @@ export class GameService {
       game.password = await bcrypt.hash(game.password, 10);
     }
 
-    return _.merge(
-      defaultGameState,
-      { game },
-      { game: { id: uuidv4(), status: 'created' } }
-    );
+    return _.merge(defaultGameState, { game }, { game: { id: uuidv4(), status: 'created' } });
   }
 
-  async validateGamePassword(game: FullGame, password) {
+  async validateGamePassword(game: FullGame, password): Promise<void> {
     if (!game.password) {
       return;
     }
@@ -107,9 +102,7 @@ export class GameService {
 
   stripGameState(gameState: FullGameState): GameState {
     const game = this.stripGame(gameState.game);
-    const players = gameState.players.map((p: FullPlayer) =>
-      _.omit(p, ['deck', 'token'])
-    );
+    const players = gameState.players.map((p: FullPlayer) => _.omit(p, ['deck', 'token']));
     return { game, players, rounds: gameState.rounds };
   }
 }
