@@ -19,4 +19,4 @@ export default function (app: Application, routes: (app: Application) => void): 
       routes(app);
       app.use(errorHandler);
     });
-};
+}
