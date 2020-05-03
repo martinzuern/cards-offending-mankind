@@ -21,6 +21,11 @@ export type Pack = {
   official: boolean;
 };
 
+export type PackInformation = Pack & {
+  promptsCount: number;
+  responsesCount: number;
+};
+
 export enum GameStatus {
   Created = 'created',
   Running = 'running',
@@ -56,9 +61,9 @@ export interface Game {
   specialRules: SpecialRule[];
 }
 
-export type FullGame = Game & { 
+export type FullGame = Game & {
   password?: string;
-}
+};
 
 export interface Piles {
   prompts: PromptCard[];

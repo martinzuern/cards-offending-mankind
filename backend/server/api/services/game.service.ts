@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import assert from 'assert';
 import { v4 as uuidv4 } from 'uuid';
-import CardDecks from 'json-against-humanity/full.md.json';
+import CardDecksRaw from 'json-against-humanity/full.md.json';
 
 import {
   FullGameState,
@@ -13,16 +13,33 @@ import {
   FullPlayer,
   GameState,
   Game,
+  PackInformation,
 } from '../../../root-types';
 import L from '../../common/logger';
 import { HttpError } from '../middlewares/error.handler';
 
+const CardDecks = _.mapValues(CardDecksRaw.metadata, (value, abbr) => ({
+  ...value,
+  abbr,
+  prompts: CardDecksRaw.black.filter((el) => el.deck === abbr),
+  responses: CardDecksRaw.white.filter((el) => el.deck === abbr),
+}));
+
 export class GameService {
-  getAvailablePacks(): Pack[] {
-    return Object.entries(CardDecks.metadata).map(([abbr, entry]) => ({
-      ...entry,
-      abbr,
-    }));
+  getAvailablePacks(): PackInformation[] {
+    return _.chain(CardDecks)
+      .values()
+      .map((el) =>
+        _.chain(el)
+          .merge({
+            promptsCount: el.prompts.length,
+            responsesCount: el.responses.length,
+          })
+          .omit(['prompts', 'responses'])
+          .value()
+      )
+      .orderBy(['official', 'responsesCount'], ['desc', 'desc'])
+      .value();
   }
 
   async initGameState(game: Partial<FullGame>): Promise<FullGameState> {
