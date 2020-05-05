@@ -13,6 +13,23 @@ const client = createHandyClient({ url: process.env.REDIS_URL });
 const redlock = new Redlock([client.redis]);
 
 export class DBService {
+  async setUserLock(id: string, create = false): Promise<boolean> {
+    L.info(`locking user with id ${id}`);
+    const canConnect = await client.set(
+      `user-active:${id}`,
+      'locked',
+      ['EX', 30],
+      create ? 'NX' : 'XX'
+    );
+    return !!canConnect;
+  }
+
+  async deleteUserLock(id: string): Promise<boolean> {
+    L.info(`unlocking user with id ${id}`);
+    const delNo = await client.del(`user-active:${id}`);
+    return delNo > 0;
+  }
+
   async getGame(id: string): Promise<FullGameState> {
     L.info(`fetch game with id ${id}`);
     const data = await client.get(`game:${id}`);

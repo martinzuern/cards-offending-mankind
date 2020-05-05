@@ -35,7 +35,7 @@ export class Controller {
     await DBService.updateGame(id, async (gameState) => {
       await GameService.validateGamePassword(gameState.game, password);
       assert(
-        gameState.game.status === 'created',
+        GameService.isGameJoinable(gameState.game),
         new HttpError('Players can only join in status "created".', 400)
       );
       assert(

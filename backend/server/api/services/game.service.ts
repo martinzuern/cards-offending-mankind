@@ -13,6 +13,7 @@ import {
   GameState,
   Game,
   PackInformation,
+  PlayerJwt,
 } from '../../../root-types';
 import { HttpError } from '../middlewares/error.handler';
 // import L from '../../common/logger';
@@ -85,7 +86,8 @@ export class GameService {
   initPlayer(gameId: string, player: Partial<Player>): FullPlayer {
     assert(player.nickname);
     const id = uuidv4();
-    const token = jwt.sign({ id, gameId }, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
+    const tokenPayload: PlayerJwt = { id, gameId };
+    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
     return _.merge(
       {
         nickname: '',
@@ -102,6 +104,10 @@ export class GameService {
 
   stripGame(game: FullGame): Game {
     return _.omit(game, ['password']);
+  }
+
+  isGameJoinable(game: FullGame): boolean {
+    return game.status === 'created';
   }
 
   stripGameState(gameState: FullGameState): GameState {
