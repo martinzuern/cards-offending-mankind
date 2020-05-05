@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import http from 'http';
 import os from 'os';
 import socketIo from 'socket.io';
+import redisAdapter from 'socket.io-redis';
 
 import l from './logger';
 
@@ -50,6 +51,7 @@ export default class ExpressServer {
         const server = http.createServer(app);
         if (this.sockets) {
           const io = socketIo(server);
+          io.adapter(redisAdapter(process.env.REDIS_URL));
           this.sockets(io);
         }
         server.listen(port, welcome(port));
