@@ -54,7 +54,10 @@ export default class ExpressServer {
           io.adapter(redisAdapter(process.env.REDIS_URL));
           this.sockets(io);
         }
-        server.listen(port, welcome(port));
+
+        if (process.env.NODE_ENV !== 'test') {
+          server.listen(port, welcome(port));
+        }
       })
       .catch((e) => {
         l.error(e);

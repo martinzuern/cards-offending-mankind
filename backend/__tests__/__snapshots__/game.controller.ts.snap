@@ -1,0 +1,90 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Game without password create should return new game 1`] = `
+Object {
+  "game": Object {
+    "handSize": 10,
+    "hasPassword": false,
+    "id": Any<String>,
+    "packs": Array [],
+    "specialRules": Array [],
+    "status": "created",
+    "timeouts": Object {
+      "betweenRounds": 30,
+      "judging": 120,
+      "playing": 120,
+      "revealing": 60,
+    },
+    "winnerPoints": 20,
+  },
+  "player": Object {
+    "deck": Array [],
+    "id": Any<String>,
+    "isAI": false,
+    "isActive": true,
+    "isHost": true,
+    "nickname": "foo",
+    "points": 0,
+    "token": Any<String>,
+  },
+}
+`;
+
+exports[`Game without password get renders 400 if not valid uuidv4 1`] = `
+Object {
+  "errors": Array [
+    Object {
+      "errorCode": "format.openapi.validation",
+      "message": "should match format \\"uuid\\"",
+      "path": ".params.GameID",
+    },
+  ],
+}
+`;
+
+exports[`Game without password get renders 404 if not found 1`] = `
+Object {
+  "errors": Array [
+    Object {
+      "message": "Resource not found.",
+    },
+  ],
+}
+`;
+
+exports[`Game without password join allows to join game 1`] = `
+Object {
+  "player": Object {
+    "deck": Array [],
+    "id": Any<String>,
+    "isAI": false,
+    "isActive": true,
+    "isHost": false,
+    "nickname": "foo2",
+    "points": 0,
+    "token": Any<String>,
+  },
+}
+`;
+
+exports[`Game without password join barfs if nickname already in use 1`] = `
+Object {
+  "errors": Array [
+    Object {
+      "message": "Error: Nickname already taken",
+    },
+  ],
+}
+`;
+
+exports[`Game without password join barfs if no nickname given 1`] = `
+Object {
+  "errors": Array [
+    Object {
+      "errorCode": "required.openapi.validation",
+      "message": "should have required property 'nickname'",
+      "path": ".body.nickname",
+    },
+  ],
+}
+`;

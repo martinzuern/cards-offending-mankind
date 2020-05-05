@@ -65,7 +65,7 @@ export class DBService {
       assert(newGame);
       await this.writeGame(newGame);
     } catch (error) {
-      L.error(`while update game with id ${id}" ${error.message}"`);
+      L.error(`while update game with id ${id} "${error.message}"`);
       throw error;
     } finally {
       await lock.unlock();
