@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import bcrypt from 'bcrypt';
-import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 import assert from 'assert';
 import { v4 as uuidv4 } from 'uuid';
 import CardDecksRaw from 'json-against-humanity/full.md.json';
@@ -16,6 +16,9 @@ import {
 } from '../../../root-types';
 import { HttpError } from '../middlewares/error.handler';
 // import L from '../../common/logger';
+
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRATION = '24h';
 
 const CardDecks = _.mapValues(CardDecksRaw.metadata, (value, abbr) => ({
   ...value,
@@ -79,9 +82,10 @@ export class GameService {
     );
   }
 
-  initPlayer(player: Partial<Player>): FullPlayer {
+  initPlayer(gameId: string, player: Partial<Player>): FullPlayer {
     assert(player.nickname);
-    const token = crypto.randomBytes(20).toString('hex');
+    const id = uuidv4();
+    const token = jwt.sign({ id, gameId }, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
     return _.merge(
       {
         nickname: '',
@@ -92,7 +96,7 @@ export class GameService {
         deck: [],
       },
       player,
-      { id: uuidv4(), token }
+      { id, token }
     );
   }
 

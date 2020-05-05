@@ -11,7 +11,7 @@ export class Controller {
     const { game, player } = req.body;
 
     const newGame = await GameService.initGameState(game);
-    const newPlayer = GameService.initPlayer({
+    const newPlayer = GameService.initPlayer(newGame.game.id, {
       nickname: player.nickname,
       isHost: true,
     });
@@ -42,7 +42,7 @@ export class Controller {
         gameState.players.every((p) => p.nickname !== nickname),
         new HttpError('Nickname already taken', 400)
       );
-      newPlayer = GameService.initPlayer({ nickname });
+      newPlayer = GameService.initPlayer(id, { nickname });
       gameState.players.push(newPlayer);
       return gameState;
     });
