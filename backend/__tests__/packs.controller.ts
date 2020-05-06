@@ -6,7 +6,7 @@ describe('Packs', () => {
     request(Server)
       .get('/api/v1/packs')
       .expect('Content-Type', /json/)
-      .then((r) => {
+      .expect((r) => {
         expect(r.body).toBeInstanceOf(Array);
         expect(r.body).toHaveLength(72);
         expect(r.body[0]).toEqual({
@@ -18,6 +18,6 @@ describe('Packs', () => {
           promptsCount: 90,
           responsesCount: 460,
         });
-        done();
-      }));
+      })
+      .end(done));
 });

@@ -65,6 +65,23 @@ Object {
 }
 `;
 
+exports[`Game without password create should return error if missing params 1`] = `
+Object {
+  "errors": Array [
+    Object {
+      "errorCode": "required.openapi.validation",
+      "message": "should have required property 'game'",
+      "path": ".body.game",
+    },
+    Object {
+      "errorCode": "required.openapi.validation",
+      "message": "should have required property 'player'",
+      "path": ".body.player",
+    },
+  ],
+}
+`;
+
 exports[`Game without password create should return new game 1`] = `
 Object {
   "game": Object {
