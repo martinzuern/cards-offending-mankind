@@ -10,7 +10,7 @@
     "dev:debug": "nodemon --exec 'node -r ts-node/register --inspect-brk' server/index.ts | pino-pretty",
     "lint": "tsc --noEmit && eslint -c .eslintrc.js '{server, __tests__}/**/*.{js,ts,tsx}' --quiet",
     "lint:fix": "tsc --noEmit && eslint -c .eslintrc.js '{server, __tests__}/**/*.{js,ts,tsx}' --quiet --fix",
-    "test": "jest",
+    "test": "jest --forceExit",
     "test:watch": "jest --watch"
   },
   "dependencies": {
