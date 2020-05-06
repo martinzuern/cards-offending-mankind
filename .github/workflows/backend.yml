@@ -1,9 +1,9 @@
-name: Node CI
+name: Backend CI
 
 on: [push]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     strategy:
@@ -14,9 +14,6 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      - name: Change to backend
-        run: cd backend
-      
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
@@ -29,9 +26,12 @@ jobs:
       
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+        working-directory: ./backend
       
       - name: Run linter
         run: yarn lint
+        working-directory: ./backend
 
       - name: Run tests
         run: yarn test
+        working-directory: ./backend
