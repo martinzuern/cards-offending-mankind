@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
 import assert from 'assert';
+import _ from 'lodash';
 
 import GameService from '../../services/game.service';
 import DBService from '../../services/db.service';
 import { HttpError } from '../../middlewares/error.handler';
+import { FullPlayerWithToken } from '../../../../root-types';
 // import L from '../../../common/logger';
 
 export class Controller {
@@ -15,7 +17,7 @@ export class Controller {
       nickname: player.nickname,
       isHost: true,
     });
-    newGame.players.push(newPlayer);
+    newGame.players.push(_.omit(newPlayer, ['token']));
 
     await DBService.writeGame(newGame, true);
 
@@ -31,7 +33,7 @@ export class Controller {
     assert(id);
     assert(nickname);
 
-    let newPlayer;
+    let newPlayer: FullPlayerWithToken;
     await DBService.updateGame(id, async (gameState) => {
       await GameService.validateGamePassword(gameState.game, password);
       assert(
@@ -43,7 +45,7 @@ export class Controller {
         new HttpError('Nickname already taken', 400)
       );
       newPlayer = GameService.initPlayer(id, { nickname });
-      gameState.players.push(newPlayer);
+      gameState.players.push(_.omit(newPlayer, ['token']));
       return gameState;
     });
 

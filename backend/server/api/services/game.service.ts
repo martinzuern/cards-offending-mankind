@@ -14,6 +14,7 @@ import {
   Game,
   PackInformation,
   PlayerJwt,
+  FullPlayerWithToken,
 } from '../../../root-types';
 import { HttpError } from '../middlewares/error.handler';
 // import L from '../../common/logger';
@@ -84,7 +85,7 @@ export class GameService {
     );
   }
 
-  initPlayer(gameId: string, player: Partial<Player>): FullPlayer {
+  initPlayer(gameId: string, player: Partial<Player>): FullPlayerWithToken {
     assert(player.nickname);
     const id = uuidv4();
     const tokenPayload: PlayerJwt = { id, gameId };
@@ -113,7 +114,7 @@ export class GameService {
 
   stripGameState(gameState: FullGameState): GameState {
     const game = this.stripGame(gameState.game);
-    const players = gameState.players.map((p: FullPlayer) => _.omit(p, ['deck', 'token']));
+    const players: Player[] = gameState.players.map((p: FullPlayer) => _.omit(p, ['deck']));
     return { game, players, rounds: gameState.rounds };
   }
 }
