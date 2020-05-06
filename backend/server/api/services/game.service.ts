@@ -73,10 +73,11 @@ export class GameService {
     return _.merge(defaultGameState, { game }, { game: { id: uuidv4(), status: 'created' } });
   }
 
-  async validateGamePassword(game: FullGame, password): Promise<void> {
+  async validateGamePassword(game: FullGame, password: string): Promise<void> {
     if (!game.password) {
       return;
     }
+    assert(password, new HttpError('Game password not provided.', 403));
     assert(
       await bcrypt.compare(password, game.password),
       new HttpError('Game password incorrect', 403)
