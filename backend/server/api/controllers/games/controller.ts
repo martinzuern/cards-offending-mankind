@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
 import assert from 'assert';
+import _ from 'lodash';
 
 import GameService from '../../services/game.service';
 import DBService from '../../services/db.service';
 import { HttpError } from '../../middlewares/error.handler';
+import { FullPlayerWithToken } from '../../../../root-types';
 // import L from '../../../common/logger';
 
 export class Controller {
@@ -11,11 +13,11 @@ export class Controller {
     const { game, player } = req.body;
 
     const newGame = await GameService.initGameState(game);
-    const newPlayer = GameService.initPlayer({
+    const newPlayer = GameService.initPlayer(newGame.game.id, {
       nickname: player.nickname,
       isHost: true,
     });
-    newGame.players.push(newPlayer);
+    newGame.players.push(_.omit(newPlayer, ['token']));
 
     await DBService.writeGame(newGame, true);
 
@@ -31,19 +33,19 @@ export class Controller {
     assert(id);
     assert(nickname);
 
-    let newPlayer;
+    let newPlayer: FullPlayerWithToken;
     await DBService.updateGame(id, async (gameState) => {
       await GameService.validateGamePassword(gameState.game, password);
       assert(
-        gameState.game.status === 'created',
+        GameService.isGameJoinable(gameState.game),
         new HttpError('Players can only join in status "created".', 400)
       );
       assert(
         gameState.players.every((p) => p.nickname !== nickname),
         new HttpError('Nickname already taken', 400)
       );
-      newPlayer = GameService.initPlayer({ nickname });
-      gameState.players.push(newPlayer);
+      newPlayer = GameService.initPlayer(id, { nickname });
+      gameState.players.push(_.omit(newPlayer, ['token']));
       return gameState;
     });
 

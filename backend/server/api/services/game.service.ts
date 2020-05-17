@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import bcrypt from 'bcrypt';
-import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 import assert from 'assert';
 import { v4 as uuidv4 } from 'uuid';
 import CardDecksRaw from 'json-against-humanity/full.md.json';
@@ -13,9 +13,14 @@ import {
   GameState,
   Game,
   PackInformation,
+  PlayerJwt,
+  FullPlayerWithToken,
 } from '../../../root-types';
 import { HttpError } from '../middlewares/error.handler';
 // import L from '../../common/logger';
+
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRATION = '24h';
 
 const CardDecks = _.mapValues(CardDecksRaw.metadata, (value, abbr) => ({
   ...value,
@@ -69,19 +74,22 @@ export class GameService {
     return _.merge(defaultGameState, { game }, { game: { id: uuidv4(), status: 'created' } });
   }
 
-  async validateGamePassword(game: FullGame, password): Promise<void> {
+  async validateGamePassword(game: FullGame, password: string): Promise<void> {
     if (!game.password) {
       return;
     }
+    assert(password, new HttpError('Game password not provided.', 403));
     assert(
       await bcrypt.compare(password, game.password),
       new HttpError('Game password incorrect', 403)
     );
   }
 
-  initPlayer(player: Partial<Player>): FullPlayer {
+  initPlayer(gameId: string, player: Partial<Player>): FullPlayerWithToken {
     assert(player.nickname);
-    const token = crypto.randomBytes(20).toString('hex');
+    const id = uuidv4();
+    const tokenPayload: PlayerJwt = { id, gameId };
+    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
     return _.merge(
       {
         nickname: '',
@@ -92,7 +100,7 @@ export class GameService {
         deck: [],
       },
       player,
-      { id: uuidv4(), token }
+      { id, token }
     );
   }
 
@@ -100,9 +108,13 @@ export class GameService {
     return _.omit(game, ['password']);
   }
 
+  isGameJoinable(game: FullGame): boolean {
+    return game.status === 'created';
+  }
+
   stripGameState(gameState: FullGameState): GameState {
     const game = this.stripGame(gameState.game);
-    const players = gameState.players.map((p: FullPlayer) => _.omit(p, ['deck', 'token']));
+    const players: Player[] = gameState.players.map((p: FullPlayer) => _.omit(p, ['deck']));
     return { game, players, rounds: gameState.rounds };
   }
 }

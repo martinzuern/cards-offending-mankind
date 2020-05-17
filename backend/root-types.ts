@@ -1,6 +1,11 @@
 // TODO
 export type Uuid = string & { readonly _: unique symbol };
 
+export type PlayerJwt = {
+  id: string;
+  gameId: string;
+};
+
 export interface GameState {
   game: Game;
   players: Player[];
@@ -102,6 +107,9 @@ export interface Player {
 
 export type FullPlayer = Player & {
   deck: ResponseCard[];
+};
+
+export type FullPlayerWithToken = FullPlayer & {
   token: string;
 };
 

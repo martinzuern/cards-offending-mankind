@@ -4,8 +4,8 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import http from 'http';
 import os from 'os';
-import cookieParser from 'cookie-parser';
 import socketIo from 'socket.io';
+import redisAdapter from 'socket.io-redis';
 
 import l from './logger';
 
@@ -25,7 +25,6 @@ export default class ExpressServer {
     app.use(bodyParser.json({ limit: process.env.REQUEST_LIMIT || '100kb' }));
     app.use(bodyParser.urlencoded({ extended: true, limit: process.env.REQUEST_LIMIT || '100kb' }));
     app.use(bodyParser.text({ limit: process.env.REQUEST_LIMIT || '100kb' }));
-    app.use(cookieParser(process.env.SESSION_SECRET));
     app.use(express.static(`${root}/public`));
   }
 
@@ -52,9 +51,13 @@ export default class ExpressServer {
         const server = http.createServer(app);
         if (this.sockets) {
           const io = socketIo(server);
+          io.adapter(redisAdapter(process.env.REDIS_URL));
           this.sockets(io);
         }
-        server.listen(port, welcome(port));
+
+        if (process.env.NODE_ENV !== 'test') {
+          server.listen(port, welcome(port));
+        }
       })
       .catch((e) => {
         l.error(e);
