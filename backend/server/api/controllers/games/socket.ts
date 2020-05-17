@@ -4,7 +4,7 @@ import socketioJwt from 'socketio-jwt';
 import GameService from '../../services/game.service';
 import DBService from '../../services/db.service';
 import L from '../../../common/logger';
-import { PlayerJwt } from '../../../../root-types';
+import { PlayerJwt, FullPlayer } from '../../../../root-types';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -54,6 +54,20 @@ export default function sockets(io: socketIo.Server): void {
 
       // Add to correct room
       socket.join(roomName);
+
+      // Set player isActive status
+      await DBService.updateGame(gameId, async (fullGameState) => ({
+        ...fullGameState,
+        players: fullGameState.players.map((player: FullPlayer) =>
+          playerId !== player.id ? player : { ...player, isActive: true }
+        ),
+      }));
+
+      // Update room
+      io.to(roomName).emit(
+        'player-joined',
+        GameService.stripGameState(await DBService.getGame(gameId))
+      );
     })
     .on('disconnect', async (socket: JwtAuthenticatedSocket) => {
       const playerId = socket?.decoded_token?.id;
