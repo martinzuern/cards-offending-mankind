@@ -56,6 +56,7 @@ export default new Vuex.Store({
           const { player, game } = response.data
           commit('setGame', game)
           commit('setPlayer', player)
+          localStorage.token = player.token
           break;
         default:
       }

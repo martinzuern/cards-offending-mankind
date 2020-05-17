@@ -12,7 +12,7 @@ const routes: RouteConfig[] = [
     component: NewGame,
   },
   {
-    path: '/:gameId',
+    path: '/games/:gameId',
     name: 'InGame',
     component: InGame,
   },
