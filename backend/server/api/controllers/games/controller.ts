@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import assert from 'assert';
 import _ from 'lodash';
 
-import GameService from '../../services/game.service';
-import DBService from '../../services/db.service';
+import GameService from '../../../services/game.service';
+import DBService from '../../../services/db.service';
 import { HttpError } from '../../middlewares/error.handler';
 import { FullPlayerWithToken } from '../../../../root-types';
 // import L from '../../../common/logger';

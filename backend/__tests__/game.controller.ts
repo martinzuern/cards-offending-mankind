@@ -1,6 +1,14 @@
 import request from 'supertest';
-import Server from '../server';
 import { v4 as uuidv4 } from 'uuid';
+import ServerInstance from '../server';
+
+let Server: unknown;
+
+beforeAll(async (done) => {
+  const { app } = await ServerInstance;
+  Server = app;
+  done();
+});
 
 describe('Game without password', () => {
   let createdGame;

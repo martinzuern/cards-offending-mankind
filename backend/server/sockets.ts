@@ -1,4 +1,4 @@
-import gameSockets from './api/controllers/games/socket';
+import gameSockets from './sockets/controllers/games/socket';
 
 export default function sockets(io: SocketIO.Server): void {
   gameSockets(io);

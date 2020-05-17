@@ -1,5 +1,13 @@
 import request from 'supertest';
-import Server from '../server';
+import ServerInstance from '../server';
+
+let Server: unknown;
+
+beforeAll(async (done) => {
+  const { app } = await ServerInstance;
+  Server = app;
+  done();
+});
 
 describe('Packs', () => {
   it('should get all packs', (done) =>
