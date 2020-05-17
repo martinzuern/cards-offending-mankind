@@ -12,16 +12,17 @@ import l from './logger';
 import installValidator from './openapi';
 
 const app = express();
-const exit = process.exit;
+const { exit } = process;
 
 export default class ExpressServer {
   private routes: (app: Application) => void;
+
   private sockets: (io: socketIo.Server) => void;
 
   constructor() {
-    const root = path.normalize(__dirname + '/../..');
+    const root = path.normalize(`${__dirname}/../..`);
     app.use(cors());
-    app.set('appPath', root + 'client');
+    app.set('appPath', `${root}client`);
     app.use(bodyParser.json({ limit: process.env.REQUEST_LIMIT || '100kb' }));
     app.use(bodyParser.urlencoded({ extended: true, limit: process.env.REQUEST_LIMIT || '100kb' }));
     app.use(bodyParser.text({ limit: process.env.REQUEST_LIMIT || '100kb' }));

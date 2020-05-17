@@ -1,6 +1,7 @@
 import express from 'express';
 import controller from './controller';
 import { wrapAsync } from '../../middlewares/error.handler';
+
 export default express
   .Router()
   .post('/', wrapAsync(controller.createGame))

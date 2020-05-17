@@ -1,7 +1,7 @@
 import * as path from 'path';
 import express, { Application } from 'express';
-import errorHandler from '../api/middlewares/error.handler';
 import { OpenApiValidator } from 'express-openapi-validator';
+import errorHandler from '../api/middlewares/error.handler';
 
 export default function (app: Application, routes: (app: Application) => void): Promise<void> {
   const apiSpec = path.join(__dirname, 'api.yml');

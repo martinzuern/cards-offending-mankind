@@ -7,6 +7,7 @@ export default function errorHandler(err, req: Request, res: Response, next: Nex
   }
   const errors = err.errors || [{ message: err.message }];
   res.status(err.status || 500).json({ errors });
+  return undefined;
 }
 
 export function wrapAsync(fn: (req: Request, res: Response, next?: NextFunction) => Promise<void>) {
@@ -18,6 +19,7 @@ export function wrapAsync(fn: (req: Request, res: Response, next?: NextFunction)
 
 export class HttpError extends Error {
   status: number;
+
   constructor(message: string, status = 500) {
     super(message);
     this.status = status;

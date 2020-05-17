@@ -19,7 +19,7 @@ import {
 import { HttpError } from '../middlewares/error.handler';
 // import L from '../../common/logger';
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const { JWT_SECRET } = process.env;
 const JWT_EXPIRATION = '24h';
 
 const CardDecks = _.mapValues(CardDecksRaw.metadata, (value, abbr) => ({
@@ -29,8 +29,8 @@ const CardDecks = _.mapValues(CardDecksRaw.metadata, (value, abbr) => ({
   responses: CardDecksRaw.white.filter((el) => el.deck === abbr),
 }));
 
-export class GameService {
-  getAvailablePacks(): PackInformation[] {
+export default class GameService {
+  static getAvailablePacks(): PackInformation[] {
     return _.chain(CardDecks)
       .values()
       .map((el) =>
@@ -46,7 +46,7 @@ export class GameService {
       .value();
   }
 
-  async initGameState(game: Partial<FullGame>): Promise<FullGameState> {
+  static async initGameState(game: Partial<FullGame>): Promise<FullGameState> {
     const defaultGameState = {
       game: {
         packs: [],
@@ -65,16 +65,21 @@ export class GameService {
       rounds: [],
     };
 
-    game.hasPassword = !!game.password;
-    if (game.hasPassword) {
+    const hasPassword = !!game.password;
+    let password;
+    if (hasPassword) {
       assert(game.password);
-      game.password = await bcrypt.hash(game.password, 10);
+      password = await bcrypt.hash(game.password, 10);
     }
 
-    return _.merge(defaultGameState, { game }, { game: { id: uuidv4(), status: 'created' } });
+    return _.merge(
+      defaultGameState,
+      { game },
+      { game: { id: uuidv4(), hasPassword, password, status: 'created' } }
+    );
   }
 
-  async validateGamePassword(game: FullGame, password: string): Promise<void> {
+  static async validateGamePassword(game: FullGame, password: string): Promise<void> {
     if (!game.password) {
       return;
     }
@@ -85,7 +90,7 @@ export class GameService {
     );
   }
 
-  initPlayer(gameId: string, player: Partial<Player>): FullPlayerWithToken {
+  static initPlayer(gameId: string, player: Partial<Player>): FullPlayerWithToken {
     assert(player.nickname);
     const id = uuidv4();
     const tokenPayload: PlayerJwt = { id, gameId };
@@ -104,19 +109,17 @@ export class GameService {
     );
   }
 
-  stripGame(game: FullGame): Game {
+  static stripGame(game: FullGame): Game {
     return _.omit(game, ['password']);
   }
 
-  isGameJoinable(game: FullGame): boolean {
+  static isGameJoinable(game: FullGame): boolean {
     return game.status === 'created';
   }
 
-  stripGameState(gameState: FullGameState): GameState {
+  static stripGameState(gameState: FullGameState): GameState {
     const game = this.stripGame(gameState.game);
     const players: Player[] = gameState.players.map((p: FullPlayer) => _.omit(p, ['deck']));
     return { game, players, rounds: gameState.rounds };
   }
 }
-
-export default new GameService();
