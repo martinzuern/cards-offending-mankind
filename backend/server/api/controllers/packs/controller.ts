@@ -1,9 +1,8 @@
-import GameService from '../../services/game.service';
 import { Request, Response } from 'express';
+import GameService from '../../services/game.service';
 
-export class Controller {
-  indexPacks(req: Request, res: Response): void {
+export default class Controller {
+  static indexPacks(req: Request, res: Response): void {
     res.json(GameService.getAvailablePacks());
   }
 }
-export default new Controller();

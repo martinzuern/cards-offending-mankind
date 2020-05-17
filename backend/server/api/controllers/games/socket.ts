@@ -6,7 +6,7 @@ import DBService from '../../services/db.service';
 import L from '../../../common/logger';
 import { PlayerJwt, FullPlayer } from '../../../../root-types';
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const { JWT_SECRET } = process.env;
 
 type JwtAuthenticatedSocket = SocketIO.Socket & {
   decoded_token: PlayerJwt;
@@ -24,10 +24,9 @@ export default function sockets(io: socketIo.Server): void {
 
         if (canConnect) {
           return onSuccess();
-        } else {
-          L.warn(`Player ${decoded.id} is locked.`);
-          return onError('user-locked');
         }
+        L.warn(`Player ${decoded.id} is locked.`);
+        return onError('user-locked');
       },
       timeout: 1000 * 15, // 15 seconds
     })

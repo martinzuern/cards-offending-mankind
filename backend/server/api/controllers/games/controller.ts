@@ -8,8 +8,8 @@ import { HttpError } from '../../middlewares/error.handler';
 import { FullPlayerWithToken } from '../../../../root-types';
 // import L from '../../../common/logger';
 
-export class Controller {
-  async createGame(req: Request, res: Response): Promise<void> {
+export default class Controller {
+  static async createGame(req: Request, res: Response): Promise<void> {
     const { game, player } = req.body;
 
     const newGame = await GameService.initGameState(game);
@@ -27,7 +27,7 @@ export class Controller {
     });
   }
 
-  async joinGame(req: Request, res: Response): Promise<void> {
+  static async joinGame(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
     const { password, nickname } = req.body;
     assert(id);
@@ -52,7 +52,7 @@ export class Controller {
     res.json({ player: newPlayer });
   }
 
-  async byId(req: Request, res: Response): Promise<void> {
+  static async byId(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
     assert(id);
 
@@ -63,4 +63,3 @@ export class Controller {
     });
   }
 }
-export default new Controller();

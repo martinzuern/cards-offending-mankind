@@ -12,8 +12,8 @@ const GAME_EXPIRATION = 60 * 60 * 24; // 24 hrs
 const client = createHandyClient({ url: process.env.REDIS_URL });
 const redlock = new Redlock([client.redis]);
 
-export class DBService {
-  async setUserLock(id: string, create = false): Promise<boolean> {
+export default class DBService {
+  static async setUserLock(id: string, create = false): Promise<boolean> {
     L.info(`locking user with id ${id}`);
     const canConnect = await client.set(
       `user-active:${id}`,
@@ -24,20 +24,20 @@ export class DBService {
     return canConnect === 'OK';
   }
 
-  async deleteUserLock(id: string): Promise<boolean> {
+  static async deleteUserLock(id: string): Promise<boolean> {
     L.info(`unlocking user with id ${id}`);
     const delNo = await client.del(`user-active:${id}`);
     return delNo > 0;
   }
 
-  async getGame(id: string): Promise<FullGameState> {
+  static async getGame(id: string): Promise<FullGameState> {
     L.info(`fetch game with id ${id}`);
     const data = await client.get(`game:${id}`);
     if (!data) throw new HttpError('Resource not found.', 404);
     return JSON.parse(data);
   }
 
-  async writeGame(data: FullGameState, create = false): Promise<FullGameState> {
+  static async writeGame(data: FullGameState, create = false): Promise<FullGameState> {
     const { id } = data.game;
     L.info(`write game with id ${id}`);
     assert(id);
@@ -48,7 +48,7 @@ export class DBService {
     return data;
   }
 
-  async updateGame(
+  static async updateGame(
     id: string,
     updateFn: (data: FullGameState) => Promise<FullGameState | null>
   ): Promise<void> {
@@ -71,5 +71,3 @@ export class DBService {
     }
   }
 }
-
-export default new DBService();
