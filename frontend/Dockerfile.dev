@@ -1,0 +1,17 @@
+# base image
+FROM node:12-alpine
+
+# set working directory
+WORKDIR /opt/app
+
+ENV PATH /opt/app/node_modules/.bin:$PATH
+
+COPY entrypoint-dev.sh .
+ENTRYPOINT ["sh", "./entrypoint-dev.sh"]
+
+# Link to /opt/app injected by compose file
+
+EXPOSE 8080
+
+# start app
+CMD ["yarn", "serve"]
