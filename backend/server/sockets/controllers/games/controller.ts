@@ -3,23 +3,23 @@ import assert from 'assert';
 import socketIo from 'socket.io';
 import _ from 'lodash';
 
-import { PlayerJwt, FullPlayer } from '../../../../root-types';
+import { PlayerJWT, InternalPlayer } from '../../../../root-types';
 import L from '../../../common/logger';
 import DBService from '../../../services/db.service';
 import GameService from '../../../services/game.service';
 
 export type JwtAuthenticatedSocket = SocketIO.Socket & {
-  decoded_token: PlayerJwt;
+  decoded_token: PlayerJWT;
 };
 
 const updatePlayer = async (
   gameId: string,
   playerId: string,
-  data: Partial<FullPlayer>
+  data: Partial<InternalPlayer>
 ): Promise<void> => {
   await DBService.updateGame(gameId, async (fullGameState) => ({
     ...fullGameState,
-    players: fullGameState.players.map((player: FullPlayer) =>
+    players: fullGameState.players.map((player: InternalPlayer) =>
       playerId !== player.id ? player : { ...player, ...data }
     ),
   }));
@@ -44,7 +44,7 @@ export default class Controller {
   }
 
   static async validateJwt(
-    decoded: PlayerJwt,
+    decoded: PlayerJWT,
     onSuccess: Function,
     onError: Function
   ): Promise<unknown> {
@@ -89,7 +89,7 @@ export default class Controller {
     if (includePlayers)
       gameState.players
         .filter((player) => player.isActive)
-        .forEach((player: FullPlayer) => {
+        .forEach((player: InternalPlayer) => {
           io.to(player.socketId).emit('player_updated', _.omit(player, ['socketId']));
         });
   }

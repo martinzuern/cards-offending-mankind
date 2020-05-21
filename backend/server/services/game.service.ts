@@ -6,21 +6,23 @@ import { v4 as uuidv4 } from 'uuid';
 import CardDecksRaw from 'json-against-humanity/full.md.json';
 
 import {
-  FullGameState,
-  FullGame,
+  InternalGameState,
   Player,
-  FullPlayer,
+  InternalPlayer,
   GameState,
   Game,
   PackInformation,
-  PlayerJwt,
-  FullPlayerWithToken,
+  PlayerJWT,
   Piles,
   Pack,
   CardType,
   Round,
   GameStatus,
   RoundStatus,
+  PlayerWithToken,
+  InternalGame,
+  CreateGame,
+  OtherPlayer,
 } from '../../root-types';
 import { HttpError } from '../api/middlewares/error.handler';
 // import L from '../../common/logger';
@@ -71,7 +73,7 @@ export default class GameService {
       .value();
   }
 
-  static buildPile(game: FullGame): Piles {
+  static buildPile(game: InternalGame): Piles {
     const decks = game.packs.map((pack) => _.get(CardDecks, pack.abbr));
     const prompts = _.chain(decks)
       .map((deck): Piles['prompts'] =>
@@ -106,7 +108,7 @@ export default class GameService {
     };
   }
 
-  static newRound(gameState: FullGameState): FullGameState {
+  static newRound(gameState: InternalGameState): InternalGameState {
     const newGameState = _.cloneDeep(gameState);
     const activePlayers = newGameState.players.filter((player) => player.isActive);
 
@@ -132,7 +134,7 @@ export default class GameService {
         ...newGameState.piles.discardedResponses.splice(0),
       ]);
 
-    newGameState.players = newGameState.players.map((player: FullPlayer) => {
+    newGameState.players = newGameState.players.map((player: InternalPlayer) => {
       if (!player.isActive || player.deck.length >= handSize) return player;
       return {
         ...player,
@@ -147,7 +149,7 @@ export default class GameService {
     return newGameState;
   }
 
-  static startGame(gameState: FullGameState): FullGameState {
+  static startGame(gameState: InternalGameState): InternalGameState {
     const newGameState = _.cloneDeep(gameState);
     assert(this.isGameJoinable(newGameState.game), 'Game has wrong status.');
     const activePlayers = newGameState.players.filter((player) => player.isActive);
@@ -168,7 +170,7 @@ export default class GameService {
     return this.newRound(newGameState);
   }
 
-  static async initGameState(game: Partial<FullGame>): Promise<FullGameState> {
+  static async initGameState(game: Partial<CreateGame>): Promise<InternalGameState> {
     const defaultGameState = {
       game: {
         packs: [],
@@ -211,7 +213,7 @@ export default class GameService {
     return result;
   }
 
-  static async validateGamePassword(game: FullGame, password: string): Promise<void> {
+  static async validateGamePassword(game: InternalGame, password: string): Promise<void> {
     if (!game.password) {
       return;
     }
@@ -222,10 +224,10 @@ export default class GameService {
     );
   }
 
-  static initPlayer(gameId: string, player: Partial<Player>): FullPlayerWithToken {
+  static initPlayer(gameId: string, player: Partial<Player>): PlayerWithToken {
     assert(player.nickname);
     const id = uuidv4();
-    const tokenPayload: PlayerJwt = { id, gameId };
+    const tokenPayload: PlayerJWT = { id, gameId };
     const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
     return _.merge(
       {
@@ -241,22 +243,22 @@ export default class GameService {
     );
   }
 
-  static stripGame(game: FullGame): Game {
+  static stripGame(game: InternalGame): Game {
     return _.omit(game, ['password']);
   }
 
-  static isGameJoinable(game: FullGame): boolean {
+  static isGameJoinable(game: InternalGame): boolean {
     return game.status === 'created';
   }
 
-  static isHost(gameState: FullGameState, playerId: string): boolean {
+  static isHost(gameState: InternalGameState, playerId: string): boolean {
     const player = gameState.players.find((p) => p.id === playerId);
     return !!player?.isHost;
   }
 
-  static stripGameState(gameState: FullGameState): GameState {
+  static stripGameState(gameState: InternalGameState): GameState {
     const game = this.stripGame(gameState.game);
-    const players: Player[] = gameState.players.map((p: FullPlayer) =>
+    const players: OtherPlayer[] = gameState.players.map((p: InternalPlayer) =>
       _.omit(p, ['deck', 'socketId'])
     );
     return { game, players, rounds: gameState.rounds };
