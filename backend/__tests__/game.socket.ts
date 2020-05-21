@@ -135,7 +135,7 @@ describe('error starting game', () => {
         throw new Error(JSON.stringify(error));
       })
       .on('authenticated', () => {
-        socket.emit('start-game');
+        socket.emit('start_game');
       })
       .emit('authenticate', {
         token: createdGame.player.token,
@@ -174,7 +174,7 @@ describe('error starting game', () => {
           throw new Error(JSON.stringify(error));
         })
         .on('authenticated', () => {
-          socket2.emit('start-game');
+          socket2.emit('start_game');
         })
         .emit('authenticate', {
           token: player2.player.token,
@@ -197,7 +197,7 @@ describe('error starting game', () => {
           throw new Error(JSON.stringify(error));
         })
         .on('authenticated', () => {
-          socket.emit('start-game');
+          socket.emit('start_game');
         })
         .emit('authenticate', {
           token: createdGame.player.token,
@@ -243,7 +243,7 @@ describe('perform game', () => {
 
     socket
       .on('authenticated', () => {
-        socket.emit('start-game');
+        socket.emit('start_game');
       })
       .on('unauthorized', (error) => {
         throw new Error(JSON.stringify(error));

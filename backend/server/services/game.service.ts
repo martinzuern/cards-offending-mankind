@@ -110,6 +110,11 @@ export default class GameService {
   }
 
   static newRound(gameState: InternalGameState): InternalGameState {
+    assert(
+      gameState.rounds.every((r) => r.status === RoundStatus.Ended),
+      'There are open rounds.'
+    );
+
     const newGameState = _.cloneDeep(gameState);
     const activePlayers = newGameState.players.filter((player) => player.isActive);
 
@@ -169,6 +174,15 @@ export default class GameService {
     newGameState.game.status = GameStatus.Running;
 
     return this.newRound(newGameState);
+  }
+
+  static endGame(gameState: InternalGameState): InternalGameState {
+    const newGameState = _.cloneDeep(gameState);
+
+    newGameState.game.status = GameStatus.Ended;
+    newGameState.rounds = newGameState.rounds.map((r) => ({ ...r, status: RoundStatus.Ended }));
+
+    return newGameState;
   }
 
   static async initGameState(game: Partial<CreateGame>): Promise<InternalGameState> {
@@ -245,7 +259,11 @@ export default class GameService {
   }
 
   static isGameJoinable(game: InternalGame): boolean {
-    return game.status === 'created';
+    return game.status === GameStatus.Created;
+  }
+
+  static isGameRunning(game: InternalGame): boolean {
+    return game.status === GameStatus.Running;
   }
 
   static isHost(gameState: InternalGameState, playerId: string): boolean {
@@ -255,9 +273,22 @@ export default class GameService {
 
   static stripGameState(gameState: InternalGameState): GameState {
     const game = this.stripGame(gameState.game);
+
     const players: OtherPlayer[] = gameState.players.map((p: InternalPlayer) =>
       _.omit(p, ['deck', 'socketId'])
     );
-    return { game, players, rounds: gameState.rounds };
+
+    // Strip card details if they are not revealed
+    const rounds = gameState.rounds.map((r: Round) => {
+      if (r.status === RoundStatus.Ended) return r;
+      const submissions = r.submissions.map((s) => {
+        if (s.isRevealed) return s;
+        const cards = s.cards.map((c) => ({ ...c, value: '***' }));
+        return { ...s, cards };
+      });
+      return { ...r, submissions };
+    });
+
+    return { game, players, rounds };
   }
 }
