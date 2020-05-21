@@ -28,17 +28,19 @@ const updatePlayer = async (
 export default class Controller {
   playerId: string;
   gameId: string;
-  room: string;
   io: socketIo.Server;
   socket: JwtAuthenticatedSocket;
 
-  constructor(io: socketIo.Server, socket: JwtAuthenticatedSocket, room: string) {
+  constructor(io: socketIo.Server, socket: JwtAuthenticatedSocket) {
     const { id: playerId, gameId } = socket.decoded_token;
     this.io = io;
     this.socket = socket;
-    this.room = room;
     this.playerId = playerId;
     this.gameId = gameId;
+  }
+
+  static getRoomName(gameId: string): string {
+    return `game:${gameId}`;
   }
 
   static async validateJwt(
@@ -46,20 +48,22 @@ export default class Controller {
     onSuccess: Function,
     onError: Function
   ): Promise<unknown> {
-    L.info(`Player ${decoded.id} wants to connect to game ${decoded.gameId}.`);
+    const { id: playerId, gameId } = decoded;
+    L.info(`Player ${playerId} wants to connect to game ${gameId}.`);
+
     try {
-      const gameState = await DBService.getGame(decoded.gameId);
-      assert(gameState.players.some((el) => el.id === decoded.id));
+      const gameState = await DBService.getGame(gameId);
+      assert(gameState.players.some((el) => el.id === playerId));
       assert(GameService.isGameJoinable(gameState.game), 'game-not-joinable');
     } catch (error) {
       return onError(error.message);
     }
 
-    if (await DBService.setUserLock(decoded.id, true)) {
+    if (await DBService.setUserLock(playerId, true)) {
       return onSuccess();
     }
 
-    L.warn(`Player ${decoded.id} is already locked.`);
+    L.warn(`Player ${playerId} is already locked.`);
     return onError('user-locked');
   }
 
@@ -77,7 +81,10 @@ export default class Controller {
     includePlayers = true
   ): Promise<void> {
     const gameState = await DBService.getGame(gameId);
-    io.to(`game:${gameId}`).emit('gamestate_updated', GameService.stripGameState(gameState));
+    io.to(this.getRoomName(gameId)).emit(
+      'gamestate_updated',
+      GameService.stripGameState(gameState)
+    );
 
     if (includePlayers)
       gameState.players

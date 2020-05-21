@@ -16,7 +16,6 @@ export default function sockets(io: socketIo.Server): void {
     .on('disconnect', Controller.onDisconnect)
     .on('authenticated', async (socket: JwtAuthenticatedSocket) => {
       const { id: playerId, gameId } = socket.decoded_token;
-      const room = `game:${gameId}`;
 
       // make sure we keep the user lock
       socket.conn.on('packet', async (packet) => {
@@ -26,9 +25,9 @@ export default function sockets(io: socketIo.Server): void {
       });
 
       L.info(`Player ${playerId} authenticated for game ${gameId}.`);
-      socket.join(room);
+      socket.join(Controller.getRoomName(gameId));
 
-      const c = new Controller(io, socket, room);
+      const c = new Controller(io, socket);
       const wrapper = _.partial(wrapAsync, socket);
 
       wrapper(c.joinGame)();
