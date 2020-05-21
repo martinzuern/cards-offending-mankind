@@ -23,6 +23,7 @@ import {
   InternalGame,
   CreateGame,
   OtherPlayer,
+  UUID,
 } from '../../root-types';
 import { HttpError } from '../api/middlewares/error.handler';
 // import L from '../../common/logger';
@@ -171,41 +172,39 @@ export default class GameService {
   }
 
   static async initGameState(game: Partial<CreateGame>): Promise<InternalGameState> {
-    const defaultGameState = {
-      game: {
-        packs: [],
-        hasPassword: false,
-        timeouts: {
-          playing: 120,
-          revealing: 60,
-          judging: 120,
-          betweenRounds: 30,
+    const result: InternalGameState = {
+      game: _.merge(
+        {
+          packs: [],
+          timeouts: {
+            playing: 120,
+            revealing: 60,
+            judging: 120,
+            betweenRounds: 30,
+          },
+          handSize: 10,
+          winnerPoints: 20,
         },
-        handSize: 10,
-        winnerPoints: 20,
-        specialRules: [],
-      },
+        game,
+        {
+          id: uuidv4() as UUID,
+          status: GameStatus.Created,
+          hasPassword: !!game.password,
+        }
+      ),
       players: [],
       rounds: [],
     };
 
-    const hasPassword = !!game.password;
-    let password;
-    if (hasPassword) {
+    if (result.game.hasPassword) {
       assert(game.password);
-      password = await bcrypt.hash(game.password, 10);
+      result.game.password = await bcrypt.hash(game.password, 10);
     }
 
-    const result = _.merge(
-      defaultGameState,
-      { game },
-      { game: { id: uuidv4(), hasPassword, password, status: 'created' } }
-    );
-
     result.game.packs = result.game.packs.map(
-      (el: string | Pack): Pack => {
-        const res = _.get(CardDecks, _.isString(el) ? el : el.abbr);
-        assert(res, 'Invalid pack.');
+      ({ abbr }): Pack => {
+        const res = _.get(CardDecks, abbr);
+        assert(res, `Invalid pack ${abbr}.`);
         return _.omit(res, ['prompts', 'responses']);
       }
     );
@@ -214,9 +213,8 @@ export default class GameService {
   }
 
   static async validateGamePassword(game: InternalGame, password: string): Promise<void> {
-    if (!game.password) {
-      return;
-    }
+    if (!game.hasPassword) return;
+
     assert(password, new HttpError('Game password not provided.', 403));
     assert(
       await bcrypt.compare(password, game.password),
@@ -226,7 +224,7 @@ export default class GameService {
 
   static initPlayer(gameId: string, player: Partial<Player>): PlayerWithToken {
     assert(player.nickname);
-    const id = uuidv4();
+    const id = uuidv4() as UUID;
     const tokenPayload: PlayerJWT = { id, gameId };
     const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
     return _.merge(
@@ -234,12 +232,11 @@ export default class GameService {
         nickname: '',
         points: 0,
         isAI: false,
-        isActive: true,
+        isActive: false,
         isHost: false,
-        deck: [],
       },
       player,
-      { id, token }
+      { id, token, deck: [] }
     );
   }
 

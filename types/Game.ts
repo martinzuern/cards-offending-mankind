@@ -26,20 +26,21 @@ export interface Game {
   hasPassword: boolean;
   status: GameStatus;
   packs: Pack[];
+  handSize: number;
+  winnerPoints: number | false;
   timeouts: {
     playing: number;
     revealing: number;
     judging: number;
     betweenRounds: number;
   };
-  handSize: number;
-  winnerPoints: number | false;
   // We don't support specialRules yet
   // specialRules: SpecialRule[];
 }
 
-export interface CreateGame extends Game {
+export interface CreateGame extends Omit<Game, 'id' | 'status' | 'hasPassword' | 'packs'> {
   password?: string;
+  packs: (Pack | Pick<Pack, 'abbr'>)[];
 }
 
 export enum RoundStatus {

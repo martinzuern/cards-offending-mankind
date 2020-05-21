@@ -2,6 +2,7 @@ import ioFront from 'socket.io-client';
 import { AddressInfo } from 'net';
 import http from 'http';
 import fetch from 'node-fetch';
+import assert from 'assert';
 import { v4 as uuidv4 } from 'uuid';
 
 import Server from '../server';
@@ -16,8 +17,9 @@ const postRequest = async (path, data): Promise<unknown> => {
     body: JSON.stringify(data),
     headers: { 'Content-Type': 'application/json' },
   });
-  expect(res.ok);
-  return res.json();
+  const json = await res.json();
+  assert(res.ok, `Error – ${json}`);
+  return json;
 };
 
 const createNewGame = async (data: {}): Promise<unknown> =>
@@ -209,7 +211,7 @@ describe('perform game', () => {
   let socket2;
   let player2;
   beforeEach(async (done) => {
-    createdGame = await createNewGame({ packs: ['BaseUK'] });
+    createdGame = await createNewGame({ packs: [{ abbr: 'BaseUK' }] });
     done();
   });
   beforeEach(async (done) => {

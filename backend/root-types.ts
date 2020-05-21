@@ -2,16 +2,18 @@
 /* eslint-disable @typescript-eslint/triple-slash-reference */
 /// <reference path="../types/index.ts" />
 
-import { GameState, CreateGame, PromptCard, ResponseCard, Player } from '../types';
+import { GameState, PromptCard, ResponseCard, Player, Game, UUID } from '../types';
 
 export * from '../types';
 
 export type PlayerJWT = {
-  id: string;
+  id: UUID;
   gameId: string;
 };
 
-export type InternalGame = CreateGame;
+export interface InternalGame extends Game {
+  password?: string;
+}
 
 export interface Piles {
   prompts: PromptCard[];
