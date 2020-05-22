@@ -57,7 +57,7 @@ const updateRound = async (
 
     const { round: newRound, gameState: newGameState } = await updateFn(round, gameState);
     const result: InternalGameState = _.merge(gameState, newGameState);
-    result.rounds[roundIndex] = _.merge(round, newRound);
+    result.rounds[roundIndex] = _.merge(result.rounds[roundIndex], newRound);
     return result;
   });
 };
@@ -146,91 +146,43 @@ export default class Controller {
   // Other actions
 
   setRoundPlayed = async (roundIndex: number): Promise<void> => {
-    await updateRound(this.gameId, roundIndex, async (prevRound, prevGameState) => {
-      assert(prevRound.status === RoundStatus.Created, 'Round already past picking.');
-      const round = _.cloneDeep(prevRound);
-      const now = new Date();
-
-      if (round.submissions.length === 0) {
-        round.status = RoundStatus.Ended;
-        round.timeouts = {
-          playing: now,
-          revealing: now,
-          judging: now,
-          betweenRounds: new Date(now.getTime() + prevGameState.game.timeouts.betweenRounds),
-        };
-      } else {
-        round.status = RoundStatus.Played;
-        round.submissions = _.shuffle(round.submissions);
-        round.timeouts = {
-          playing: now,
-          revealing: new Date(now.getTime() + prevGameState.game.timeouts.revealing),
-        };
-      }
-
-      return { round };
+    await updateRound(this.gameId, roundIndex, async (_prevRound, prevGameState) => {
+      const gameState = GameService.playRound(prevGameState, roundIndex);
+      return { gameState };
     });
     await Controller.sendUpdated(this.io, this.gameId, ['round']);
   };
 
   setRoundRevealed = async (roundIndex: number): Promise<void> => {
-    await updateRound(this.gameId, roundIndex, async (prevRound, prevGameState) => {
-      assert(prevRound.status === RoundStatus.Played, 'Round has invalid status.');
-      const round = _.cloneDeep(prevRound);
-      const now = new Date();
-
-      round.status = RoundStatus.Revealed;
-      round.timeouts = {
-        ...round.timeouts,
-        revealing: now,
-        judging: new Date(now.getTime() + prevGameState.game.timeouts.judging),
-      };
-      round.submissions = round.submissions.map((s) => ({ ...s, isRevealed: true }));
-      return { round };
+    await updateRound(this.gameId, roundIndex, async (_prevRound, prevGameState) => {
+      const gameState = GameService.revealRound(prevGameState, roundIndex);
+      return { gameState };
     });
     await Controller.sendUpdated(this.io, this.gameId, ['round']);
   };
 
   setRoundEnded = async (roundIndex: number): Promise<void> => {
     let gameShouldEnd = false;
-    await updateRound(this.gameId, roundIndex, async (prevRound, prevGameState) => {
-      assert(prevRound.status !== RoundStatus.Ended, 'Round has invalid status.');
-      const round = _.cloneDeep(prevRound);
-      const gameState = _.cloneDeep(prevGameState);
-
-      gameState.players = gameState.players.map((player) => {
-        const change = _.chain(round.submissions)
-          .concat(round.discard)
-          .filter((s) => s.playerId === player.id)
-          .reduce((sum, s) => sum + s.pointsChange, 0)
-          .value();
-        return { ...player, points: player.points + change };
-      });
+    await updateRound(this.gameId, roundIndex, async (_round, prevGameState) => {
+      const gameState = GameService.endRound(prevGameState, roundIndex);
 
       gameShouldEnd =
         !!gameState.game.winnerPoints &&
         gameState.players.some((p) => p.points >= gameState.game.winnerPoints);
 
-      const now = new Date();
-      round.status = RoundStatus.Ended;
-      round.timeouts = {
-        ...round.timeouts,
-        judging: now,
-      };
-
-      if (!gameShouldEnd) {
-        round.timeouts = {
-          ...round.timeouts,
-          betweenRounds: new Date(now.getTime() + prevGameState.game.timeouts.betweenRounds),
-        };
+      if (gameShouldEnd) {
+        gameState.rounds[roundIndex].timeouts = _.omit(
+          gameState.rounds[roundIndex].timeouts,
+          'betweenRounds'
+        );
       }
-
-      return { round, gameState };
+      return { gameState };
     });
-    if (!gameShouldEnd) {
-      await Controller.sendUpdated(this.io, this.gameId, ['gamestate']);
-    } else {
+
+    if (gameShouldEnd) {
       this.setGameEnded();
+    } else {
+      await Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);
     }
   };
 
@@ -261,41 +213,19 @@ export default class Controller {
 
   onPickCards = async ({ roundIndex, cards: pickedCards }: MessagePickCards): Promise<void> => {
     let pickComplete = false;
-    await updateRound(this.gameId, roundIndex, async (round, gameState) => {
-      assert(round.status === RoundStatus.Created, 'Incorrect round status.');
-      assert(round.judgeId !== this.playerId, 'Judge cannot pick cards.');
-      assert(
-        round.submissions.every((s) => s.playerId !== this.playerId),
-        'Player already picked cards.'
+    await updateRound(this.gameId, roundIndex, async (_round, prevGameState) => {
+      const gameState = GameService.pickCards(
+        prevGameState,
+        roundIndex,
+        this.playerId as UUID,
+        pickedCards
       );
 
-      const myPlayer = _.find(gameState.players, {
-        playerId: this.playerId,
-        isActive: true,
-      }) as InternalPlayer;
-      assert(myPlayer);
-
-      const cards = pickedCards.map((card) => {
-        const found = _.find(myPlayer.deck, card);
-        assert(found, 'Invalid card');
-        myPlayer.deck = _.without(myPlayer.deck, found);
-        return found;
-      });
-      assert(cards.length === round.prompt.pick, 'Incorrect number of cards.');
-
-      const newSubmission: RoundSubmission = {
-        playerId: this.playerId as UUID,
-        timestamp: new Date(),
-        cards,
-        pointsChange: 0,
-        isRevealed: false,
-      };
-      round.submissions.push(newSubmission);
-
       pickComplete =
-        round.submissions.length >= gameState.players.filter((p) => p.isActive).length - 1;
+        gameState.rounds[roundIndex].submissions.length >=
+        gameState.players.filter((p) => p.isActive).length - 1;
 
-      return { round, gameState };
+      return { gameState };
     });
 
     if (pickComplete) {
@@ -305,24 +235,14 @@ export default class Controller {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onRevealSubmission = async ({
     roundIndex,
     submissionIndex,
   }: MessageRevealSubmission): Promise<void> => {
     let revealComplete = false;
-    await updateRound(this.gameId, roundIndex, async (round) => {
-      assert(round.status === RoundStatus.Played, 'Incorrect round status.');
-      assert(round.judgeId === this.playerId, 'Only judge can reveal.');
-      assert(
-        round.submissions[submissionIndex].isRevealed === false,
-        'Submission already revealed.'
-      );
-
-      const submission = round.submissions[submissionIndex];
-      assert(submission, 'Submission not found.');
-      submission.isRevealed = true;
-
+    await updateRound(this.gameId, roundIndex, async (prevRound) => {
+      assert(prevRound.judgeId === this.playerId, 'Only judge can reveal.');
+      const round = GameService.revealSubmission(prevRound, submissionIndex);
       revealComplete = round.submissions.every((s) => s.isRevealed);
       return { round };
     });
@@ -335,18 +255,9 @@ export default class Controller {
   };
 
   onChooseWinner = async ({ roundIndex, submissionIndex }: MessageChooseWinner): Promise<void> => {
-    await updateRound(this.gameId, roundIndex, async (prevRound, prevGameState) => {
-      assert(prevRound.status === RoundStatus.Revealed, 'Incorrect round status.');
-      assert(prevRound.judgeId === this.playerId, 'Only judge can choose winner.');
-
-      const round = _.cloneDeep(prevRound);
-      const gameState = _.cloneDeep(prevGameState);
-
-      const submission = round.submissions[submissionIndex];
-      assert(submission, 'Submission not found.');
-      submission.pointsChange = 1;
-
-      return { round, gameState };
+    await updateRound(this.gameId, roundIndex, async (round) => {
+      assert(round.judgeId === this.playerId, 'Only the judge can choose a winner.');
+      return { round: GameService.chooseWinner(round, submissionIndex) };
     });
     this.setRoundEnded(roundIndex);
   };
@@ -356,6 +267,7 @@ export default class Controller {
       assert(gameState.game.status === GameStatus.Running, 'Only running games can be updated.');
       return GameService.newRound(gameState);
     });
+    await Controller.sendUpdated(this.io, this.gameId, ['gamestate']);
   };
 
   onEndGame = async (): Promise<void> => {
