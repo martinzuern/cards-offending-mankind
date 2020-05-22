@@ -15,6 +15,9 @@ import {
   RoundStatus,
   RoundSubmission,
   UUID,
+  GameState,
+  Player,
+  MessageRoundUpdated,
 } from '../../../../root-types';
 import L from '../../../common/logger';
 import DBService from '../../../services/db.service';
@@ -88,7 +91,7 @@ export default class Controller {
     try {
       const gameState = await DBService.getGame(gameId);
       assert(gameState.players.some((el) => el.id === playerId));
-      assert(GameService.isGameJoinable(gameState.game), 'game-not-joinable');
+      assert(GameService.isGameJoinable(gameState.game), 'Game not joinable.');
     } catch (error) {
       return onError(error.message);
     }
@@ -105,27 +108,39 @@ export default class Controller {
     if (!socket.decoded_token) return;
     const { id: playerId, gameId } = socket.decoded_token;
     await updatePlayer(gameId, playerId, { isActive: false, socketId: undefined });
-    await this.sendGamestateUpdated(socket, gameId, false);
+    await this.sendUpdated(socket, gameId, ['gamestate']);
     await DBService.deleteUserLock(playerId);
   }
 
-  static async sendGamestateUpdated(
+  static async sendUpdated(
     io: socketIo.Server | socketIo.Socket,
     gameId: string,
-    includePlayers = true
+    information: Array<'gamestate' | 'player' | 'round'>
   ): Promise<void> {
     const gameState = await DBService.getGame(gameId);
-    io.to(this.getRoomName(gameId)).emit(
-      'gamestate_updated',
-      GameService.stripGameState(gameState)
-    );
 
-    if (includePlayers)
+    if (information.includes('gamestate')) {
+      const msgGamestate: GameState = GameService.stripGameState(gameState);
+      io.to(this.getRoomName(gameId)).emit('gamestate_updated', msgGamestate);
+    }
+
+    if (information.includes('round')) {
+      const roundIndex: number = gameState.rounds.length - 1;
+      const msgRound: MessageRoundUpdated = {
+        roundIndex,
+        round: GameService.stripRound(gameState.rounds[roundIndex]),
+      };
+      io.to(this.getRoomName(gameId)).emit('round_updated', msgRound);
+    }
+
+    if (information.includes('player')) {
       gameState.players
         .filter((player) => player.isActive)
         .forEach((player: InternalPlayer) => {
-          io.to(player.socketId).emit('player_updated', _.omit(player, ['socketId']));
+          const msgPlayer: Player = _.omit(player, ['socketId']);
+          io.to(player.socketId).emit('player_updated', msgPlayer);
         });
+    }
   }
 
   // Other actions
@@ -166,7 +181,7 @@ export default class Controller {
 
   onJoinGame = async (): Promise<void> => {
     await updatePlayer(this.gameId, this.playerId, { isActive: true, socketId: this.socket.id });
-    await Controller.sendGamestateUpdated(this.io, this.gameId, false);
+    await Controller.sendUpdated(this.io, this.gameId, ['gamestate']);
   };
 
   onStartGame = async (): Promise<void> => {
@@ -175,7 +190,7 @@ export default class Controller {
       return GameService.startGame(fullGameState);
     });
 
-    await Controller.sendGamestateUpdated(this.io, this.gameId);
+    await Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -221,7 +236,7 @@ export default class Controller {
     if (pickComplete) {
       this.setRoundEnded(roundIndex);
     } else {
-      await Controller.sendGamestateUpdated(this.io, this.gameId);
+      await Controller.sendUpdated(this.io, this.gameId, ['round', 'player']);
     }
   };
 
@@ -252,6 +267,6 @@ export default class Controller {
       return GameService.endGame(fullGameState);
     });
 
-    await Controller.sendGamestateUpdated(this.io, this.gameId, false);
+    await Controller.sendUpdated(this.io, this.gameId, ['gamestate']);
   };
 }
