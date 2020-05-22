@@ -26,7 +26,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Pack'
+                  $ref: '#/components/schemas/PackInformation'
               examples: {}
           headers: {}
       operationId: get-packs
@@ -57,7 +57,7 @@ paths:
                   game:
                     $ref: '#/components/schemas/Game'
                   player:
-                    $ref: '#/components/schemas/FullPlayer'
+                    $ref: '#/components/schemas/Player'
                 required:
                   - game
                   - player
@@ -73,7 +73,7 @@ paths:
               type: object
               properties:
                 game:
-                  $ref: '#/components/schemas/Game'
+                  $ref: '#/components/schemas/CreateGame'
                 player:
                   type: object
                   required:
@@ -134,7 +134,7 @@ paths:
                 type: object
                 properties:
                   player:
-                    $ref: '#/components/schemas/FullPlayer'
+                    $ref: '#/components/schemas/Player'
                 required:
                   - player
         '400':
@@ -159,7 +159,7 @@ paths:
         description: ''
 components:
   schemas:
-    FullPlayer:
+    Player:
       title: FullPlayer
       type: object
       properties:
@@ -204,11 +204,59 @@ components:
           type: string
         isOfficial:
           type: boolean
-        promptsCount:
-          type: integer
-        responsesCount:
-          type: integer
+      required:
+        - abbr
     Game:
+      title: Game
+      type: object
+      properties:
+        hasPassword:
+          type: boolean
+        status:
+          type: string
+          default: created
+          enum:
+            - created
+            - running
+            - ended
+        packs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Pack'
+        id:
+          type: string
+          format: uuid
+        winnerPoints:
+          oneOf:
+            - type: integer
+              default: 20
+              minimum: 1
+            - type: boolean
+              enum:
+                - 'false'
+        timeouts:
+          type: object
+          properties:
+            playing:
+              type: integer
+              default: 120
+              minimum: 5
+            revealing:
+              type: integer
+              default: 60
+              minimum: 5
+            judging:
+              type: integer
+              default: 120
+              minimum: 5
+            betweenRounds:
+              type: integer
+              default: 30
+              minimum: 5
+        handSize:
+          type: integer
+          minimum: 2
+    CreateGame:
       title: Game
       type: object
       properties:
@@ -231,9 +279,6 @@ components:
               type: integer
               default: 30
               minimum: 5
-        specialRules:
-          type: array
-          items: {}
         winnerPoints:
           oneOf:
             - type: integer
@@ -248,19 +293,17 @@ components:
           minimum: 2
         password:
           type: string
-        hasPassword:
-          type: boolean
-        status:
-          type: string
-          default: created
-          enum:
-            - created
-            - running
-            - ended
         packs:
-          oneOf:
-            - items:
-                $ref: '#/components/schemas/Pack'
-            - items:
-                type: string
           type: array
+          items:
+            $ref: '#/components/schemas/Pack'
+    PackInformation:
+      title: PackInformation
+      allOf:
+        - $ref: '#/components/schemas/Pack'
+        - type: object
+          properties:
+            promptsCount:
+              type: integer
+            responsesCount:
+              type: integer

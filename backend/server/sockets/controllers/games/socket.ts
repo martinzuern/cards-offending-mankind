@@ -16,22 +16,26 @@ export default function sockets(io: socketIo.Server): void {
     .on('disconnect', Controller.onDisconnect)
     .on('authenticated', async (socket: JwtAuthenticatedSocket) => {
       const { id: playerId, gameId } = socket.decoded_token;
-      const room = `game:${gameId}`;
 
       // make sure we keep the user lock
-      socket.conn.on('packet', async (packet) => {
+      socket.conn.on('packet', (packet) => {
         if (packet.type === 'ping') {
-          await DBService.setUserLock(playerId);
+          DBService.setUserLock(playerId);
         }
       });
 
       L.info(`Player ${playerId} authenticated for game ${gameId}.`);
-      socket.join(room);
+      socket.join(Controller.getRoomName(gameId));
 
-      const c = new Controller(io, socket, room);
+      const c = new Controller(io, socket);
       const wrapper = _.partial(wrapAsync, socket);
 
-      wrapper(c.joinGame)();
-      socket.on('start-game', wrapper(c.startGame));
+      wrapper(c.onJoinGame)();
+      socket.on('start_game', wrapper(c.onStartGame));
+      socket.on('pick_cards', wrapper(c.onPickCards));
+      socket.on('reveal_submission', wrapper(c.onRevealSubmission));
+      socket.on('choose_winner', wrapper(c.onChooseWinner));
+      socket.on('start_next_round', wrapper(c.onStartNextRound));
+      socket.on('end_game', wrapper(c.onEndGame));
     });
 }

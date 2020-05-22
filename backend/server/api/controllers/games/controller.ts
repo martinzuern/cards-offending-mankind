@@ -5,7 +5,7 @@ import _ from 'lodash';
 import GameService from '../../../services/game.service';
 import DBService from '../../../services/db.service';
 import { HttpError } from '../../middlewares/error.handler';
-import { FullPlayerWithToken } from '../../../../root-types';
+import { PlayerWithToken } from '../../../../root-types';
 // import L from '../../../common/logger';
 
 export default class Controller {
@@ -33,7 +33,7 @@ export default class Controller {
     assert(id);
     assert(nickname);
 
-    let newPlayer: FullPlayerWithToken;
+    let newPlayer: PlayerWithToken;
     await DBService.updateGame(id, async (gameState) => {
       await GameService.validateGamePassword(gameState.game, password);
       assert(

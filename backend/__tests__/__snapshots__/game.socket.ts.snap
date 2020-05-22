@@ -28,7 +28,6 @@ Object {
     "hasPassword": false,
     "id": Any<String>,
     "packs": Array [],
-    "specialRules": Array [],
     "status": "created",
     "timeouts": Object {
       "betweenRounds": 30,
@@ -109,7 +108,6 @@ Object {
         "official": true,
       },
     ],
-    "specialRules": Array [],
     "status": "created",
     "timeouts": Object {
       "betweenRounds": 30,
@@ -136,6 +134,14 @@ Object {
       "nickname": "foo2",
       "points": 0,
     },
+    Object {
+      "id": Any<String>,
+      "isAI": false,
+      "isActive": true,
+      "isHost": false,
+      "nickname": "foo3",
+      "points": 0,
+    },
   ],
   "rounds": Array [],
 }
@@ -156,7 +162,6 @@ Object {
         "official": true,
       },
     ],
-    "specialRules": Array [],
     "status": "running",
     "timeouts": Object {
       "betweenRounds": 30,

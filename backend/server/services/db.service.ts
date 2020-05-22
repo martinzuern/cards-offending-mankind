@@ -1,7 +1,7 @@
 import { createHandyClient } from 'handy-redis';
 import Redlock from 'redlock';
 import assert from 'assert';
-import { FullGameState } from '../../root-types';
+import { InternalGameState } from '../../root-types';
 
 import L from '../common/logger';
 import { HttpError } from '../api/middlewares/error.handler';
@@ -30,14 +30,14 @@ export default class DBService {
     return delNo > 0;
   }
 
-  static async getGame(id: string): Promise<FullGameState> {
+  static async getGame(id: string): Promise<InternalGameState> {
     L.info(`fetch game with id ${id}`);
     const data = await client.get(`game:${id}`);
     if (!data) throw new HttpError('Resource not found.', 404);
     return JSON.parse(data);
   }
 
-  static async writeGame(data: FullGameState, create = false): Promise<FullGameState> {
+  static async writeGame(data: InternalGameState, create = false): Promise<InternalGameState> {
     const { id } = data.game;
     L.info(`write game with id ${id}`);
     assert(id);
@@ -50,7 +50,7 @@ export default class DBService {
 
   static async updateGame(
     id: string,
-    updateFn: (data: FullGameState) => Promise<FullGameState | null>
+    updateFn: (data: InternalGameState) => Promise<InternalGameState | null>
   ): Promise<void> {
     L.info(`Requesting lock for game with id ${id}`);
     const lock = await redlock.lock(`lock:game:${id}`, LOCK_TIMEOUT);

@@ -6,21 +6,24 @@ import { v4 as uuidv4 } from 'uuid';
 import CardDecksRaw from 'json-against-humanity/full.md.json';
 
 import {
-  FullGameState,
-  FullGame,
+  InternalGameState,
   Player,
-  FullPlayer,
+  InternalPlayer,
   GameState,
   Game,
   PackInformation,
-  PlayerJwt,
-  FullPlayerWithToken,
+  PlayerJWT,
   Piles,
   Pack,
   CardType,
   Round,
   GameStatus,
   RoundStatus,
+  PlayerWithToken,
+  InternalGame,
+  CreateGame,
+  OtherPlayer,
+  UUID,
 } from '../../root-types';
 import { HttpError } from '../api/middlewares/error.handler';
 // import L from '../../common/logger';
@@ -71,7 +74,7 @@ export default class GameService {
       .value();
   }
 
-  static buildPile(game: FullGame): Piles {
+  static buildPile(game: InternalGame): Piles {
     const decks = game.packs.map((pack) => _.get(CardDecks, pack.abbr));
     const prompts = _.chain(decks)
       .map((deck): Piles['prompts'] =>
@@ -106,7 +109,12 @@ export default class GameService {
     };
   }
 
-  static newRound(gameState: FullGameState): FullGameState {
+  static newRound(gameState: InternalGameState): InternalGameState {
+    assert(
+      gameState.rounds.every((r) => r.status === RoundStatus.Ended),
+      'There are open rounds.'
+    );
+
     const newGameState = _.cloneDeep(gameState);
     const activePlayers = newGameState.players.filter((player) => player.isActive);
 
@@ -132,7 +140,7 @@ export default class GameService {
         ...newGameState.piles.discardedResponses.splice(0),
       ]);
 
-    newGameState.players = newGameState.players.map((player: FullPlayer) => {
+    newGameState.players = newGameState.players.map((player: InternalPlayer) => {
       if (!player.isActive || player.deck.length >= handSize) return player;
       return {
         ...player,
@@ -147,11 +155,11 @@ export default class GameService {
     return newGameState;
   }
 
-  static startGame(gameState: FullGameState): FullGameState {
+  static startGame(gameState: InternalGameState): InternalGameState {
     const newGameState = _.cloneDeep(gameState);
     assert(this.isGameJoinable(newGameState.game), 'Game has wrong status.');
     const activePlayers = newGameState.players.filter((player) => player.isActive);
-    assert(activePlayers.length > 1, 'There are not enough players.');
+    assert(activePlayers.length >= 3, 'There are not enough players.');
 
     newGameState.piles = GameService.buildPile(newGameState.game);
     assert(newGameState.piles.prompts.length > 1, 'There are not enough packs.');
@@ -168,42 +176,49 @@ export default class GameService {
     return this.newRound(newGameState);
   }
 
-  static async initGameState(game: Partial<FullGame>): Promise<FullGameState> {
-    const defaultGameState = {
-      game: {
-        packs: [],
-        hasPassword: false,
-        timeouts: {
-          playing: 120,
-          revealing: 60,
-          judging: 120,
-          betweenRounds: 30,
+  static endGame(gameState: InternalGameState): InternalGameState {
+    const newGameState = _.cloneDeep(gameState);
+
+    newGameState.game.status = GameStatus.Ended;
+    newGameState.rounds = newGameState.rounds.map((r) => ({ ...r, status: RoundStatus.Ended }));
+
+    return newGameState;
+  }
+
+  static async initGameState(game: Partial<CreateGame>): Promise<InternalGameState> {
+    const result: InternalGameState = {
+      game: _.merge(
+        {
+          packs: [],
+          timeouts: {
+            playing: 120,
+            revealing: 60,
+            judging: 120,
+            betweenRounds: 30,
+          },
+          handSize: 10,
+          winnerPoints: 20,
         },
-        handSize: 10,
-        winnerPoints: 20,
-        specialRules: [],
-      },
+        game,
+        {
+          id: uuidv4() as UUID,
+          status: GameStatus.Created,
+          hasPassword: !!game.password,
+        }
+      ),
       players: [],
       rounds: [],
     };
 
-    const hasPassword = !!game.password;
-    let password;
-    if (hasPassword) {
+    if (result.game.hasPassword) {
       assert(game.password);
-      password = await bcrypt.hash(game.password, 10);
+      result.game.password = await bcrypt.hash(game.password, 10);
     }
 
-    const result = _.merge(
-      defaultGameState,
-      { game },
-      { game: { id: uuidv4(), hasPassword, password, status: 'created' } }
-    );
-
     result.game.packs = result.game.packs.map(
-      (el: string | Pack): Pack => {
-        const res = _.get(CardDecks, _.isString(el) ? el : el.abbr);
-        assert(res, 'Invalid pack.');
+      ({ abbr }): Pack => {
+        const res = _.get(CardDecks, abbr);
+        assert(res, `Invalid pack ${abbr}.`);
         return _.omit(res, ['prompts', 'responses']);
       }
     );
@@ -211,10 +226,9 @@ export default class GameService {
     return result;
   }
 
-  static async validateGamePassword(game: FullGame, password: string): Promise<void> {
-    if (!game.password) {
-      return;
-    }
+  static async validateGamePassword(game: InternalGame, password: string): Promise<void> {
+    if (!game.hasPassword) return;
+
     assert(password, new HttpError('Game password not provided.', 403));
     assert(
       await bcrypt.compare(password, game.password),
@@ -222,43 +236,59 @@ export default class GameService {
     );
   }
 
-  static initPlayer(gameId: string, player: Partial<Player>): FullPlayerWithToken {
+  static initPlayer(gameId: string, player: Partial<Player>): PlayerWithToken {
     assert(player.nickname);
-    const id = uuidv4();
-    const tokenPayload: PlayerJwt = { id, gameId };
+    const id = uuidv4() as UUID;
+    const tokenPayload: PlayerJWT = { id, gameId };
     const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
     return _.merge(
       {
         nickname: '',
         points: 0,
         isAI: false,
-        isActive: true,
+        isActive: false,
         isHost: false,
-        deck: [],
       },
       player,
-      { id, token }
+      { id, token, deck: [] }
     );
   }
 
-  static stripGame(game: FullGame): Game {
+  static stripGame(game: InternalGame): Game {
     return _.omit(game, ['password']);
   }
 
-  static isGameJoinable(game: FullGame): boolean {
-    return game.status === 'created';
+  static isGameJoinable(game: InternalGame): boolean {
+    return game.status === GameStatus.Created;
   }
 
-  static isHost(gameState: FullGameState, playerId: string): boolean {
+  static isGameRunning(game: InternalGame): boolean {
+    return game.status === GameStatus.Running;
+  }
+
+  static isHost(gameState: InternalGameState, playerId: string): boolean {
     const player = gameState.players.find((p) => p.id === playerId);
     return !!player?.isHost;
   }
 
-  static stripGameState(gameState: FullGameState): GameState {
+  static stripGameState(gameState: InternalGameState): GameState {
     const game = this.stripGame(gameState.game);
-    const players: Player[] = gameState.players.map((p: FullPlayer) =>
+
+    const players: OtherPlayer[] = gameState.players.map((p: InternalPlayer) =>
       _.omit(p, ['deck', 'socketId'])
     );
-    return { game, players, rounds: gameState.rounds };
+
+    // Strip card details if they are not revealed
+    const rounds = gameState.rounds.map((r: Round) => {
+      if (r.status === RoundStatus.Ended) return r;
+      const submissions = r.submissions.map((s) => {
+        if (s.isRevealed) return s;
+        const cards = s.cards.map((c) => ({ ...c, value: '***' }));
+        return { ...s, cards };
+      });
+      return { ...r, submissions };
+    });
+
+    return { game, players, rounds };
   }
 }
