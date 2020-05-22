@@ -235,14 +235,13 @@ export default class GameService {
     return result;
   }
 
-  static async validateGamePassword(game: InternalGame, password: string): Promise<void> {
-    if (!game.hasPassword) return;
+  static async validateGamePassword(game: InternalGame, password: string): Promise<boolean> {
+    if (!game.hasPassword) return true;
 
-    assert(password, new HttpError('Game password not provided.', 403));
-    assert(
-      await bcrypt.compare(password, game.password),
-      new HttpError('Game password incorrect', 403)
-    );
+    assert(_.isString(password), new HttpError('Game password not provided.', 403));
+    const valid = await bcrypt.compare(password, game.password);
+    assert(valid === true, new HttpError('Game password incorrect', 403));
+    return valid;
   }
 
   static initPlayer(gameId: string, player: Partial<Player>): PlayerWithToken {

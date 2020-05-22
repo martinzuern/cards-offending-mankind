@@ -69,13 +69,13 @@ exports[`joining game error jwt not valid 1`] = `
 Object {
   "data": Object {
     "code": "invalid_token",
-    "message": "jwt expired",
+    "message": "invalid signature",
     "type": "UnauthorizedError",
   },
   "inner": Object {
-    "message": "jwt expired",
+    "message": "invalid signature",
   },
-  "message": "jwt expired",
+  "message": "invalid signature",
 }
 `;
 
