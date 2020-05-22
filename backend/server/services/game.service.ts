@@ -254,10 +254,6 @@ export default class GameService {
     );
   }
 
-  static stripGame(game: InternalGame): Game {
-    return _.omit(game, ['password']);
-  }
-
   static isGameJoinable(game: InternalGame): boolean {
     return game.status === GameStatus.Created;
   }
@@ -271,24 +267,28 @@ export default class GameService {
     return !!player?.isHost;
   }
 
+  static stripGame(game: InternalGame): Game {
+    return _.omit(game, ['password']);
+  }
+
+  static stripRound(round: Round): Round {
+    if (round.status === RoundStatus.Ended) return round;
+
+    const submissions = round.submissions.map((s) => {
+      const cards = s.isRevealed ? s.cards : s.cards.map((c) => ({ ...c, value: '***' }));
+      const playerId = '00000000-0000-0000-0000-000000000000' as UUID;
+      return { ...s, cards, playerId };
+    });
+
+    return { ...round, submissions };
+  }
+
   static stripGameState(gameState: InternalGameState): GameState {
     const game = this.stripGame(gameState.game);
-
     const players: OtherPlayer[] = gameState.players.map((p: InternalPlayer) =>
       _.omit(p, ['deck', 'socketId'])
     );
-
-    // Strip card details if they are not revealed
-    const rounds = gameState.rounds.map((r: Round) => {
-      if (r.status === RoundStatus.Ended) return r;
-      const submissions = r.submissions.map((s) => {
-        if (s.isRevealed) return s;
-        const cards = s.cards.map((c) => ({ ...c, value: '***' }));
-        return { ...s, cards };
-      });
-      return { ...r, submissions };
-    });
-
+    const rounds = gameState.rounds.map(this.stripRound);
     return { game, players, rounds };
   }
 }
