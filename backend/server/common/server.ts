@@ -39,32 +39,33 @@ export default class ExpressServer {
     return this;
   }
 
-  listen(port: number): Application {
-    const welcome = (p: number) => () =>
+  // eslint-disable-next-line consistent-return
+  async listen(port: number): Promise<{ app: Application; server: http.Server }> {
+    const welcome = (p: number) => (): void =>
       l.info(
         `up and running in ${
           process.env.NODE_ENV || 'development'
         } @: ${os.hostname()} on port: ${p}}`
       );
 
-    installValidator(app, this.routes)
-      .then(() => {
-        const server = http.createServer(app);
-        if (this.sockets) {
-          const io = socketIo(server);
-          io.adapter(redisAdapter(process.env.REDIS_URL));
-          this.sockets(io);
-        }
+    try {
+      await installValidator(app, this.routes);
 
-        if (process.env.NODE_ENV !== 'test') {
-          server.listen(port, welcome(port));
-        }
-      })
-      .catch((e) => {
-        l.error(e);
-        exit(1);
-      });
+      const server = http.createServer(app);
+      if (this.sockets) {
+        const io = socketIo(server);
+        io.adapter(redisAdapter(process.env.REDIS_URL));
+        this.sockets(io);
+      }
 
-    return app;
+      if (process.env.NODE_ENV !== 'test') {
+        server.listen(port, welcome(port));
+      }
+
+      return { app, server };
+    } catch (error) {
+      l.error(error);
+      exit(1);
+    }
   }
 }

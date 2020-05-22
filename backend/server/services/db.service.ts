@@ -1,10 +1,10 @@
 import { createHandyClient } from 'handy-redis';
 import Redlock from 'redlock';
 import assert from 'assert';
-import { FullGameState } from '../../../root-types';
+import { FullGameState } from '../../root-types';
 
-import L from '../../common/logger';
-import { HttpError } from '../middlewares/error.handler';
+import L from '../common/logger';
+import { HttpError } from '../api/middlewares/error.handler';
 
 const LOCK_TIMEOUT = 3000;
 const GAME_EXPIRATION = 60 * 60 * 24; // 24 hrs

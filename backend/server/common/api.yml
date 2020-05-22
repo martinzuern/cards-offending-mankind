@@ -109,6 +109,7 @@ paths:
                     $ref: '#/components/schemas/Game'
                 required:
                   - game
+              examples: {}
         '404':
           description: Not Found
       operationId: get-games-gameId
@@ -256,3 +257,10 @@ components:
             - created
             - running
             - ended
+        packs:
+          oneOf:
+            - items:
+                $ref: '#/components/schemas/Pack'
+            - items:
+                type: string
+          type: array

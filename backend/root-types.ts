@@ -107,6 +107,7 @@ export interface Player {
 
 export type FullPlayer = Player & {
   deck: ResponseCard[];
+  socketId?: string;
 };
 
 export type FullPlayerWithToken = FullPlayer & {

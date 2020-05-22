@@ -1,0 +1,246 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`error starting game error when there are not enough players 1`] = `
+Object {
+  "message": "There are not enough players.",
+  "type": "AssertionError",
+}
+`;
+
+exports[`error starting game with two players error when non-host starts game 1`] = `
+Object {
+  "message": "Only a host can start a game.",
+  "type": "AssertionError",
+}
+`;
+
+exports[`error starting game with two players error when there are not enough packs 1`] = `
+Object {
+  "message": "There are not enough packs.",
+  "type": "AssertionError",
+}
+`;
+
+exports[`joining game accepts valid token 1`] = `
+Object {
+  "game": Object {
+    "handSize": 10,
+    "hasPassword": false,
+    "id": Any<String>,
+    "packs": Array [],
+    "specialRules": Array [],
+    "status": "created",
+    "timeouts": Object {
+      "betweenRounds": 30,
+      "judging": 120,
+      "playing": 120,
+      "revealing": 60,
+    },
+    "winnerPoints": 20,
+  },
+  "players": Array [
+    Object {
+      "id": Any<String>,
+      "isAI": false,
+      "isActive": true,
+      "isHost": true,
+      "nickname": "foo",
+      "points": 0,
+    },
+  ],
+  "rounds": Array [],
+}
+`;
+
+exports[`joining game error jwt malformed 1`] = `
+Object {
+  "data": Object {
+    "code": "invalid_token",
+    "message": "jwt malformed",
+    "type": "UnauthorizedError",
+  },
+  "inner": Object {
+    "message": "jwt malformed",
+  },
+  "message": "jwt malformed",
+}
+`;
+
+exports[`joining game error jwt not valid 1`] = `
+Object {
+  "data": Object {
+    "code": "invalid_token",
+    "message": "jwt expired",
+    "type": "UnauthorizedError",
+  },
+  "inner": Object {
+    "message": "jwt expired",
+  },
+  "message": "jwt expired",
+}
+`;
+
+exports[`joining game error on locked user 1`] = `
+Object {
+  "data": Object {
+    "code": "unknown",
+    "message": "user-locked",
+    "type": "UnauthorizedError",
+  },
+  "inner": Object {
+    "message": "user-locked",
+  },
+  "message": "user-locked",
+}
+`;
+
+exports[`perform game works 1`] = `
+Object {
+  "game": Object {
+    "handSize": 10,
+    "hasPassword": false,
+    "id": Any<String>,
+    "packs": Array [
+      Object {
+        "abbr": "BaseUK",
+        "description": "The UK edition of the base game",
+        "icon": "",
+        "name": "Base Set (UK Edition)",
+        "official": true,
+      },
+    ],
+    "specialRules": Array [],
+    "status": "created",
+    "timeouts": Object {
+      "betweenRounds": 30,
+      "judging": 120,
+      "playing": 120,
+      "revealing": 60,
+    },
+    "winnerPoints": 20,
+  },
+  "players": Array [
+    Object {
+      "id": Any<String>,
+      "isAI": false,
+      "isActive": true,
+      "isHost": true,
+      "nickname": "foo",
+      "points": 0,
+    },
+    Object {
+      "id": Any<String>,
+      "isAI": false,
+      "isActive": true,
+      "isHost": false,
+      "nickname": "foo2",
+      "points": 0,
+    },
+  ],
+  "rounds": Array [],
+}
+`;
+
+exports[`perform game works 2`] = `
+Object {
+  "game": Object {
+    "handSize": 10,
+    "hasPassword": false,
+    "id": Any<String>,
+    "packs": Array [
+      Object {
+        "abbr": "BaseUK",
+        "description": "The UK edition of the base game",
+        "icon": "",
+        "name": "Base Set (UK Edition)",
+        "official": true,
+      },
+    ],
+    "specialRules": Array [],
+    "status": "running",
+    "timeouts": Object {
+      "betweenRounds": 30,
+      "judging": 120,
+      "playing": 120,
+      "revealing": 60,
+    },
+    "winnerPoints": 20,
+  },
+  "players": Any<Array>,
+  "rounds": Array [
+    Object {
+      "discard": Array [],
+      "judgeId": Any<String>,
+      "prompt": Any<Object>,
+      "status": "created",
+      "submissions": Array [],
+      "timeouts": Object {
+        "playing": Any<String>,
+      },
+    },
+  ],
+}
+`;
+
+exports[`perform game works 3`] = `
+Object {
+  "deck": Array [
+    Object {
+      "packAbbr": "BaseUK",
+      "type": "text",
+      "value": Any<String>,
+    },
+    Object {
+      "packAbbr": "BaseUK",
+      "type": "text",
+      "value": Any<String>,
+    },
+    Object {
+      "packAbbr": "BaseUK",
+      "type": "text",
+      "value": Any<String>,
+    },
+    Object {
+      "packAbbr": "BaseUK",
+      "type": "text",
+      "value": Any<String>,
+    },
+    Object {
+      "packAbbr": "BaseUK",
+      "type": "text",
+      "value": Any<String>,
+    },
+    Object {
+      "packAbbr": "BaseUK",
+      "type": "text",
+      "value": Any<String>,
+    },
+    Object {
+      "packAbbr": "BaseUK",
+      "type": "text",
+      "value": Any<String>,
+    },
+    Object {
+      "packAbbr": "BaseUK",
+      "type": "text",
+      "value": Any<String>,
+    },
+    Object {
+      "packAbbr": "BaseUK",
+      "type": "text",
+      "value": Any<String>,
+    },
+    Object {
+      "packAbbr": "BaseUK",
+      "type": "text",
+      "value": Any<String>,
+    },
+  ],
+  "id": Any<String>,
+  "isAI": false,
+  "isActive": true,
+  "isHost": true,
+  "nickname": "foo",
+  "points": 0,
+}
+`;
