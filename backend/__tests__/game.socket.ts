@@ -145,6 +145,8 @@ describe('error starting game', () => {
   describe('with two players', () => {
     let socket2;
     let player2;
+    let socket3;
+    let player3;
     beforeEach(async (done) => {
       player2 = await postRequest(`/api/v1/games/${createdGame.game.id}/join`, {
         nickname: uuidv4(),
@@ -158,9 +160,23 @@ describe('error starting game', () => {
         done();
       });
     });
+    beforeEach(async (done) => {
+      player3 = await postRequest(`/api/v1/games/${createdGame.game.id}/join`, {
+        nickname: uuidv4(),
+      });
+      socket3 = ioFront.connect(httpServerUrl.toString(), {
+        reconnection: false,
+        forceNew: true,
+      });
+      socket3.on('connect', () => {
+        expect(socket3.connected).toBeTruthy();
+        done();
+      });
+    });
 
     afterEach((done) => {
       if (socket2.connected) socket2.disconnect();
+      if (socket3.connected) socket3.disconnect();
       done();
     });
 
@@ -183,8 +199,13 @@ describe('error starting game', () => {
 
     it('error when there are not enough packs', async (done) => {
       await new Promise((resolve, reject) => {
-        socket2.on('error', reject).on('authenticated', resolve).emit('authenticate', {
+        socket2.on('error', reject).on('gamestate_updated', resolve).emit('authenticate', {
           token: player2.player.token,
+        });
+      });
+      await new Promise((resolve, reject) => {
+        socket3.on('error', reject).on('gamestate_updated', resolve).emit('authenticate', {
+          token: player3.player.token,
         });
       });
 
@@ -210,6 +231,8 @@ describe('perform game', () => {
   let createdGame;
   let socket2;
   let player2;
+  let socket3;
+  let player3;
   beforeEach(async (done) => {
     createdGame = await createNewGame({ packs: [{ abbr: 'BaseUK' }] });
     done();
@@ -227,16 +250,44 @@ describe('perform game', () => {
       done();
     });
   });
+  beforeEach(async (done) => {
+    player3 = await postRequest(`/api/v1/games/${createdGame.game.id}/join`, {
+      nickname: 'foo3',
+    });
+    socket3 = ioFront.connect(httpServerUrl.toString(), {
+      reconnection: false,
+      forceNew: true,
+    });
+    socket3.on('connect', () => {
+      expect(socket3.connected).toBeTruthy();
+      done();
+    });
+  });
+
   afterEach((done) => {
     if (socket2.connected) socket2.disconnect();
+    if (socket3.connected) socket3.disconnect();
     done();
   });
 
   it('works', async (done) => {
     await new Promise((resolve, reject) => {
-      socket2.on('error', reject).on('authenticated', resolve).emit('authenticate', {
-        token: player2.player.token,
-      });
+      socket2
+        .on('error', reject)
+        .on('unauthorized', reject)
+        .on('gamestate_updated', resolve)
+        .emit('authenticate', {
+          token: player2.player.token,
+        });
+    });
+    await new Promise((resolve, reject) => {
+      socket3
+        .on('error', reject)
+        .on('unauthorized', reject)
+        .on('gamestate_updated', resolve)
+        .emit('authenticate', {
+          token: player3.player.token,
+        });
     });
 
     let updateCounter = 0;
@@ -261,7 +312,7 @@ describe('perform game', () => {
       .on('gamestate_updated', (data) => {
         updateCounter += 1;
         if (updateCounter === 1) {
-          return expect(data).toMatchSnapshot({
+          expect(data).toMatchSnapshot({
             game: {
               id: expect.any(String),
             },
@@ -272,8 +323,12 @@ describe('perform game', () => {
               {
                 id: expect.any(String),
               },
+              {
+                id: expect.any(String),
+              },
             ],
           });
+          return;
         }
 
         expect(data).toMatchSnapshot({

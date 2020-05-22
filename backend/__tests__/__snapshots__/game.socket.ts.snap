@@ -134,6 +134,14 @@ Object {
       "nickname": "foo2",
       "points": 0,
     },
+    Object {
+      "id": Any<String>,
+      "isAI": false,
+      "isActive": true,
+      "isHost": false,
+      "nickname": "foo3",
+      "points": 0,
+    },
   ],
   "rounds": Array [],
 }

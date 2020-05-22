@@ -159,7 +159,7 @@ export default class GameService {
     const newGameState = _.cloneDeep(gameState);
     assert(this.isGameJoinable(newGameState.game), 'Game has wrong status.');
     const activePlayers = newGameState.players.filter((player) => player.isActive);
-    assert(activePlayers.length > 1, 'There are not enough players.');
+    assert(activePlayers.length >= 3, 'There are not enough players.');
 
     newGameState.piles = GameService.buildPile(newGameState.game);
     assert(newGameState.piles.prompts.length > 1, 'There are not enough packs.');
