@@ -352,8 +352,10 @@ export default class Controller {
   };
 
   onStartNextRound = async (): Promise<void> => {
-    // Check status
-    // Trigger next round
+    await DBService.updateGame(this.gameId, async (gameState) => {
+      assert(gameState.game.status === GameStatus.Running, 'Only running games can be updated.');
+      return GameService.newRound(gameState);
+    });
   };
 
   onEndGame = async (): Promise<void> => {
