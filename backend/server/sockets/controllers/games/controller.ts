@@ -145,20 +145,50 @@ export default class Controller {
 
   // Other actions
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setRoundPlayed = async (roundIndex: number): Promise<void> => {
-    // TODO Check status
-    // TODO add timeout
-    // TODO set status
-    // TODO shuffle submissions
+    await updateRound(this.gameId, roundIndex, async (prevRound, prevGameState) => {
+      assert(prevRound.status === RoundStatus.Created, 'Round already past picking.');
+      const round = _.cloneDeep(prevRound);
+      const now = new Date();
+
+      if (round.submissions.length === 0) {
+        round.status = RoundStatus.Ended;
+        round.timeouts = {
+          playing: now,
+          revealing: now,
+          judging: now,
+          betweenRounds: new Date(now.getTime() + prevGameState.game.timeouts.betweenRounds),
+        };
+      } else {
+        round.status = RoundStatus.Played;
+        round.submissions = _.shuffle(round.submissions);
+        round.timeouts = {
+          playing: now,
+          revealing: new Date(now.getTime() + prevGameState.game.timeouts.revealing),
+        };
+      }
+
+      return { round };
+    });
+    await Controller.sendUpdated(this.io, this.gameId, ['round']);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setRoundRevealed = async (roundIndex: number): Promise<void> => {
-    // TODO Check status
-    // TODO add timeout
-    // TODO set status
-    // TODO set status for all submissions
+    await updateRound(this.gameId, roundIndex, async (prevRound, prevGameState) => {
+      assert(prevRound.status === RoundStatus.Played, 'Round has invalid status.');
+      const round = _.cloneDeep(prevRound);
+      const now = new Date();
+
+      round.status = RoundStatus.Revealed;
+      round.timeouts = {
+        ...round.timeouts,
+        revealing: now,
+        judging: new Date(now.getTime() + prevGameState.game.timeouts.judging),
+      };
+      round.submissions = round.submissions.map((s) => ({ ...s, isRevealed: true }));
+      return { round };
+    });
+    await Controller.sendUpdated(this.io, this.gameId, ['round']);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -194,15 +224,14 @@ export default class Controller {
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onPickCards = async (data: MessagePickCards): Promise<void> => {
-    const { roundIndex } = data;
+  onPickCards = async ({ roundIndex, cards: pickedCards }: MessagePickCards): Promise<void> => {
     let pickComplete = false;
     await updateRound(this.gameId, roundIndex, async (round, gameState) => {
-      assert(round.status === RoundStatus.Created, 'Round already past picking.');
+      assert(round.status === RoundStatus.Created, 'Incorrect round status.');
       assert(round.judgeId !== this.playerId, 'Judge cannot pick cards.');
       assert(
         round.submissions.every((s) => s.playerId !== this.playerId),
-        'Already picked cards.'
+        'Player already picked cards.'
       );
 
       const myPlayer = _.find(gameState.players, {
@@ -211,7 +240,7 @@ export default class Controller {
       }) as InternalPlayer;
       assert(myPlayer);
 
-      const cards = data.cards.map((card) => {
+      const cards = pickedCards.map((card) => {
         const found = _.find(myPlayer.deck, card);
         assert(found, 'Invalid card');
         myPlayer.deck = _.without(myPlayer.deck, found);
@@ -228,23 +257,46 @@ export default class Controller {
       };
       round.submissions.push(newSubmission);
 
-      pickComplete = round.submissions.length >= gameState.players.filter((p) => p.isActive).length;
+      pickComplete =
+        round.submissions.length >= gameState.players.filter((p) => p.isActive).length - 1;
 
       return { round, gameState };
     });
 
     if (pickComplete) {
-      this.setRoundEnded(roundIndex);
+      this.setRoundPlayed(roundIndex);
     } else {
       await Controller.sendUpdated(this.io, this.gameId, ['round', 'player']);
     }
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onRevealSubmission = async (data: MessageRevealSubmission): Promise<void> => {
-    // Check status
-    // Check that player is judge
-    // If all cards were revealed, trigger setRoundPlayed
+  onRevealSubmission = async ({
+    roundIndex,
+    submissionIndex,
+  }: MessageRevealSubmission): Promise<void> => {
+    let revealComplete = false;
+    await updateRound(this.gameId, roundIndex, async (round) => {
+      assert(round.status === RoundStatus.Played, 'Incorrect round status.');
+      assert(round.judgeId === this.playerId, 'Only judge can reveal.');
+      assert(
+        round.submissions[submissionIndex].isRevealed === false,
+        'Submission already revealed.'
+      );
+
+      const submission = round.submissions[submissionIndex];
+      assert(submission, 'Submission not found.');
+      submission.isRevealed = true;
+
+      revealComplete = round.submissions.every((s) => s.isRevealed);
+      return { round };
+    });
+
+    if (revealComplete) {
+      this.setRoundRevealed(roundIndex);
+    } else {
+      await Controller.sendUpdated(this.io, this.gameId, ['round']);
+    }
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
