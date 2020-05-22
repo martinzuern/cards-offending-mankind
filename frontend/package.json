@@ -2,6 +2,9 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "description": "Cards-Offending-Mankind Frontend",
+  "license": "MIT",
+  "author": "Christopher Klaus",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",

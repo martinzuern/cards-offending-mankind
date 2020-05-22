@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Cards-Offending-Mankind Backend",
   "main": "index.js",
+  "private": true,
+  "license": "MIT",
+  "author": "Martin Zürn",
   "scripts": {
     "start": "node dist/index.js",
     "compile": "ts-node build.ts && tsc",
