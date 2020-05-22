@@ -191,20 +191,56 @@ export default class Controller {
     await Controller.sendUpdated(this.io, this.gameId, ['round']);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setRoundEnded = async (roundIndex: number): Promise<void> => {
-    // TODO Set status
-    // TODO Remove timeouts
-    // TODO Update points for player
-    // TODO check that Game should not end, otherwise end
-    // TODO Create timeout for new Round
+    let gameShouldEnd = false;
+    await updateRound(this.gameId, roundIndex, async (prevRound, prevGameState) => {
+      assert(prevRound.status !== RoundStatus.Ended, 'Round has invalid status.');
+      const round = _.cloneDeep(prevRound);
+      const gameState = _.cloneDeep(prevGameState);
+
+      gameState.players = gameState.players.map((player) => {
+        const change = _.chain(round.submissions)
+          .concat(round.discard)
+          .filter((s) => s.playerId === player.id)
+          .reduce((sum, s) => sum + s.pointsChange, 0)
+          .value();
+        return { ...player, points: player.points + change };
+      });
+
+      gameShouldEnd =
+        !!gameState.game.winnerPoints &&
+        gameState.players.some((p) => p.points >= gameState.game.winnerPoints);
+
+      const now = new Date();
+      round.status = RoundStatus.Ended;
+      round.timeouts = {
+        ...round.timeouts,
+        judging: now,
+      };
+
+      if (!gameShouldEnd) {
+        round.timeouts = {
+          ...round.timeouts,
+          betweenRounds: new Date(now.getTime() + prevGameState.game.timeouts.betweenRounds),
+        };
+      }
+
+      return { round, gameState };
+    });
+    if (!gameShouldEnd) {
+      await Controller.sendUpdated(this.io, this.gameId, ['gamestate']);
+    } else {
+      this.setGameEnded();
+    }
   };
 
   setGameEnded = async (): Promise<void> => {
-    // TODO Remove timeouts
-    // TODO Update points for player
-    // TODO hit Game Ended
-    // TODO Update players
+    await DBService.updateGame(this.gameId, async (fullGameState) => {
+      assert(fullGameState.game.status !== GameStatus.Ended, 'Game is already ended.');
+      return GameService.endGame(fullGameState);
+    });
+
+    await Controller.sendUpdated(this.io, this.gameId, ['gamestate']);
   };
 
   // Event handlers
@@ -223,7 +259,6 @@ export default class Controller {
     await Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onPickCards = async ({ roundIndex, cards: pickedCards }: MessagePickCards): Promise<void> => {
     let pickComplete = false;
     await updateRound(this.gameId, roundIndex, async (round, gameState) => {
@@ -299,12 +334,21 @@ export default class Controller {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onChooseWinner = async (data: MessageChooseWinner): Promise<void> => {
-    // Check status
-    // Check that player is judge
-    // Update Points in round
-    // trigger setRoundEnded
+  onChooseWinner = async ({ roundIndex, submissionIndex }: MessageChooseWinner): Promise<void> => {
+    await updateRound(this.gameId, roundIndex, async (prevRound, prevGameState) => {
+      assert(prevRound.status === RoundStatus.Revealed, 'Incorrect round status.');
+      assert(prevRound.judgeId === this.playerId, 'Only judge can choose winner.');
+
+      const round = _.cloneDeep(prevRound);
+      const gameState = _.cloneDeep(prevGameState);
+
+      const submission = round.submissions[submissionIndex];
+      assert(submission, 'Submission not found.');
+      submission.pointsChange = 1;
+
+      return { round, gameState };
+    });
+    this.setRoundEnded(roundIndex);
   };
 
   onStartNextRound = async (): Promise<void> => {
@@ -313,12 +357,8 @@ export default class Controller {
   };
 
   onEndGame = async (): Promise<void> => {
-    await DBService.updateGame(this.gameId, async (fullGameState) => {
-      assert(GameService.isHost(fullGameState, this.playerId), 'Only a host can end a game.');
-      assert(fullGameState.game.status !== GameStatus.Ended, 'Game is already ended.');
-      return GameService.endGame(fullGameState);
-    });
-
-    await Controller.sendUpdated(this.io, this.gameId, ['gamestate']);
+    const gameState = await DBService.getGame(this.gameId);
+    assert(GameService.isHost(gameState, this.playerId), 'Only a host can end a game.');
+    this.setGameEnded();
   };
 }
