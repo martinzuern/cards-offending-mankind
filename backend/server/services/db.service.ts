@@ -58,9 +58,9 @@ export default class DBService {
 
     try {
       const previousGame = await this.getGame(id);
-      assert(previousGame);
+      assert(previousGame, 'Could not find requested game.');
       const newGame = await updateFn(previousGame);
-      assert(newGame);
+      assert(newGame, 'Updated game is invalid.');
       await this.writeGame(newGame);
     } catch (error) {
       L.error(`while update game with id ${id} "${error.message}"`);
