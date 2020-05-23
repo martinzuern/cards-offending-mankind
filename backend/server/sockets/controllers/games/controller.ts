@@ -267,7 +267,7 @@ export default class Controller {
       assert(gameState.game.status === GameStatus.Running, 'Only running games can be updated.');
       return GameService.newRound(gameState);
     });
-    await Controller.sendUpdated(this.io, this.gameId, ['gamestate']);
+    await Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);
   };
 
   onEndGame = async (): Promise<void> => {
