@@ -275,7 +275,7 @@ export default class GameService {
       'Player already picked cards.'
     );
     const myPlayer = _.find(gameState.players, {
-      playerId,
+      id: playerId,
       isActive: true,
     }) as InternalPlayer;
     assert(myPlayer, 'Could not find player.');
