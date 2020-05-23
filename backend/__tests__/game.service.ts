@@ -143,7 +143,7 @@ describe('GameService', () => {
       try {
         GameService.initPlayer(gameId, {});
       } catch (error) {
-        expect(error).toMatchInlineSnapshot(`[AssertionError: undefined == true]`);
+        expect(error).toMatchInlineSnapshot(`[AssertionError: No nickname given.]`);
       }
     });
 

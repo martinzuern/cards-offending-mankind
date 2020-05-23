@@ -220,7 +220,6 @@ export default class GameService {
     };
 
     if (result.game.hasPassword) {
-      assert(game.password);
       result.game.password = await bcrypt.hash(game.password, 10);
     }
 
@@ -245,7 +244,7 @@ export default class GameService {
   }
 
   static initPlayer(gameId: string, player: Partial<Player>): PlayerWithToken {
-    assert(player.nickname);
+    assert(player.nickname, 'No nickname given.');
     const id = uuidv4() as UUID;
     const tokenPayload: PlayerJWT = { id, gameId };
     const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
@@ -276,10 +275,10 @@ export default class GameService {
       'Player already picked cards.'
     );
     const myPlayer = _.find(gameState.players, {
-      playerId,
+      id: playerId,
       isActive: true,
     }) as InternalPlayer;
-    assert(myPlayer);
+    assert(myPlayer, 'Could not find player.');
 
     const cards = pickedCards.map((card) => {
       const found = _.find(myPlayer.deck, card);

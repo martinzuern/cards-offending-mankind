@@ -150,7 +150,7 @@ export default class Controller {
       const gameState = GameService.playRound(prevGameState, roundIndex);
       return { gameState };
     });
-    await Controller.sendUpdated(this.io, this.gameId, ['round']);
+    await Controller.sendUpdated(this.io, this.gameId, ['round', 'player']);
   };
 
   setRoundRevealed = async (roundIndex: number): Promise<void> => {
@@ -267,7 +267,7 @@ export default class Controller {
       assert(gameState.game.status === GameStatus.Running, 'Only running games can be updated.');
       return GameService.newRound(gameState);
     });
-    await Controller.sendUpdated(this.io, this.gameId, ['gamestate']);
+    await Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);
   };
 
   onEndGame = async (): Promise<void> => {
