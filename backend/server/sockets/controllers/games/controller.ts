@@ -150,7 +150,7 @@ export default class Controller {
       const gameState = GameService.playRound(prevGameState, roundIndex);
       return { gameState };
     });
-    await Controller.sendUpdated(this.io, this.gameId, ['round']);
+    await Controller.sendUpdated(this.io, this.gameId, ['round', 'player']);
   };
 
   setRoundRevealed = async (roundIndex: number): Promise<void> => {
