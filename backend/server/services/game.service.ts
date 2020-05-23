@@ -329,7 +329,7 @@ export default class GameService {
     const gameState = _.cloneDeep(prevGameState);
     const round = gameState.rounds[roundIndex];
     const now = new Date();
-    assert(round.status !== RoundStatus.Played, 'Round has invalid status.');
+    assert(round.status === RoundStatus.Played, 'Round has invalid status.');
 
     round.status = RoundStatus.Revealed;
     round.timeouts = {
