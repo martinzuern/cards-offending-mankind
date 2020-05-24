@@ -120,6 +120,7 @@ export default class Controller {
     if (information.includes('gamestate')) {
       const msgGamestate: GameState = GameService.stripGameState(gameState);
       io.to(this.getRoomName(gameId)).emit('gamestate_updated', msgGamestate);
+      L.info('Game %s - send updated GameState %o', gameId, msgGamestate);
     }
 
     if (information.includes('round')) {
@@ -129,6 +130,7 @@ export default class Controller {
         round: GameService.stripRound(gameState.rounds[roundIndex]),
       };
       io.to(this.getRoomName(gameId)).emit('round_updated', msgRound);
+      L.info('Game %s - send updated round %o', gameId, msgRound);
     }
 
     if (information.includes('player')) {
@@ -137,6 +139,7 @@ export default class Controller {
         .forEach((player: InternalPlayer) => {
           const msgPlayer: Player = _.omit(player, ['socketId']);
           io.to(player.socketId).emit('player_updated', msgPlayer);
+          L.info('Game %s - Player %s - send updated player %o', gameId, player.id, msgPlayer);
         });
     }
   }
@@ -201,6 +204,7 @@ export default class Controller {
   };
 
   onStartGame = async (): Promise<void> => {
+    L.info('Game %s – Player %s – Received event onStartGame.', this.gameId, this.playerId);
     await DBService.updateGame(this.gameId, async (fullGameState) => {
       assert(GameService.isHost(fullGameState, this.playerId), 'Only a host can start a game.');
       return GameService.startGame(fullGameState);
@@ -209,7 +213,14 @@ export default class Controller {
     await Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);
   };
 
-  onPickCards = async ({ roundIndex, cards: pickedCards }: MessagePickCards): Promise<void> => {
+  onPickCards = async (data: MessagePickCards): Promise<void> => {
+    L.info(
+      'Game %s – Player %s – Received event onPickCards: %o.',
+      this.gameId,
+      this.playerId,
+      data
+    );
+    const { roundIndex, cards: pickedCards } = data;
     let pickComplete = false;
     await updateRound(this.gameId, roundIndex, async (_round, prevGameState) => {
       const gameState = GameService.pickCards(
@@ -233,10 +244,14 @@ export default class Controller {
     }
   };
 
-  onRevealSubmission = async ({
-    roundIndex,
-    submissionIndex,
-  }: MessageRevealSubmission): Promise<void> => {
+  onRevealSubmission = async (data: MessageRevealSubmission): Promise<void> => {
+    L.info(
+      'Game %s – Player %s – Received event onRevealSubmission: %o.',
+      this.gameId,
+      this.playerId,
+      data
+    );
+    const { roundIndex, submissionIndex } = data;
     let revealComplete = false;
     await updateRound(this.gameId, roundIndex, async (prevRound) => {
       assert(prevRound.judgeId === this.playerId, 'Only judge can reveal.');
@@ -252,7 +267,14 @@ export default class Controller {
     }
   };
 
-  onChooseWinner = async ({ roundIndex, submissionIndex }: MessageChooseWinner): Promise<void> => {
+  onChooseWinner = async (data: MessageChooseWinner): Promise<void> => {
+    L.info(
+      'Game %s – Player %s – Received event onChooseWinner: %o.',
+      this.gameId,
+      this.playerId,
+      data
+    );
+    const { roundIndex, submissionIndex } = data;
     await updateRound(this.gameId, roundIndex, async (round) => {
       assert(round.judgeId === this.playerId, 'Only the judge can choose a winner.');
       return { round: GameService.chooseWinner(round, submissionIndex) };
@@ -261,6 +283,7 @@ export default class Controller {
   };
 
   onStartNextRound = async (): Promise<void> => {
+    L.info('Game %s – Player %s – Received event onStartNextRound.', this.gameId, this.playerId);
     await DBService.updateGame(this.gameId, async (gameState) => {
       assert(gameState.game.status === GameStatus.Running, 'Only running games can be updated.');
       return GameService.newRound(gameState);
@@ -269,6 +292,7 @@ export default class Controller {
   };
 
   onEndGame = async (): Promise<void> => {
+    L.info('Game %s – Player %s – Received event onEndGame.', this.gameId, this.playerId);
     const gameState = await DBService.getGame(this.gameId);
     assert(GameService.isHost(gameState, this.playerId), 'Only a host can end a game.');
     this.setGameEnded();
