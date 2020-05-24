@@ -8,7 +8,13 @@ export default function wrapAsync(
   return (...args: unknown[]): Promise<void> =>
     fn(...args).catch((err: Error) => {
       const msg = { message: err.message, type: err.name };
-      L.warn('Socket %o, Error: %o', socket.decoded_token, msg);
+      L.warn(
+        'Game %s - Player %s - Error: %o',
+        socket.decoded_token.gameId,
+        socket.decoded_token.id,
+        msg
+      );
+      L.error(err);
       socket.error(msg);
     });
 }
