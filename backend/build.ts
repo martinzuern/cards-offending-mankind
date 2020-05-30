@@ -1,8 +1,11 @@
 import s from 'shelljs';
+import path from 'path';
 
 import config from './tsconfig.json';
-const outDir = config.compilerOptions.outDir;
-const targetDir = `${outDir}/backend/server`;
+const outDir = path.resolve(config.compilerOptions.outDir);
+
+const currentFolderName = path.basename(__dirname);
+const targetDir = path.resolve(outDir, currentFolderName, 'server');
 
 s.rm('-rf', outDir);
 s.mkdir(outDir);
