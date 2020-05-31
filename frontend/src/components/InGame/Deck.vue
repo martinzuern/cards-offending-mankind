@@ -47,7 +47,7 @@ export default Vue.extend({
   watch: {
     currentRound() {
       this.selectedCards.length = 0
-    }
+    },
   },
   methods: {
     submitSelection() {

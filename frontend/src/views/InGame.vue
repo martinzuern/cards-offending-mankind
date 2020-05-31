@@ -48,8 +48,8 @@ export default Vue.extend({
       try {
         this.$store.commit('setSocket', io(baseURL, { autoConnect: false }))
         this.socket
-          .on('connect', () => {})
-          .on('authenticated', () => {})
+          // .on('connect', () => {})
+          // .on('authenticated', () => {})
           .on('gamestate_updated', (data: any) => {
             const { players, game, rounds } = data
             this.$store.commit('setPlayers', players)
@@ -57,7 +57,7 @@ export default Vue.extend({
             this.$store.commit('setRounds', rounds)
             this.$store.commit('setRoundIndex', (rounds.length || 1) - 1)
           })
-          .on('start_game', (data: any) => {})
+          // .on('start_game', (data: any) => {})
           .on('player_updated', (data) => {
             this.$store.commit('setPlayer', data)
           })
