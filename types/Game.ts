@@ -57,6 +57,8 @@ type timeouts = {
   betweenRounds: Date;
 };
 
+export type RoundTimeoutKeys = keyof timeouts;
+
 export interface RoundSubmission {
   playerId: Player['id'];
   timestamp: Date;

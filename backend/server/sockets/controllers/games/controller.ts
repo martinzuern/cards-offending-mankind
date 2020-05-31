@@ -16,6 +16,7 @@ import {
   GameState,
   Player,
   MessageRoundUpdated,
+  RoundTimeoutKeys,
 } from '../../../../root-types';
 import L from '../../../common/logger';
 import DBService from '../../../services/db.service';
@@ -23,19 +24,6 @@ import GameService from '../../../services/game.service';
 
 export type JwtAuthenticatedSocket = SocketIO.Socket & {
   decoded_token: PlayerJWT;
-};
-
-const updatePlayer = async (
-  gameId: string,
-  playerId: string,
-  data: Partial<InternalPlayer>
-): Promise<void> => {
-  await DBService.updateGame(gameId, async (fullGameState) => ({
-    ...fullGameState,
-    players: fullGameState.players.map((player: InternalPlayer) =>
-      playerId !== player.id ? player : { ...player, ...data }
-    ),
-  }));
 };
 
 const updateRound = async (
@@ -65,6 +53,7 @@ export default class Controller {
   gameId: string;
   io: socketIo.Server;
   socket: JwtAuthenticatedSocket;
+  timeouts: Partial<Record<RoundTimeoutKeys, NodeJS.Timeout>>[];
 
   constructor(io: socketIo.Server, socket: JwtAuthenticatedSocket) {
     const { id: playerId, gameId } = socket.decoded_token;
@@ -72,6 +61,7 @@ export default class Controller {
     this.socket = socket;
     this.playerId = playerId;
     this.gameId = gameId;
+    this.timeouts = [];
   }
 
   static getRoomName(gameId: string): string {
@@ -105,7 +95,14 @@ export default class Controller {
   static async onDisconnect(socket: JwtAuthenticatedSocket): Promise<void> {
     if (!socket.decoded_token) return;
     const { id: playerId, gameId } = socket.decoded_token;
-    await updatePlayer(gameId, playerId, { isActive: false, socketId: undefined });
+
+    await DBService.updateGame(gameId, async (fullGameState) => {
+      return GameService.updatePlayer(fullGameState, playerId, {
+        isActive: false,
+        socketId: undefined,
+      });
+    });
+
     await this.sendUpdated(socket, gameId, ['gamestate']);
     await DBService.deleteUserLock(playerId);
   }
@@ -147,22 +144,27 @@ export default class Controller {
   // Other actions
 
   setRoundPlayed = async (roundIndex: number): Promise<void> => {
+    this.clearTimeouts(roundIndex);
     await updateRound(this.gameId, roundIndex, async (_prevRound, prevGameState) => {
       const gameState = GameService.playRound(prevGameState, roundIndex);
+      this.addTimeoutHandler(gameState, 'revealing');
       return { gameState };
     });
     await Controller.sendUpdated(this.io, this.gameId, ['round', 'player']);
   };
 
   setRoundRevealed = async (roundIndex: number): Promise<void> => {
+    this.clearTimeouts(roundIndex);
     await updateRound(this.gameId, roundIndex, async (_prevRound, prevGameState) => {
       const gameState = GameService.revealRound(prevGameState, roundIndex);
+      this.addTimeoutHandler(gameState, 'judging');
       return { gameState };
     });
     await Controller.sendUpdated(this.io, this.gameId, ['round']);
   };
 
   setRoundEnded = async (roundIndex: number): Promise<void> => {
+    this.clearTimeouts(roundIndex);
     let gameShouldEnd = false;
     await updateRound(this.gameId, roundIndex, async (_round, prevGameState) => {
       const gameState = GameService.endRound(prevGameState, roundIndex);
@@ -176,6 +178,8 @@ export default class Controller {
           gameState.rounds[roundIndex].timeouts,
           'betweenRounds'
         );
+      } else {
+        this.addTimeoutHandler(gameState, 'betweenRounds');
       }
       return { gameState };
     });
@@ -196,10 +200,74 @@ export default class Controller {
     await Controller.sendUpdated(this.io, this.gameId, ['gamestate']);
   };
 
+  // Timeout handlers
+
+  addTimeoutHandler = (fullGameState: InternalGameState, eventName: RoundTimeoutKeys): void => {
+    const roundIdx = fullGameState.rounds.length - 1;
+    assert(roundIdx >= 0, 'No round found.');
+    const timeoutMs =
+      ((fullGameState.rounds[roundIdx].timeouts[eventName] as Date)?.getTime() || 0) - _.now();
+    assert(timeoutMs > 0, 'No timeout to set.');
+
+    const logPrefix = `Game ${this.gameId} - Player ${this.playerId} - Timeout ${eventName} at round ${roundIdx}`;
+    L.info('%s - remaining: %d ms.', logPrefix, timeoutMs);
+
+    const handlerFns: Record<RoundTimeoutKeys, Function> = {
+      playing: this.setRoundPlayed,
+      revealing: this.setRoundRevealed,
+      judging: this.setRoundEnded,
+      betweenRounds: this.onStartNextRound,
+    };
+    const handlerFn = handlerFns[eventName];
+    assert(handlerFn, 'No valid event submitted.');
+
+    const timeout: NodeJS.Timeout = setTimeout(async () => {
+      try {
+        L.info('%s - Fired!', logPrefix);
+        await handlerFn(roundIdx);
+      } catch (error) {
+        // We expect errors here, as the timeouts might be set from different players.
+        L.warn('%s - ERROR: %o', logPrefix, error);
+      }
+    }, timeoutMs);
+
+    _.set(this.timeouts, [roundIdx, eventName], timeout);
+  };
+
+  clearTimeouts = (roundIdx: number): void => {
+    _.forEach(this.timeouts[roundIdx], (value, key) => {
+      if (value === undefined) return;
+      clearTimeout(value);
+      L.debug(
+        'Game %s - Player %s - Resetting timeout handler %s for round %d',
+        this.gameId,
+        this.playerId,
+        key,
+        roundIdx
+      );
+
+      // eslint-disable-next-line no-param-reassign
+      value = undefined;
+    });
+  };
+
   // Event handlers
 
   onJoinGame = async (): Promise<void> => {
-    await updatePlayer(this.gameId, this.playerId, { isActive: true, socketId: this.socket.id });
+    await DBService.updateGame(this.gameId, async (fullGameState) => {
+      let gameState = GameService.updatePlayer(fullGameState, this.playerId, {
+        isActive: true,
+        socketId: this.socket.id,
+      });
+
+      // If the game is running, we need to make sure the player has a full hand
+      if (GameService.isGameRunning(gameState.game)) {
+        gameState = GameService.refillHandForPlayers(gameState, [{ id: this.playerId }]);
+      }
+
+      return gameState;
+    });
+
     await Controller.sendUpdated(this.io, this.gameId, ['gamestate']);
   };
 
@@ -207,9 +275,23 @@ export default class Controller {
     L.info('Game %s – Player %s – Received event onStartGame.', this.gameId, this.playerId);
     await DBService.updateGame(this.gameId, async (fullGameState) => {
       assert(GameService.isHost(fullGameState, this.playerId), 'Only a host can start a game.');
-      return GameService.startGame(fullGameState);
+      const gameState = GameService.startGame(fullGameState);
+      this.addTimeoutHandler(gameState, 'playing');
+      return gameState;
     });
 
+    await Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);
+  };
+
+  onStartNextRound = async (previosRoundIdx = 0): Promise<void> => {
+    L.info('Game %s – Player %s – Received event onStartNextRound.', this.gameId, this.playerId);
+    this.clearTimeouts(previosRoundIdx);
+    await DBService.updateGame(this.gameId, async (fullGameState) => {
+      assert(GameService.isGameRunning(fullGameState.game), 'Only running games can be updated.');
+      const gameState = GameService.newRound(fullGameState);
+      this.addTimeoutHandler(gameState, 'playing');
+      return gameState;
+    });
     await Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);
   };
 
@@ -280,15 +362,6 @@ export default class Controller {
       return { round: GameService.chooseWinner(round, submissionIndex) };
     });
     this.setRoundEnded(roundIndex);
-  };
-
-  onStartNextRound = async (): Promise<void> => {
-    L.info('Game %s – Player %s – Received event onStartNextRound.', this.gameId, this.playerId);
-    await DBService.updateGame(this.gameId, async (gameState) => {
-      assert(gameState.game.status === GameStatus.Running, 'Only running games can be updated.');
-      return GameService.newRound(gameState);
-    });
-    await Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);
   };
 
   onEndGame = async (): Promise<void> => {
