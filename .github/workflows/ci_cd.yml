@@ -1,16 +1,14 @@
-name: Backend CI
+name: CI CD
 
 on: [push]
 
 jobs:
-  test:
+  test-backend:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         node-version: [12.x]
         redis-version: [6]
-
     steps:
       - uses: actions/checkout@v1
 
@@ -18,16 +16,16 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      
+
       - name: Start Redis ${{ matrix.redis-version }}
         uses: supercharge/redis-github-action@1.1.0
         with:
           redis-version: ${{ matrix.redis-version }}
-      
+
       - name: Install dependencies
         run: yarn install --frozen-lockfile
         working-directory: ./backend
-      
+
       - name: Run linter
         run: yarn lint
         working-directory: ./backend
@@ -35,3 +33,20 @@ jobs:
       - name: Run tests
         run: yarn test
         working-directory: ./backend
+
+  deploy-heroku:
+    runs-on: ubuntu-latest
+    if: "'refs/heads/master' == github.ref"
+    needs: [test-backend]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build, Push and Deploy to Heroku
+        id: heroku
+        uses: jctaveras/heroku-deploy@v1.0.0
+        with:
+          email: ${{ secrets.HEROKU_EMAIL }}
+          api_key: ${{ secrets.HEROKU_API_KEY }}
+          app_name: ${{ secrets.HEROKU_APP_NAME }}
+          dockerfile_path: './Dockerfile'
+          options: '' # Docker Build Options
