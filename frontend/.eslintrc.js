@@ -25,6 +25,7 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': 'warn',
     'vue/no-use-v-if-with-v-for': 'warn',
     'vue/no-parsing-error': 'warn',
+    '@typescript-eslint/ban-ts-ignore': 'warn',
   },
   overrides: [
     {

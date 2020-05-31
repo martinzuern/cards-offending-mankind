@@ -13,7 +13,7 @@ import Vue from 'vue';
 import io from 'socket.io-client';
 import GameState from '@/components/InGame/GameState.vue';
 import Deck from '@/components/InGame/Deck.vue';
-import { Player, Game, Round } from '../../../types';
+import { Player, Game, Round, MessageRoundUpdated, GameState as GameStateType } from '../../../types';
 
 export default Vue.extend({
   name: 'InGame',
@@ -50,7 +50,7 @@ export default Vue.extend({
         this.socket
           // .on('connect', () => {})
           // .on('authenticated', () => {})
-          .on('gamestate_updated', (data: any) => {
+          .on('gamestate_updated', (data: GameStateType) => {
             const { players, game, rounds } = data;
             this.$store.commit('setPlayers', players);
             this.$store.commit('setGame', game);
@@ -58,10 +58,10 @@ export default Vue.extend({
             this.$store.commit('setRoundIndex', (rounds.length || 1) - 1);
           })
           // .on('start_game', (data: any) => {})
-          .on('player_updated', (data) => {
+          .on('player_updated', (data: Player) => {
             this.$store.commit('setPlayer', data);
           })
-          .on('round_updated', (data) => {
+          .on('round_updated', (data: MessageRoundUpdated) => {
             this.$store.commit('setRoundAtIndex', { round: data.round, index: data.roundIndex });
           })
           .emit('authenticate', { token });

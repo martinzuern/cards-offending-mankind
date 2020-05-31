@@ -75,6 +75,7 @@ export default Vue.extend({
   methods: {
     clickNewGame() {
       const { game, player } = this;
+      // @ts-ignore
       game.packs = [{ abbr: 'BaseUK' }];
       this.$store
         .dispatch('executeAPI', {
@@ -95,12 +96,14 @@ export default Vue.extend({
       this.$store
         .dispatch('executeAPI', {
           action: 'game.join',
+          // @ts-ignore
           id: this.game.id,
           payload: {
             nickname: this.player.nickname,
           },
         })
         .then(({ data }) => {
+          // @ts-ignore
           this.$router.push({ name: 'InGame', params: { gameId: this.game.id } });
         })
         .catch((errors) => {

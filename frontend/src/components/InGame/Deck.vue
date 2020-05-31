@@ -57,7 +57,7 @@ export default Vue.extend({
     submitSelection() {
       this.$store.state.socket.emit('pick_cards', { roundIndex: this.rounds.length - 1, cards: this.selectedCards });
     },
-    clickToggleCard(card) {
+    clickToggleCard(card: ResponseCard) {
       if (!this.selectedCards.find(({ value }) => value === card.value)) {
         this.selectedCards.push(card);
       } else {

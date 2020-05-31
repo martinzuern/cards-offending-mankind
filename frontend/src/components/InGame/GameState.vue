@@ -118,7 +118,7 @@ export default Vue.extend({
     startGame(): any {
       this.socket.emit('start_game')
     },
-    chooseWinner(index) {
+    chooseWinner(index: number) {
       this.socket.emit(
         'choose_winner',
         {
@@ -127,7 +127,7 @@ export default Vue.extend({
         },
       )
     },
-    revealSubmissionForCard(index) {
+    revealSubmissionForCard(index: number) {
       if (this.isJudge) {
         this.socket.emit(
           'reveal_submission',
@@ -141,7 +141,7 @@ export default Vue.extend({
     clickNextRound() {
       this.socket.emit('start_next_round')
     },
-    clickEndGame(index) {
+    clickEndGame(index: number) {
       this.socket.emit('end_game')
     },
   },
