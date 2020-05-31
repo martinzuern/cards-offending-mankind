@@ -19,7 +19,12 @@ module.exports = {
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    '@typescript-eslint/no-unused-vars': 'error',
+    // '@typescript-eslint/no-unused-vars': 'error',
+
+    // TODO remove the following lines and uncomment the one above
+    '@typescript-eslint/no-unused-vars': 'warn',
+    'vue/no-use-v-if-with-v-for': 'warn',
+    'vue/no-parsing-error': 'warn',
   },
   overrides: [
     {
