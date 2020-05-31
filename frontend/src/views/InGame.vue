@@ -55,7 +55,7 @@ export default Vue.extend({
             this.$store.commit('setPlayers', players)
             this.$store.commit('setGame', game)
             this.$store.commit('setRounds', rounds)
-            this.$store.commit('setRoundIndex', rounds.length - 1)
+            this.$store.commit('setRoundIndex', (rounds.length || 1) - 1)
           })
           .on('start_game', (data: any) => {})
           .on('player_updated', (data) => {

@@ -10,9 +10,9 @@
           <h5 class="mt-3">Round {{ $store.state.roundIndex + 1 }}</h5>
           Other players in this game:
           <span
-            v-for="gamePlayer in players"
+            v-for="(gamePlayer, index) in players"
             v-if="gamePlayer.nickname !== player.nickname"
-            :key="gamePlayer.id">{{ gamePlayer.nickname }}, </span>
+            :key="gamePlayer.id">{{ gamePlayer.nickname }} <template v-if="index < players.length - 1">, </template></span>
         </p>
         <template v-if="rounds.length && isJudge">
           <p class="mb-0">
@@ -26,8 +26,6 @@
         v-if="player.isHost && !rounds.length && players.length > 2"
         @click="startGame">Start Game</button>
     </div>
-
-
 
     <div
       class="play-card black-card mx-auto mt-5"

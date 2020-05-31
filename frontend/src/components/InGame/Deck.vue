@@ -44,6 +44,11 @@ export default Vue.extend({
       return this.rounds[this.rounds.length - 1] || {}
     },
   },
+  watch: {
+    currentRound() {
+      this.selectedCards.length = 0
+    }
+  },
   methods: {
     submitSelection() {
       this.$store.state.socket.emit('pick_cards', { roundIndex: this.rounds.length - 1, cards: this.selectedCards })
