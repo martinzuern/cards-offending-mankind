@@ -1,73 +1,82 @@
 <template>
   <div v-if="game || player">
-    <div class="card p-0">
-      <div class="p-3">
-        <h6>Invite other players to join</h6>
+    <template v-if="game.status === 'ended'">
+      <div class="list-group">
         <div
-          class="badge badge-pill badge-secondary"
-          :class="{ 'badge-success': player.isHost }">{{ game.id }}</div>
-        <p class="mt-3 mb-0" v-if="players.length > 1">
-          <h5 class="mt-3">Round {{ $store.state.roundIndex + 1 }}</h5>
-          Other players in this game:
-          <span
-            v-for="(gamePlayer, index) in players"
-            v-if="gamePlayer.nickname !== player.nickname"
-            :key="gamePlayer.id">{{ gamePlayer.nickname }} <template v-if="index < players.length - 1">, </template></span>
-        </p>
-        <template v-if="rounds.length && isJudge">
-          <p class="mb-0">
-            You are the judge.
-            <strong v-if="currentRound.status === 'played'">The round been played - please judge.</strong>
-          </p>
-        </template>
-      </div>
-      <button
-        class="btn btn-success d-block w-100 mt-3"
-        v-if="player.isHost && !rounds.length && players.length > 2"
-        @click="startGame">Start Game</button>
-    </div>
-
-    <div
-      class="play-card black-card mx-auto mt-5"
-      v-if="game.status === 'running'">{{ (currentRound.prompt || {}).value }}</div>
-    <div class="mt-5 alert alert-success" v-if="(currentRound.submissions || []).length">
-      <h5>Submissions</h5>
-      <div v-for="(submission, submissionIndex) in currentRound.submissions" :key="submission.timestamp">
-        <div
-          class="d-flex justify-content-center align-items-center"
-          v-for="(card, index) in submission.cards"
-          :key="index">
-          <div
-            @click="revealSubmissionForCard(submissionIndex)"
-            class="play-card white-card">{{ card.value }}</div>
-          <button
-            v-if="isJudge && submission.isRevealed"
-            class="ml-2 btn btn-success"
-            @click="chooseWinner(submissionIndex)">Winner 🎉</button>
-          <div
-            class="ml-3"
-            v-if="submission.playerId === player.id && submission.pointsChange">
-            🎉 You won!
+          v-for="player in players"
+          :key="player.id"
+          class="list-group-item d-flex justify-content-between align-items-center">
+            <strong>{{ player.nickname }}</strong>
+            <span>{{ player.points }}</span>
           </div>
+      </div>
+    </template>
+    <template v-else>
+      <div class="card p-0">
+        <div class="p-3">
+          <h6>Invite other players to join</h6>
           <div
-            class="ml-3"
-            v-else>
-            {{ (players.find(({ id }) => id === submission.playerId) || {}).nickname }}
+            class="badge badge-pill badge-secondary"
+            :class="{ 'badge-success': player.isHost }">{{ game.id }}</div>
+          <p class="mt-3 mb-0" v-if="players.length > 1">
+            <h5 class="mt-3">Round {{ $store.state.roundIndex + 1 }}</h5>
+            Other players in this game:
+            <span
+              v-for="(gamePlayer, index) in players"
+              v-if="gamePlayer.nickname !== player.nickname"
+              :key="gamePlayer.id">{{ gamePlayer.nickname }} <template v-if="index < players.length - 1">, </template></span>
+          </p>
+          <template v-if="rounds.length && isJudge">
+            <p class="mb-0">
+              You are the judge.
+              <strong v-if="currentRound.status === 'played'">The round been played - please judge.</strong>
+            </p>
+          </template>
+        </div>
+        <button
+          class="btn btn-success d-block w-100 mt-3"
+          v-if="player.isHost && !rounds.length && players.length > 2"
+          @click="startGame">Start Game</button>
+      </div>
+
+      <div
+        class="play-card black-card mx-auto mt-5"
+        v-if="game.status === 'running'">{{ (currentRound.prompt || {}).value }}</div>
+      <div class="mt-5 alert alert-success" v-if="(currentRound.submissions || []).length">
+        <h5>Submissions</h5>
+        <div v-for="(submission, submissionIndex) in currentRound.submissions" :key="submission.timestamp">
+          <div
+            class="d-flex justify-content-center align-items-center"
+            v-for="(card, index) in submission.cards"
+            :key="index">
+            <div
+              @click="revealSubmissionForCard(submissionIndex)"
+              class="play-card white-card">{{ card.value }}</div>
+            <button
+              v-if="isJudge && submission.isRevealed"
+              class="ml-2 btn btn-success"
+              @click="chooseWinner(submissionIndex)">Winner 🎉</button>
+            <div
+              class="ml-3"
+              v-if="submission.playerId === player.id && submission.pointsChange">
+              🎉 You won!
             </div>
+            <div
+              class="ml-3"
+              v-else>
+              {{ (players.find(({ id }) => id === submission.playerId) || {}).nickname }}
+              </div>
+          </div>
         </div>
       </div>
-    </div>
-    <template v-if="currentRound.status === 'ended'">
-      <button
-        class="btn btn-success d-block mb-3 d-block w-100"
-        @click="clickNextRound">Next Round</button>
-      <button
-        class="btn btn-secondary d-block w-100 mt-3"
-        @click="clickEndGame">End Game</button>
-    </template>
-    <template v-if="game.status === 'ended'">
-      {{ game }}
-      {{ players }}
+      <template v-if="currentRound.status === 'ended'">
+        <button
+          class="btn btn-success d-block mb-3 d-block w-100"
+          @click="clickNextRound">Next Round</button>
+        <button
+          class="btn btn-secondary d-block w-100 mt-3"
+          @click="clickEndGame">End Game</button>
+      </template>
     </template>
   </div>
 </template>
