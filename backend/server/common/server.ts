@@ -41,7 +41,6 @@ export default class ExpressServer {
     return this;
   }
 
-  // eslint-disable-next-line consistent-return
   async listen(port: number): Promise<{ app: Application; server: http.Server }> {
     const welcome = (p: number) => (): void =>
       l.info(`up and running in ${env} @: ${os.hostname()} on port: ${p}}`);
@@ -63,7 +62,7 @@ export default class ExpressServer {
       return { app, server };
     } catch (error) {
       l.error(error);
-      exit(1);
+      return exit(1);
     }
   }
 }

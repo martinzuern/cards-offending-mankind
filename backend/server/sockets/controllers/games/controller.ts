@@ -1,4 +1,3 @@
-/* eslint-disable lines-between-class-members */
 import assert from 'assert';
 import socketIo from 'socket.io';
 import _ from 'lodash';
@@ -13,7 +12,6 @@ import {
   InternalGameState,
   Round,
   RoundStatus,
-  RoundSubmission,
   UUID,
   GameState,
   Player,
