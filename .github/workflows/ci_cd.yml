@@ -5,31 +5,22 @@ on: [push]
 jobs:
   test-backend:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [12.x]
-        redis-version: [6]
     steps:
-      - uses: actions/checkout@v1
-
-      - name: Use Node.js ${{ matrix.node-version }}
+      - uses: actions/checkout@v2
+      - name: Use Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: ${{ matrix.node-version }}
-
-      - name: Start Redis ${{ matrix.redis-version }}
+          node-version: 12.x
+      - name: Start Redis
         uses: supercharge/redis-github-action@1.1.0
         with:
-          redis-version: ${{ matrix.redis-version }}
-
+          redis-version: 6
       - name: Install dependencies
         run: yarn install --frozen-lockfile
         working-directory: ./backend
-
       - name: Run linter
         run: yarn lint
         working-directory: ./backend
-
       - name: Run tests
         run: yarn test
         working-directory: ./backend
