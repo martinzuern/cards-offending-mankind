@@ -1,4 +1,5 @@
 import { JwtAuthenticatedSocket } from '../controllers/games/controller';
+import L from '../../common/logger';
 
 export default function wrapAsync(
   socket: JwtAuthenticatedSocket,
@@ -6,6 +7,14 @@ export default function wrapAsync(
 ) {
   return (...args: unknown[]): Promise<void> =>
     fn(...args).catch((err: Error) => {
-      socket.error({ message: err.message, type: err.name });
+      const msg = { message: err.message, type: err.name };
+      L.warn(
+        'Game %s - Player %s - Error: %o',
+        socket.decoded_token.gameId,
+        socket.decoded_token.id,
+        msg
+      );
+      L.error(err);
+      socket.error(msg);
     });
 }
