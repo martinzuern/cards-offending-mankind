@@ -169,7 +169,7 @@ export default class GameService {
       judgeId: activePlayers[newGameState.rounds.length % activePlayers.length].id,
       status: RoundStatus.Created,
       timeouts: {
-        playing: new Date(_.now() + newGameState.game.timeouts.playing),
+        playing: new Date(_.now() + newGameState.game.timeouts.playing * 1000),
       },
       prompt: newGameState.piles.prompts.shift(),
       submissions: [],
@@ -328,14 +328,14 @@ export default class GameService {
         playing: now,
         revealing: now,
         judging: now,
-        betweenRounds: new Date(now.getTime() + prevGameState.game.timeouts.betweenRounds),
+        betweenRounds: new Date(now.getTime() + prevGameState.game.timeouts.betweenRounds * 1000),
       };
     } else {
       round.status = RoundStatus.Played;
       round.submissions = _.shuffle(round.submissions);
       round.timeouts = {
         playing: now,
-        revealing: new Date(now.getTime() + prevGameState.game.timeouts.revealing),
+        revealing: new Date(now.getTime() + prevGameState.game.timeouts.revealing * 1000),
       };
     }
     return gameState;
@@ -351,7 +351,7 @@ export default class GameService {
     round.timeouts = {
       ...round.timeouts,
       revealing: now,
-      judging: new Date(now.getTime() + prevGameState.game.timeouts.judging),
+      judging: new Date(now.getTime() + prevGameState.game.timeouts.judging * 1000),
     };
     round.submissions = round.submissions.map((s) => ({ ...s, isRevealed: true }));
     return gameState;
@@ -376,7 +376,7 @@ export default class GameService {
     round.timeouts = {
       ...round.timeouts,
       judging: now,
-      betweenRounds: new Date(now.getTime() + prevGameState.game.timeouts.betweenRounds),
+      betweenRounds: new Date(now.getTime() + prevGameState.game.timeouts.betweenRounds * 1000),
     };
 
     return gameState;
