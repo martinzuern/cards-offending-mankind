@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import axios from '@/helpers/api.ts'
-import { Game, Player, Round } from '../../types'
-import { get } from 'lodash'
+import axios from '@/helpers/api.ts';
+import { Game, Player, Round } from '../../types';
+import { get } from 'lodash';
 
 Vue.use(Vuex);
 
@@ -32,68 +32,68 @@ export default new Vuex.Store({
             method: 'post',
           },
         },
-      }
+      };
     },
     callAPI: (state, getters) => ({ apiAction = {}, payload = {} }) => {
-      return axios()({ ...apiAction, data: payload })
+      return axios()({ ...apiAction, data: payload });
     },
     currentRound: (state, getters) => {
-      return state.rounds[state.roundIndex] || {}
+      return state.rounds[state.roundIndex] || {};
     },
   },
   mutations: {
     setGame(state, game) {
-      state.game = game
+      state.game = game;
     },
     setPlayer(state, player) {
-      state.player = player
+      state.player = player;
     },
     setRounds(state, rounds) {
-      state.rounds = rounds
+      state.rounds = rounds;
     },
     setRoundAtIndex(state, { round, index }) {
-      state.rounds.splice(index, 1, round)
+      state.rounds.splice(index, 1, round);
     },
     setPlayers(state, players) {
-      state.players = players
+      state.players = players;
     },
     setSocket(state, socket) {
-      state.socket = socket
+      state.socket = socket;
     },
     setRoundIndex(state, value) {
-      state.roundIndex = value
+      state.roundIndex = value;
     },
   },
   actions: {
     executeAPI: ({ state, getters, dispatch }, { action, payload, id = null }) => {
-      const apiAction = get(getters.apiFunction(payload, id), action)
-      return getters.callAPI({ apiAction, payload })
+      const apiAction = get(getters.apiFunction(payload, id), action);
+      return getters
+        .callAPI({ apiAction, payload })
         .then((response: any) => {
-          dispatch('resolveResponse', { action, response })
-          return response
+          dispatch('resolveResponse', { action, response });
+          return response;
         })
         .catch((error: Error) => {
-          return error
-        })
+          return error;
+        });
     },
     resolveResponse: ({ state, commit }, { action, response }) => {
-      const storageData = {} as any
+      const storageData = {} as any;
       switch (action) {
         case 'game.create':
-          commit('setGame', response.data.game)
-          commit('setPlayer', response.data.player)
-          storageData[state.game.id] = response.data.player.token
-          localStorage.token = JSON.stringify(storageData)
+          commit('setGame', response.data.game);
+          commit('setPlayer', response.data.player);
+          storageData[state.game.id] = response.data.player.token;
+          localStorage.token = JSON.stringify(storageData);
           break;
         case 'game.join':
-          commit('setPlayer', response.data.player)
-          storageData[state.game.id] = response.data.player.token
-          localStorage.token = JSON.stringify(storageData)
+          commit('setPlayer', response.data.player);
+          storageData[state.game.id] = response.data.player.token;
+          localStorage.token = JSON.stringify(storageData);
           break;
         default:
       }
     },
   },
-  modules: {
-  },
+  modules: {},
 });

@@ -14,8 +14,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 
 export default Vue.extend({
   name: 'App',
-  components: {
-  },
+  components: {},
 });
 </script>
 
