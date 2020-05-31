@@ -25,19 +25,6 @@ export type JwtAuthenticatedSocket = SocketIO.Socket & {
   decoded_token: PlayerJWT;
 };
 
-const updatePlayer = async (
-  gameId: string,
-  playerId: string,
-  data: Partial<InternalPlayer>
-): Promise<void> => {
-  await DBService.updateGame(gameId, async (fullGameState) => ({
-    ...fullGameState,
-    players: fullGameState.players.map((player: InternalPlayer) =>
-      playerId !== player.id ? player : { ...player, ...data }
-    ),
-  }));
-};
-
 const updateRound = async (
   gameId: string,
   roundIndex: number,
@@ -105,7 +92,14 @@ export default class Controller {
   static async onDisconnect(socket: JwtAuthenticatedSocket): Promise<void> {
     if (!socket.decoded_token) return;
     const { id: playerId, gameId } = socket.decoded_token;
-    await updatePlayer(gameId, playerId, { isActive: false, socketId: undefined });
+
+    await DBService.updateGame(gameId, async (fullGameState) => {
+      return GameService.updatePlayer(fullGameState, playerId, {
+        isActive: false,
+        socketId: undefined,
+      });
+    });
+
     await this.sendUpdated(socket, gameId, ['gamestate']);
     await DBService.deleteUserLock(playerId);
   }
@@ -199,7 +193,20 @@ export default class Controller {
   // Event handlers
 
   onJoinGame = async (): Promise<void> => {
-    await updatePlayer(this.gameId, this.playerId, { isActive: true, socketId: this.socket.id });
+    await DBService.updateGame(this.gameId, async (fullGameState) => {
+      let gameState = GameService.updatePlayer(fullGameState, this.playerId, {
+        isActive: true,
+        socketId: this.socket.id,
+      });
+
+      // If the game is running, we need to make sure the player has a full hand
+      if (GameService.isGameRunning(gameState.game)) {
+        gameState = GameService.refillHandForPlayers(gameState, [{ id: this.playerId }]);
+      }
+
+      return gameState;
+    });
+
     await Controller.sendUpdated(this.io, this.gameId, ['gamestate']);
   };
 

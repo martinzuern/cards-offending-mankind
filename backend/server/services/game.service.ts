@@ -118,6 +118,41 @@ export default class GameService {
     };
   }
 
+  static refillHandForPlayers(
+    gameState: InternalGameState,
+    players: { id: string }[]
+  ): InternalGameState {
+    const newGameState = _.cloneDeep(gameState);
+    const round = _.last(newGameState.rounds);
+    assert(round, 'There are no rounds.');
+
+    // If the round is not running, then no need to refill hands
+    if (round.status !== RoundStatus.Created) return newGameState;
+
+    const playerIds = players.map((p) => p.id);
+    const newPlayers = newGameState.players.filter((p) => playerIds.includes(p.id));
+
+    // Make sure we have enough cards left
+    const handSize = newGameState.game.handSize + round.prompt.draw - 1;
+    if (newGameState.piles.responses.length < handSize * newPlayers.length)
+      newGameState.piles.responses = _.shuffle([
+        ...newGameState.piles.responses,
+        ...newGameState.piles.discardedResponses.splice(0),
+      ]);
+
+    newPlayers.forEach((player: InternalPlayer) => {
+      if (player.deck.length >= handSize) return;
+
+      // eslint-disable-next-line no-param-reassign
+      player.deck = [
+        ...player.deck,
+        ...newGameState.piles.responses.splice(0, handSize - player.deck.length),
+      ];
+    });
+
+    return newGameState;
+  }
+
   static newRound(gameState: InternalGameState): InternalGameState {
     assert(
       gameState.rounds.every((r) => r.status === RoundStatus.Ended),
@@ -125,7 +160,7 @@ export default class GameService {
     );
 
     const newGameState = _.cloneDeep(gameState);
-    const activePlayers = newGameState.players.filter((player) => player.isActive);
+    const activePlayers = newGameState.players.filter((p) => p.isActive);
 
     if (!newGameState.piles.prompts.length)
       newGameState.piles.prompts = _.shuffle(newGameState.piles.discardedPrompts.splice(0));
@@ -140,28 +175,9 @@ export default class GameService {
       submissions: [],
       discard: [],
     };
-
-    // Refill hand
-    const handSize = newGameState.game.handSize + newRound.prompt.draw - 1;
-    if (newGameState.piles.responses.length < handSize * activePlayers.length)
-      newGameState.piles.responses = _.shuffle([
-        ...newGameState.piles.responses,
-        ...newGameState.piles.discardedResponses.splice(0),
-      ]);
-
-    newGameState.players = newGameState.players.map((player: InternalPlayer) => {
-      if (!player.isActive || player.deck.length >= handSize) return player;
-      return {
-        ...player,
-        deck: [
-          ...player.deck,
-          ...newGameState.piles.responses.splice(0, handSize - player.deck.length),
-        ],
-      };
-    });
-
     newGameState.rounds.push(newRound);
-    return newGameState;
+
+    return this.refillHandForPlayers(newGameState, activePlayers);
   }
 
   static startGame(gameState: InternalGameState): InternalGameState {
@@ -381,6 +397,19 @@ export default class GameService {
     assert(submission.isRevealed === false, 'Submission already revealed.');
     submission.isRevealed = true;
     return round;
+  }
+
+  static updatePlayer(
+    gameState: InternalGameState,
+    playerId: string,
+    data: Partial<InternalPlayer>
+  ): InternalGameState {
+    return {
+      ...gameState,
+      players: gameState.players.map((player: InternalPlayer) =>
+        playerId !== player.id ? player : { ...player, ...data }
+      ),
+    };
   }
 
   static isGameJoinable(game: InternalGame): boolean {
