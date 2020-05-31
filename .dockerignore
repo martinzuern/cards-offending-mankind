@@ -1,0 +1,10 @@
+.git
+.github
+.vscode
+docker-compose*.yml
+
+**/node_modules
+**/dist
+**/npm-debug.log
+**/yarn-error.log
+**/__tests__
