@@ -144,7 +144,7 @@ export default class Controller {
   // Other actions
 
   setRoundPlayed = async (roundIndex: number): Promise<void> => {
-    clearTimeout(_.get(this.timeouts, [roundIndex, 'playing']));
+    this.clearTimeouts(roundIndex);
     await updateRound(this.gameId, roundIndex, async (_prevRound, prevGameState) => {
       const gameState = GameService.playRound(prevGameState, roundIndex);
       this.addTimeoutHandler(gameState, 'revealing');
@@ -154,7 +154,7 @@ export default class Controller {
   };
 
   setRoundRevealed = async (roundIndex: number): Promise<void> => {
-    clearTimeout(_.get(this.timeouts, [roundIndex, 'revealing']));
+    this.clearTimeouts(roundIndex);
     await updateRound(this.gameId, roundIndex, async (_prevRound, prevGameState) => {
       const gameState = GameService.revealRound(prevGameState, roundIndex);
       this.addTimeoutHandler(gameState, 'judging');
@@ -164,7 +164,7 @@ export default class Controller {
   };
 
   setRoundEnded = async (roundIndex: number): Promise<void> => {
-    clearTimeout(_.get(this.timeouts, [roundIndex, 'judging']));
+    this.clearTimeouts(roundIndex);
     let gameShouldEnd = false;
     await updateRound(this.gameId, roundIndex, async (_round, prevGameState) => {
       const gameState = GameService.endRound(prevGameState, roundIndex);
@@ -200,13 +200,17 @@ export default class Controller {
     await Controller.sendUpdated(this.io, this.gameId, ['gamestate']);
   };
 
+  // Timeout handlers
+
   addTimeoutHandler = (fullGameState: InternalGameState, eventName: RoundTimeoutKeys): void => {
-    const now = _.now();
     const roundIdx = fullGameState.rounds.length - 1;
-    const round = fullGameState.rounds[roundIdx];
-    assert(roundIdx >= 0 && round, 'No round found.');
-    const timeoutMs = (round.timeouts[eventName]?.getTime() || 0) - now;
+    assert(roundIdx >= 0, 'No round found.');
+    const timeoutMs =
+      ((fullGameState.rounds[roundIdx].timeouts[eventName] as Date)?.getTime() || 0) - _.now();
     assert(timeoutMs > 0, 'No timeout to set.');
+
+    const logPrefix = `Game ${this.gameId} - Player ${this.playerId} - Timeout ${eventName} at round ${roundIdx}`;
+    L.info('%s - remaining: %d ms.', logPrefix, timeoutMs);
 
     const handlerFns: Record<RoundTimeoutKeys, Function> = {
       playing: this.setRoundPlayed,
@@ -219,20 +223,32 @@ export default class Controller {
 
     const timeout: NodeJS.Timeout = setTimeout(async () => {
       try {
+        L.info('%s - Fired!', logPrefix);
         await handlerFn(roundIdx);
       } catch (error) {
-        L.warn(
-          'Game %s - Player %s - Error on timeout %s for round %d: %o',
-          this.gameId,
-          this.playerId,
-          eventName,
-          roundIdx,
-          error
-        );
+        // We expect errors here, as the timeouts might be set from different players.
+        L.warn('%s - ERROR: %o', logPrefix, error);
       }
     }, timeoutMs);
 
     _.set(this.timeouts, [roundIdx, eventName], timeout);
+  };
+
+  clearTimeouts = (roundIdx: number): void => {
+    _.forEach(this.timeouts[roundIdx], (value, key) => {
+      if (value === undefined) return;
+      clearTimeout(value);
+      L.debug(
+        'Game %s - Player %s - Resetting timeout handler %s for round %d',
+        this.gameId,
+        this.playerId,
+        key,
+        roundIdx
+      );
+
+      // eslint-disable-next-line no-param-reassign
+      value = undefined;
+    });
   };
 
   // Event handlers
@@ -269,7 +285,7 @@ export default class Controller {
 
   onStartNextRound = async (previosRoundIdx = 0): Promise<void> => {
     L.info('Game %s – Player %s – Received event onStartNextRound.', this.gameId, this.playerId);
-    clearTimeout(_.get(this.timeouts, [previosRoundIdx, 'betweenRounds']));
+    this.clearTimeouts(previosRoundIdx);
     await DBService.updateGame(this.gameId, async (fullGameState) => {
       assert(GameService.isGameRunning(fullGameState.game), 'Only running games can be updated.');
       const gameState = GameService.newRound(fullGameState);
