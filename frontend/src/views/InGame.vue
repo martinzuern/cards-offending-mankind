@@ -41,12 +41,12 @@ export default Vue.extend({
     },
   },
   mounted() {
+    const baseURL = new URL(process.env.VUE_APP_BACKEND_URL || window.location.origin).toString();
     const tokenData = JSON.parse(localStorage.token)
     const token = tokenData[this.$route.params.gameId]
     if (token) {
-      // const websocket = io.connect(process.env.VUE_APP_BACKEND_URL)
       try {
-        this.$store.commit('setSocket', io(process.env.VUE_APP_BACKEND_URL, { autoConnect: false }))
+        this.$store.commit('setSocket', io(baseURL, { autoConnect: false }))
         this.socket
           .on('connect', () => {})
           .on('authenticated', () => {})
