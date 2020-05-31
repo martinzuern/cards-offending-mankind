@@ -93,7 +93,7 @@ export default Vue.extend({
         action: 'game.join',
         id: this.game.id,
         payload: {
-          nickname: this.player.nickname
+          nickname: this.player.nickname,
         },
       }).then(({ data }) => {
         this.$router.push({ name: 'InGame', params: { gameId: this.game.id  } })

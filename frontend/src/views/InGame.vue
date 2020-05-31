@@ -41,15 +41,15 @@ export default Vue.extend({
     },
   },
   mounted() {
+    const baseURL = new URL(process.env.VUE_APP_BACKEND_URL || window.location.origin).toString();
     const tokenData = JSON.parse(localStorage.token)
     const token = tokenData[this.$route.params.gameId]
     if (token) {
-      // const websocket = io.connect(process.env.VUE_APP_BACKEND_URL)
       try {
-        this.$store.commit('setSocket', io(process.env.VUE_APP_BACKEND_URL, { autoConnect: false }))
+        this.$store.commit('setSocket', io(baseURL, { autoConnect: false }))
         this.socket
-          .on('connect', () => {})
-          .on('authenticated', () => {})
+          // .on('connect', () => {})
+          // .on('authenticated', () => {})
           .on('gamestate_updated', (data: any) => {
             const { players, game, rounds } = data
             this.$store.commit('setPlayers', players)
@@ -57,7 +57,7 @@ export default Vue.extend({
             this.$store.commit('setRounds', rounds)
             this.$store.commit('setRoundIndex', (rounds.length || 1) - 1)
           })
-          .on('start_game', (data: any) => {})
+          // .on('start_game', (data: any) => {})
           .on('player_updated', (data) => {
             this.$store.commit('setPlayer', data)
           })

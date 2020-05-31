@@ -7,6 +7,9 @@
                                              
 FROM node:12-alpine as build_frontent
 
+# Trigger fallback to origin
+ENV VUE_APP_BACKEND_URL=''
+
 WORKDIR /opt/types
 ADD ./types .
 

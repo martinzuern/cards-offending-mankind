@@ -112,7 +112,7 @@ export default Vue.extend({
     },
     roundIndex(): number {
       return this.$store.state.roundIndex
-    }
+    },
   },
   methods: {
     startGame(): any {
@@ -124,7 +124,7 @@ export default Vue.extend({
         {
           submissionIndex: index,
           roundIndex: this.roundIndex,
-        }
+        },
       )
     },
     revealSubmissionForCard(index) {
