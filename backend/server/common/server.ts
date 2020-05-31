@@ -6,6 +6,7 @@ import http from 'http';
 import os from 'os';
 import socketIo from 'socket.io';
 import redisAdapter from 'socket.io-redis';
+import helmet from 'helmet';
 
 import l from './logger';
 
@@ -21,6 +22,7 @@ export default class ExpressServer {
 
   constructor() {
     const root = path.normalize(`${__dirname}/../..`);
+    app.use(helmet());
     app.use(cors());
     app.set('appPath', `${root}client`);
     app.use(bodyParser.json({ limit: process.env.REQUEST_LIMIT || '100kb' }));

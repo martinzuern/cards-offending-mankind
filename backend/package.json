@@ -25,6 +25,7 @@
     "express": "^4.17.1",
     "express-openapi-validator": "^3.12.7",
     "handy-redis": "^1.8.1",
+    "helmet": "^3.22.0",
     "json-against-humanity": "crhallberg/json-against-humanity",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.15",
@@ -71,8 +72,8 @@
     "tslint": "^6.1.2",
     "typescript": "^3.8.3"
   },
-  "resolutions": { 
-    "ts-lint/optimist/minimist": "^0.2.1" 
+  "resolutions": {
+    "ts-lint/optimist/minimist": "^0.2.1"
   },
   "jest": {
     "moduleFileExtensions": [
