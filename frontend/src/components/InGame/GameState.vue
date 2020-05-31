@@ -18,7 +18,7 @@
           <div
             class="badge badge-pill badge-secondary"
             :class="{ 'badge-success': player.isHost }">{{ game.id }}</div>
-          <p class="mt-3 mb-0" v-if="players.length > 1">
+          <p v-if="players.length > 1" class="mt-3 mb-0">
             <h5 class="mt-3">Round {{ $store.state.roundIndex + 1 }}</h5>
             Other players in this game:
             <span
@@ -34,36 +34,36 @@
           </template>
         </div>
         <button
-          class="btn btn-success d-block w-100 mt-3"
           v-if="player.isHost && !rounds.length && players.length > 2"
+          class="btn btn-success d-block w-100 mt-3"
           @click="startGame">Start Game</button>
       </div>
 
       <div
-        class="play-card black-card mx-auto mt-5"
-        v-if="game.status === 'running'">{{ (currentRound.prompt || {}).value }}</div>
-      <div class="mt-5 alert alert-success" v-if="(currentRound.submissions || []).length">
+        v-if="game.status === 'running'"
+        class="play-card black-card mx-auto mt-5">{{ (currentRound.prompt || {}).value }}</div>
+      <div v-if="(currentRound.submissions || []).length" class="mt-5 alert alert-success">
         <h5>Submissions</h5>
         <div v-for="(submission, submissionIndex) in currentRound.submissions" :key="submission.timestamp">
           <div
-            class="d-flex justify-content-center align-items-center"
             v-for="(card, index) in submission.cards"
-            :key="index">
+            :key="index"
+            class="d-flex justify-content-center align-items-center">
             <div
-              @click="revealSubmissionForCard(submissionIndex)"
-              class="play-card white-card">{{ card.value }}</div>
+              class="play-card white-card"
+              @click="revealSubmissionForCard(submissionIndex)">{{ card.value }}</div>
             <button
               v-if="isJudge && submission.isRevealed"
               class="ml-2 btn btn-success"
               @click="chooseWinner(submissionIndex)">Winner 🎉</button>
             <div
-              class="ml-3"
-              v-if="submission.playerId === player.id && submission.pointsChange">
+              v-if="submission.playerId === player.id && submission.pointsChange"
+              class="ml-3">
               🎉 You won!
             </div>
             <div
-              class="ml-3"
-              v-else>
+              v-else
+              class="ml-3">
               {{ (players.find(({ id }) => id === submission.playerId) || {}).nickname }}
               </div>
           </div>
@@ -118,7 +118,7 @@ export default Vue.extend({
     startGame(): any {
       this.socket.emit('start_game')
     },
-    chooseWinner(index) {
+    chooseWinner(index: number) {
       this.socket.emit(
         'choose_winner',
         {
@@ -127,7 +127,7 @@ export default Vue.extend({
         },
       )
     },
-    revealSubmissionForCard(index) {
+    revealSubmissionForCard(index: number) {
       if (this.isJudge) {
         this.socket.emit(
           'reveal_submission',
@@ -141,7 +141,7 @@ export default Vue.extend({
     clickNextRound() {
       this.socket.emit('start_next_round')
     },
-    clickEndGame(index) {
+    clickEndGame(index: number) {
       this.socket.emit('end_game')
     },
   },

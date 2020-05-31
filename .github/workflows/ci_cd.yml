@@ -17,6 +17,9 @@ jobs:
       - name: Run linter
         run: yarn lint
         working-directory: ./frontend
+      - name: Build frontend successfully
+        run: yarn build
+        working-directory: ./frontend
   
   test-backend:
     runs-on: ubuntu-latest
