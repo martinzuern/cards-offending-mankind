@@ -7,11 +7,15 @@ import Controller, { JwtAuthenticatedSocket } from './controller';
 import wrapAsync from '../../middlewares/error.handler';
 import L from '../../../common/logger';
 
+import queue from './queue';
+
 const { JWT_SECRET } = process.env;
 
 const auth = socketioJwt.authorize({ secret: JWT_SECRET, additional_auth: Controller.validateJwt });
 
 export default function sockets(io: socketIo.Server): void {
+  queue.setSocketServer(io);
+
   io.on('connection', auth)
     .on('disconnect', Controller.onDisconnect)
     .on('authenticated', async (socket: JwtAuthenticatedSocket) => {
