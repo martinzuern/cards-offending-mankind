@@ -2,12 +2,12 @@ import socketIo from 'socket.io';
 import socketioJwt from 'socketio-jwt';
 import _ from 'lodash';
 
+import queue from './queue';
+
 import DBService from '../../../services/db.service';
 import Controller, { JwtAuthenticatedSocket } from './controller';
 import wrapAsync from '../../middlewares/error.handler';
 import L from '../../../common/logger';
-
-import queue from './queue';
 
 const { JWT_SECRET } = process.env;
 

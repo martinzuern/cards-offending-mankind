@@ -259,7 +259,7 @@ export default class GameService {
     return valid;
   }
 
-  static initPlayer(gameId: string, player: Partial<Player>): PlayerWithToken {
+  static initPlayer(gameId: UUID, player: Partial<Player>): PlayerWithToken {
     assert(player.nickname, 'No nickname given.');
     const id = uuidv4() as UUID;
     const tokenPayload: PlayerJWT = { id, gameId };

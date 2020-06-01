@@ -28,7 +28,7 @@ services:
       - 3000:3000
     environment:
       NODE_ENV: development
-      REDIS_URL: redis://redis:6379/
+      REDIS_URL: redis://redis:6379
     volumes:
       - ./backend:/opt/app
       - ./types:/opt/types
