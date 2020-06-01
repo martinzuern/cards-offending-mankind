@@ -52,13 +52,10 @@ export default class Controller {
   playerId: string;
   gameId: string;
   io: socketIo.Server;
-  socket: JwtAuthenticatedSocket;
   timeouts: Partial<Record<RoundTimeoutKeys, NodeJS.Timeout>>[];
 
-  constructor(io: socketIo.Server, socket: JwtAuthenticatedSocket) {
-    const { id: playerId, gameId } = socket.decoded_token;
+  constructor(io: socketIo.Server, gameId: UUID, playerId: UUID) {
     this.io = io;
-    this.socket = socket;
     this.playerId = playerId;
     this.gameId = gameId;
     this.timeouts = [];
@@ -253,11 +250,11 @@ export default class Controller {
 
   // Event handlers
 
-  onJoinGame = async (): Promise<void> => {
+  onJoinGame = async (socket: JwtAuthenticatedSocket): Promise<void> => {
     await DBService.updateGame(this.gameId, async (fullGameState) => {
       let gameState = GameService.updatePlayer(fullGameState, this.playerId, {
         isActive: true,
-        socketId: this.socket.id,
+        socketId: socket.id,
       });
 
       // If the game is running, we need to make sure the player has a full hand

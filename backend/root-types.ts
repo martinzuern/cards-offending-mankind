@@ -8,7 +8,7 @@ export * from '../types';
 
 export type PlayerJWT = {
   id: UUID;
-  gameId: string;
+  gameId: UUID;
 };
 
 export interface InternalGame extends Game {
