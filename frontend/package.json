@@ -6,7 +6,7 @@
   "author": "Christopher Klaus",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "vue-cli-service build --modern",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },
@@ -49,5 +49,8 @@
     "typescript": "~3.8.3",
     "vue-template-compiler": "^2.6.11"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "vue": {
+    "productionSourceMap": false
+  }
 }
