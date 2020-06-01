@@ -49,5 +49,8 @@
     "typescript": "~3.8.3",
     "vue-template-compiler": "^2.6.11"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "vue": {
+    "productionSourceMap": false
+  }
 }
