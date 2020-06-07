@@ -7,7 +7,7 @@ import os from 'os';
 import socketIo from 'socket.io';
 import redisAdapter from 'socket.io-redis';
 import helmet from 'helmet';
-import Sentry from '@sentry/node';
+import * as Sentry from '@sentry/node';
 
 import l from './logger';
 
@@ -17,11 +17,8 @@ const app = express();
 const { exit } = process;
 const env = process.env.NODE_ENV || 'development';
 
-const sentryDsn = process.env.SENTRY_DSN;
-if (sentryDsn) {
-  Sentry.init({ dsn: sentryDsn });
-  app.use(Sentry.Handlers.requestHandler());
-}
+Sentry.init({ dsn: process.env.SENTRY_DSN });
+app.use(Sentry.Handlers.requestHandler());
 
 export default class ExpressServer {
   private routes: (app: Application) => void;
@@ -55,9 +52,7 @@ export default class ExpressServer {
     try {
       await installValidator(app, this.routes);
 
-      if (sentryDsn) {
-        app.use(Sentry.Handlers.errorHandler());
-      }
+      app.use(Sentry.Handlers.errorHandler());
 
       const server = http.createServer(app);
       if (this.sockets) {
