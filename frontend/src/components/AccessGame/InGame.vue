@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="player-information">
-      <GameState />
+      <GameStateView />
       <Deck />
     </div>
   </div>
@@ -11,15 +11,21 @@
 // @ is an alias to /src
 import Vue from 'vue';
 import io from 'socket.io-client';
-import GameState from '@/components/InGame/GameState.vue';
-import Deck from '@/components/InGame/Deck.vue';
-import { Player, Game, Round, MessageRoundUpdated, GameState as GameStateType } from '../../../types';
+import GameStateView from '@/components/AccessGame/GameState.vue';
+import Deck from '@/components/AccessGame/Deck.vue';
+import { Player, Game, Round, MessageRoundUpdated, GameState } from '../../../types';
 
 export default Vue.extend({
   name: 'InGame',
   components: {
-    GameState,
+    GameStateView,
     Deck,
+  },
+  props: {
+    token: {
+      required: true,
+      type: String,
+    },
   },
   data() {
     return {
@@ -41,36 +47,40 @@ export default Vue.extend({
     },
   },
   mounted() {
-    const baseURL = new URL(process.env.VUE_APP_BACKEND_URL || window.location.origin).toString();
-    const tokenData = JSON.parse(localStorage.token);
-    const token = tokenData[this.$route.params.gameId];
-    if (token) {
+    if (this.token) {
+      console.log({ socket: this.socket });
+      console.log('Initializing Socket');
+      this.initSocket();
+    }
+  },
+  methods: {
+    initSocket() {
+      const baseURL = new URL(process.env.VUE_APP_BACKEND_URL || window.location.origin).toString();
       try {
         this.$store.commit('setSocket', io(baseURL, { autoConnect: false }));
         this.socket
-          // .on('connect', () => {})
-          // .on('authenticated', () => {})
-          .on('gamestate_updated', (data: GameStateType) => {
+          .on('gamestate_updated', (data: GameState) => {
             const { players, game, rounds } = data;
             this.$store.commit('setPlayers', players);
             this.$store.commit('setGame', game);
             this.$store.commit('setRounds', rounds);
             this.$store.commit('setRoundIndex', (rounds.length || 1) - 1);
           })
-          // .on('start_game', (data: any) => {})
           .on('player_updated', (data: Player) => {
             this.$store.commit('setPlayer', data);
           })
           .on('round_updated', (data: MessageRoundUpdated) => {
             this.$store.commit('setRoundAtIndex', { round: data.round, index: data.roundIndex });
           })
-          .emit('authenticate', { token });
+          .on('error', (data) => {
+            console.log(data);
+          })
+          .emit('authenticate', { token: this.token });
         this.socket.open();
       } catch (error) {
         this.error = error;
       }
-    }
+    },
   },
-  methods: {},
 });
 </script>

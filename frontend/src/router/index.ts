@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import VueRouter, { RouteConfig } from 'vue-router';
 import NewGame from '../views/NewGame.vue';
-import InGame from '../views/InGame.vue';
+import AccessGame from '../views/AccessGame.vue';
 
 Vue.use(VueRouter);
 
@@ -13,8 +13,8 @@ const routes: RouteConfig[] = [
   },
   {
     path: '/games/:gameId',
-    name: 'InGame',
-    component: InGame,
+    name: 'AccessGame',
+    component: AccessGame,
   },
 ];
 
