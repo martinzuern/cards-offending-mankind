@@ -264,12 +264,11 @@ export default class Controller {
 
       // validate isActive state of players
       let gameState = _.cloneDeep(fullGameState);
-      gameState.players
-        .filter((p) => p.isActive)
-        .forEach(async (p) => {
-          // eslint-disable-next-line no-param-reassign
-          p.isActive = await DBService.isUserLocked(p.id);
-        });
+
+      const isActive = await Promise.all(
+        gameState.players.map((p) => p.isActive && DBService.isUserLocked(p.id))
+      );
+      gameState.players = gameState.players.map((p, idx) => ({ ...p, isActive: isActive[idx] }));
 
       if (gameState.players.some((p) => p.isActive)) {
         gameState = GameService.newRound(fullGameState);
