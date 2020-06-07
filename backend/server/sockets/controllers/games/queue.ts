@@ -78,7 +78,6 @@ class TimeoutQueue {
       await handlerFn(roundIdx);
       L.info('%s - Finished processing!', logPrefix);
     } catch (error) {
-      // We expect errors here, as the timeouts might be set from different players.
       L.warn('%s - ERROR: %o', logPrefix, serializeError(error));
     }
   };
