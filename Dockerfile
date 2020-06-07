@@ -5,7 +5,7 @@
 #  |_|   |_|   \___/ |_||_|  \__| \___| |_||_| \__,_|
 ###################### Frontend ######################                                                  
                                              
-FROM node:12 as build_frontent
+FROM node:14 as build_frontent
 
 # Trigger fallback to origin
 ENV VUE_APP_BACKEND_URL=''
@@ -39,7 +39,7 @@ RUN ls -laR ./dist
 #  |___/ \__,_| \__| |_\_\ \___| |_||_| \__,_|
 ################### Backend ###################
 
-FROM node:12 as build_backend
+FROM node:14 as build_backend
 
 # Type folder needed for typescript compilation
 WORKDIR /opt/types
@@ -70,7 +70,7 @@ RUN ls -laR ./dist
 #  |_|   |_| |_||_| \__,_| |_|   |___/  \_,_| |_| |_| \__,_|
 ######################## Final Build ########################
 
-FROM node:12
+FROM node:14
 
 ENV NODE_ENV=production
 
