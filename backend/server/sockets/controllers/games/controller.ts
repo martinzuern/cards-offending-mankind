@@ -147,7 +147,7 @@ export default class Controller {
     this.clearTimeouts(roundIndex, 'playing');
     await updateRound(this.gameId, roundIndex, async (_prevRound, prevGameState) => {
       const gameState = GameService.playRound(prevGameState, roundIndex);
-      this.addTimeoutHandler(gameState, 'revealing');
+      this.addTimeoutHandler(gameState);
       return { gameState };
     });
     await Controller.sendUpdated(this.io, this.gameId, ['round', 'player']);
@@ -157,7 +157,7 @@ export default class Controller {
     this.clearTimeouts(roundIndex, 'revealing');
     await updateRound(this.gameId, roundIndex, async (_prevRound, prevGameState) => {
       const gameState = GameService.revealRound(prevGameState, roundIndex);
-      this.addTimeoutHandler(gameState, 'judging');
+      this.addTimeoutHandler(gameState);
       return { gameState };
     });
     await Controller.sendUpdated(this.io, this.gameId, ['round']);
@@ -179,7 +179,7 @@ export default class Controller {
           'betweenRounds'
         );
       } else {
-        this.addTimeoutHandler(gameState, 'betweenRounds');
+        this.addTimeoutHandler(gameState);
       }
       return { gameState };
     });
@@ -202,12 +202,18 @@ export default class Controller {
 
   // Timeout handlers
 
-  addTimeoutHandler = (fullGameState: InternalGameState, eventName: RoundTimeoutKeys): void => {
-    const roundIdx = fullGameState.rounds.length - 1;
-    assert(roundIdx >= 0, 'No round found.');
-    const timeoutMs =
-      ((fullGameState.rounds[roundIdx].timeouts[eventName] as Date)?.getTime() || 0) - _.now();
-    assert(timeoutMs > 0, 'No timeout to set.');
+  addTimeoutHandler = (fullGameState: InternalGameState): void => {
+    const [roundIdx, round] = _.last(fullGameState.rounds.map((val, idx) => [idx, val]));
+    assert(roundIdx >= 0 && round, 'No round found.');
+
+    const [eventName, eventTimeout] = _.chain(round.timeouts)
+      .toPairs()
+      .sortBy(1)
+      .last()
+      .value() as [RoundTimeoutKeys, Date];
+
+    const timeoutMs = (eventTimeout?.getTime() || 0) - _.now();
+    assert(timeoutMs > 0, `No timeout to set (value: ${timeoutMs}).`);
 
     const logPrefix = `Game ${this.gameId} - Player ${this.playerId} - Timeout ${eventName} at round ${roundIdx}`;
     L.info('%s - remaining: %d ms.', logPrefix, timeoutMs);
@@ -244,7 +250,7 @@ export default class Controller {
     await DBService.updateGame(this.gameId, async (fullGameState) => {
       assert(GameService.isHost(fullGameState, this.playerId), 'Only a host can start a game.');
       const gameState = GameService.startGame(fullGameState);
-      this.addTimeoutHandler(gameState, 'playing');
+      this.addTimeoutHandler(gameState);
       return gameState;
     });
 
@@ -257,7 +263,7 @@ export default class Controller {
     await DBService.updateGame(this.gameId, async (fullGameState) => {
       assert(GameService.isGameRunning(fullGameState.game), 'Only running games can be updated.');
       const gameState = GameService.newRound(fullGameState);
-      this.addTimeoutHandler(gameState, 'playing');
+      this.addTimeoutHandler(gameState);
       return gameState;
     });
     await Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);

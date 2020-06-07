@@ -58,7 +58,7 @@ class TimeoutQueue {
   }
 
   processJob = async (job: Queue.Job<GameTimeoutJob>): Promise<void> => {
-    L.debug('Process job: %o', job.data);
+    L.debug('Starting processing job: %o', job.data);
     assert(this.io !== undefined, 'SocketServer is not set, cannot process job');
     const { gameId, roundIdx, eventName } = job.data;
     const logPrefix = `Game ${gameId} - Timeout ${eventName} at round ${roundIdx}`;
@@ -71,7 +71,7 @@ class TimeoutQueue {
       betweenRounds: c.onStartNextRound,
     };
     const handlerFn = handlerFns[eventName];
-    assert(handlerFn, 'No valid event submitted.');
+    assert(handlerFn, `Invalid event submitted (value: ${eventName}).`);
 
     try {
       L.info('%s - Started processing!', logPrefix);
