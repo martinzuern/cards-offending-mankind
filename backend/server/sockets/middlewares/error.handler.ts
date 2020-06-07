@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import { JwtAuthenticatedSocket } from '../controllers/games/controller';
 import L from '../../common/logger';
 
@@ -7,6 +8,7 @@ export default function wrapAsync(
 ) {
   return (...args: unknown[]): Promise<void> =>
     fn(...args).catch((err: Error) => {
+      Sentry.captureException(err);
       const msg = { message: err.message, type: err.name };
       L.warn(
         'Game %s - Player %s - Error: %o',

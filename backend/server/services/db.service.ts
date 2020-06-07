@@ -31,8 +31,8 @@ export default class DBService {
   }
 
   static async isUserLocked(id: string): Promise<boolean> {
-    const lock = await client.get(`user-active:${id}`);
-    return !!lock;
+    const lock = await client.exists(`user-active:${id}`);
+    return lock === 1;
   }
 
   static async getGame(id: string): Promise<InternalGameState> {

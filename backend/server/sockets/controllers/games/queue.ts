@@ -1,6 +1,7 @@
 import assert from 'assert';
 import socketIo from 'socket.io';
 import Queue from 'bull';
+import * as Sentry from '@sentry/node';
 import { serializeError } from 'serialize-error';
 
 import L from '../../../common/logger';
@@ -52,6 +53,7 @@ class TimeoutQueue {
       if (job) await job.moveToCompleted(null, true, true);
       return true;
     } catch (error) {
+      Sentry.captureException(error);
       L.warn('Cannot clear job - ERROR: %o', serializeError(error));
       return false;
     }
@@ -78,6 +80,7 @@ class TimeoutQueue {
       await handlerFn(roundIdx);
       L.info('%s - Finished processing!', logPrefix);
     } catch (error) {
+      Sentry.captureException(error);
       L.warn('%s - ERROR: %o', logPrefix, serializeError(error));
     }
   };
