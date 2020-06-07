@@ -1,6 +1,7 @@
 import assert from 'assert';
 import socketIo from 'socket.io';
 import Queue from 'bull';
+import { serializeError } from 'serialize-error';
 
 import L from '../../../common/logger';
 import { UUID, RoundTimeoutKeys } from '../../../../../types';
@@ -18,7 +19,12 @@ class TimeoutQueue {
   timeoutQueue: Queue.Queue<GameTimeoutJob>;
 
   constructor() {
-    this.timeoutQueue = new Queue('games-to', process.env.REDIS_URL);
+    this.timeoutQueue = new Queue('games-to', process.env.REDIS_URL, {
+      defaultJobOptions: {
+        removeOnComplete: true,
+        removeOnFail: 10,
+      },
+    });
     this.timeoutQueue.process(this.processJob);
   }
 
@@ -38,11 +44,17 @@ class TimeoutQueue {
     return this.timeoutQueue.add(data, { delay, jobId });
   }
 
-  async clearJob(data: GameTimeoutJob): Promise<void> {
-    L.debug('Clear job: %o', data);
-    const jobId = TimeoutQueue.jobId(data);
-    const job = await this.timeoutQueue.getJob(jobId);
-    if (job) await job.remove();
+  async clearJob(data: GameTimeoutJob): Promise<boolean> {
+    try {
+      L.debug('Clear job: %o', data);
+      const jobId = TimeoutQueue.jobId(data);
+      const job = await this.timeoutQueue.getJob(jobId);
+      if (job) await job.moveToCompleted(null, true, true);
+      return true;
+    } catch (error) {
+      L.warn('Cannot clear job - ERROR: %o', serializeError(error));
+      return false;
+    }
   }
 
   processJob = async (job: Queue.Job<GameTimeoutJob>): Promise<void> => {
@@ -67,7 +79,7 @@ class TimeoutQueue {
       L.info('%s - Finished processing!', logPrefix);
     } catch (error) {
       // We expect errors here, as the timeouts might be set from different players.
-      L.warn('%s - ERROR: %o', logPrefix, error);
+      L.warn('%s - ERROR: %o', logPrefix, serializeError(error));
     }
   };
 }
