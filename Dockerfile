@@ -1,11 +1,11 @@
-#  _______                                   _ 
-# (_______)              _                  | |
-#  _____ ____ ___  ____ | |_  ____ ____   _ | |
-# |  ___) ___) _ \|  _ \|  _)/ _  )  _ \ / || |
-# | |  | |  | |_| | | | | |_( (/ /| | | ( (_| |
-# |_|  |_|   \___/|_| |_|\___)____)_| |_|\____|
+######################################################
+#   ___                      _                     _ 
+#  | __|  _ _   ___   _ _   | |_   ___   _ _    __| |
+#  | _|  | '_| / _ \ | ' \  |  _| / -_) | ' \  / _` |
+#  |_|   |_|   \___/ |_||_|  \__| \___| |_||_| \__,_|
+###################### Frontend ######################                                                  
                                              
-FROM node:12-alpine as build_frontent
+FROM node:12 as build_frontent
 
 # Trigger fallback to origin
 ENV VUE_APP_BACKEND_URL=''
@@ -32,15 +32,14 @@ RUN yarn licenses generate-disclaimer > ./dist/licenses/frontend.txt
 RUN ls -laR ./dist
 
 
+###############################################
+#   ___               _                     _ 
+#  | _ )  __ _   __  | |__  ___   _ _    __| |
+#  | _ \ / _` | / _| | / / / -_) | ' \  / _` |
+#  |___/ \__,_| \__| |_\_\ \___| |_||_| \__,_|
+################### Backend ###################
 
-#  ______              _                    _ 
-# (____  \            | |                  | |
-#  ____)  ) ____  ____| |  _ ____ ____   _ | |
-# |  __  ( / _  |/ ___) | / ) _  )  _ \ / || |
-# | |__)  | ( | ( (___| |< ( (/ /| | | ( (_| |
-# |______/ \_||_|\____)_| \_)____)_| |_|\____|
-                                            
-FROM node:12
+FROM node:12 as build_backend
 
 # Type folder needed for typescript compilation
 WORKDIR /opt/types
@@ -56,15 +55,40 @@ RUN yarn --frozen-lockfile
 ADD ./backend .
 RUN yarn compile
 
-# Inject frontend files
-RUN rm -rf ./dist/backend/public/*
-COPY --from=build_frontent /opt/frontend/dist ./dist/backend/public/
-
 # Add licenses
-RUN yarn licenses generate-disclaimer > ./dist/backend/public/licenses/backend.txt
+RUN mkdir -p ./licenses
+RUN yarn licenses generate-disclaimer > ./licenses/backend.txt
 
+# Debug: List built files
 RUN ls -laR ./dist
+
+
+#############################################################
+#   ___   _                 _     ___          _   _      _ 
+#  | __| (_)  _ _    __ _  | |   | _ )  _  _  (_) | |  __| |
+#  | _|  | | | ' \  / _` | | |   | _ \ | || | | | | | / _` |
+#  |_|   |_| |_||_| \__,_| |_|   |___/  \_,_| |_| |_| \__,_|
+######################## Final Build ########################
+
+FROM node:12
 
 ENV NODE_ENV=production
 
-CMD ["node", "dist/backend/server/index.js"]
+WORKDIR /opt/app
+
+COPY ./backend/package.json ./backend/yarn.lock ./
+RUN yarn --frozen-lockfile
+
+# Inject backend files
+COPY --from=build_backend /opt/backend/dist .
+RUN cp ./backend/server/.env .
+
+# Inject frontend files
+RUN rm -rf ./backend/public/*
+COPY --from=build_frontent /opt/frontend/dist ./backend/public/
+COPY --from=build_backend /opt/backend/licenses/* ./backend/public/licenses
+
+# Debug: List built files
+RUN ls -laR .
+
+CMD ["node", "backend/server/index.js"]

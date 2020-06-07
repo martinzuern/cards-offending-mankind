@@ -181,9 +181,9 @@ describe('GameService', () => {
         packs: [{ abbr: 'BaseUK' }],
       });
       baseGameState.players.push(
-        _.omit(GameService.initPlayer('', { nickname: 'foo1', isActive: true }), 'token'),
-        _.omit(GameService.initPlayer('', { nickname: 'foo2', isActive: true }), 'token'),
-        _.omit(GameService.initPlayer('', { nickname: 'foo3', isActive: true }), 'token')
+        _.omit(GameService.initPlayer('' as UUID, { nickname: 'foo1', isActive: true }), 'token'),
+        _.omit(GameService.initPlayer('' as UUID, { nickname: 'foo2', isActive: true }), 'token'),
+        _.omit(GameService.initPlayer('' as UUID, { nickname: 'foo3', isActive: true }), 'token')
       );
       const newGameState = GameService.startGame(baseGameState);
       expect(newGameState.players.length).toBe(3);

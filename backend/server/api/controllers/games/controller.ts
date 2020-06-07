@@ -5,7 +5,7 @@ import _ from 'lodash';
 import GameService from '../../../services/game.service';
 import DBService from '../../../services/db.service';
 import { HttpError } from '../../middlewares/error.handler';
-import { PlayerWithToken } from '../../../../root-types';
+import { PlayerWithToken, UUID } from '../../../../root-types';
 // import L from '../../../common/logger';
 
 export default class Controller {
@@ -44,7 +44,7 @@ export default class Controller {
         gameState.players.every((p) => p.nickname !== nickname),
         new HttpError('Nickname already taken', 400)
       );
-      newPlayer = GameService.initPlayer(id, { nickname });
+      newPlayer = GameService.initPlayer(id as UUID, { nickname });
       gameState.players.push(_.omit(newPlayer, ['token']));
       return gameState;
     });
