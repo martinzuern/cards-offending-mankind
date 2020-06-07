@@ -55,13 +55,11 @@ export default class Controller {
   playerId: UUID;
   gameId: UUID;
   io: socketIo.Server;
-  timeouts: Partial<Record<RoundTimeoutKeys, NodeJS.Timeout>>[];
 
   constructor(io: socketIo.Server, gameId: UUID, playerId: UUID) {
     this.io = io;
     this.playerId = playerId;
     this.gameId = gameId;
-    this.timeouts = [];
   }
 
   static getRoomName(gameId: UUID): string {
