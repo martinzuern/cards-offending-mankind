@@ -30,6 +30,11 @@ export default class DBService {
     return delNo > 0;
   }
 
+  static async isUserLocked(id: string): Promise<boolean> {
+    const lock = await client.get(`user-active:${id}`);
+    return !!lock;
+  }
+
   static async getGame(id: string): Promise<InternalGameState> {
     L.info(`fetch game with id ${id}`);
     const data = await client.get(`game:${id}`);
