@@ -258,13 +258,33 @@ export default class Controller {
   onStartNextRound = async (previosRoundIdx = 0): Promise<void> => {
     L.info('Game %s – Player %s – Received event onStartNextRound.', this.gameId, this.playerId);
     this.clearTimeouts(previosRoundIdx, 'betweenRounds');
+    let gameShouldEnd = false;
     await DBService.updateGame(this.gameId, async (fullGameState) => {
       assert(GameService.isGameRunning(fullGameState.game), 'Only running games can be updated.');
-      const gameState = GameService.newRound(fullGameState);
-      this.addTimeoutHandler(gameState);
+
+      // validate isActive state of players
+      let gameState = _.cloneDeep(fullGameState);
+      gameState.players
+        .filter((p) => p.isActive)
+        .forEach(async (p) => {
+          // eslint-disable-next-line no-param-reassign
+          p.isActive = await DBService.isUserLocked(p.id);
+        });
+
+      if (gameState.players.some((p) => p.isActive)) {
+        gameState = GameService.newRound(fullGameState);
+        this.addTimeoutHandler(gameState);
+      } else {
+        gameShouldEnd = true;
+      }
       return gameState;
     });
-    await Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);
+
+    if (gameShouldEnd) {
+      this.setGameEnded();
+    } else {
+      await Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);
+    }
   };
 
   onPickCards = async (data: MessagePickCards): Promise<void> => {
