@@ -291,6 +291,7 @@ describe('perform game', () => {
     });
 
     let updateCounter = 0;
+    let playerUpdateCounter = 0;
 
     socket
       .on('authenticated', () => {
@@ -303,11 +304,18 @@ describe('perform game', () => {
         throw new Error(JSON.stringify(error));
       })
       .on('player_updated', (data) => {
-        expect(data).toMatchSnapshot({
-          id: expect.any(String),
-          deck: Array(10).fill({ value: expect.any(String) }),
-        });
-        done();
+        if (playerUpdateCounter === 0) {
+          expect(data).toMatchSnapshot({
+            id: expect.any(String),
+          });
+        } else {
+          expect(data).toMatchSnapshot({
+            id: expect.any(String),
+            deck: Array(10).fill({ value: expect.any(String) }),
+          });
+          done();
+        }
+        playerUpdateCounter += 1;
       })
       .on('gamestate_updated', (data) => {
         updateCounter += 1;

@@ -149,6 +149,18 @@ Object {
 
 exports[`perform game works 2`] = `
 Object {
+  "deck": Array [],
+  "id": Any<String>,
+  "isAI": false,
+  "isActive": true,
+  "isHost": true,
+  "nickname": "foo",
+  "points": 0,
+}
+`;
+
+exports[`perform game works 3`] = `
+Object {
   "game": Object {
     "handSize": 10,
     "hasPassword": false,
@@ -187,7 +199,7 @@ Object {
 }
 `;
 
-exports[`perform game works 3`] = `
+exports[`perform game works 4`] = `
 Object {
   "deck": Array [
     Object {
