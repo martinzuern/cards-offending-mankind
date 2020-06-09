@@ -240,7 +240,7 @@ export default class Controller {
       return gameState;
     });
 
-    await Controller.sendUpdated(this.io, this.gameId, ['gamestate']);
+    await Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);
   };
 
   onStartGame = async (): Promise<void> => {
