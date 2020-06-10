@@ -4120,7 +4120,7 @@ jsesc@^2.5.1:
 
 json-against-humanity@crhallberg/json-against-humanity:
   version "0.0.0"
-  resolved "https://codeload.github.com/crhallberg/json-against-humanity/tar.gz/a0b056eae8ec3ef56365b5f4b708ee63975c5614"
+  resolved "https://codeload.github.com/crhallberg/json-against-humanity/tar.gz/ad079cee034d823a80cd6d8c67f1a7f72cfcc636"
 
 json-buffer@3.0.0:
   version "3.0.0"

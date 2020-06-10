@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Packs should get all packs 1`] = `
+Object {
+  "abbr": "Base",
+  "description": "- placeholder -",
+  "icon": "",
+  "name": "Base Set",
+  "official": true,
+  "promptsCount": 90,
+  "responsesCount": 460,
+}
+`;
