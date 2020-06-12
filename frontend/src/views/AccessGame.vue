@@ -37,7 +37,7 @@ export default Vue.extend({
   },
   computed: {
     reloaded(): boolean {
-      return this.token && !this.player.id;
+      return !!this.token && !this.player.id;
     },
     player(): PlayerWithToken {
       return this.$store.state.player;

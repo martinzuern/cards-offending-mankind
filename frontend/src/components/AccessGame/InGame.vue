@@ -72,7 +72,7 @@ export default Vue.extend({
           .on('round_updated', (data: MessageRoundUpdated) => {
             this.$store.commit('setRoundAtIndex', { round: data.round, index: data.roundIndex });
           })
-          .on('error', (data) => {
+          .on('error', (data: unknown) => {
             console.log(data);
           })
           .emit('authenticate', { token: this.token });

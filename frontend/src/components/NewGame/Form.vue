@@ -97,7 +97,7 @@
 </template>
 
 <script lang="ts">
-import { Game, Player, Pack } from '../../../types';
+import { Game, Player, Pack, CreateGame } from '../../../types';
 import 'bootstrap/dist/css/bootstrap.css';
 import Vue from 'vue';
 
@@ -107,17 +107,19 @@ export default Vue.extend({
     gameId: {
       type: String,
       required: false,
+      default: '',
     },
     gameToken: {
       type: String,
       required: false,
+      default: '',
     },
   },
   data() {
     return {
       joinGame: false as boolean,
       player: {} as Player,
-      errors: [] as any[],
+      errors: [] as unknown[],
       password: '' as string,
     };
   },
@@ -182,7 +184,7 @@ export default Vue.extend({
           id: this.game.id,
           payload: {
             nickname: this.player.nickname,
-            password: this.game.password,
+            password: (this.game as CreateGame).password,
           },
         })
         .then(() => {
