@@ -1,6 +1,6 @@
 <template>
-  <div v-if="player && player.id !== currentRound.judgeId && game.status === 'running'" class="deck my-5">
-    <h5>Your Cards</h5>
+  <div v-if="player && player.id !== currentRound.judgeId && currentRound.status === 'created'" class="deck my-5">
+    <h6 class="text-center">Your Cards</h6>
     <div class="card-grid">
       <div
         v-for="card in player.deck"
@@ -47,9 +47,12 @@ export default Vue.extend({
     currentRound(): Round {
       return this.rounds[this.rounds.length - 1] || {};
     },
+    roundIndex(): number {
+      return this.$store.state.roundIndex;
+    },
   },
   watch: {
-    currentRound() {
+    roundIndex() {
       this.selectedCards.length = 0;
     },
   },
