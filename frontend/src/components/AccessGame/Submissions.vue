@@ -9,7 +9,9 @@
         Submission by {{ ((players || []).find(({ id }) => id === submission.playerId) || {}).nickname || '***' }}
       </h6>
       <div v-for="(card, index) in submission.cards" :key="index">
-        <div class="play-card white-card pt-5" @click="revealSubmissionForCard(submissionIndex)">{{ card.value }}</div>
+        <div class="submission-card play-card white-card pt-5" @click="revealSubmissionForCard(submissionIndex)">
+          {{ card.value }}
+        </div>
       </div>
       <button
         v-if="isJudge && submission.isRevealed"
@@ -82,4 +84,16 @@ export default Vue.extend({
 });
 </script>
 
-<style lang="sass"></style>
+<style lang="sass">
+
+@keyframes randomMoveIn
+  from
+    transform: translate(-100vw, -100vh) rotate(120deg) // placeholder, needs to be defined programmatically
+    opacity: 0
+  to
+    transform: translate(0px, 0px) rotate(0deg)
+    opacity: 1
+
+.submission-card
+  animation: .5s randomMoveIn ease-out
+</style>
