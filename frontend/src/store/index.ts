@@ -1,115 +1,132 @@
+import 'socket.io-client';
+
 import Vue from 'vue';
 import Vuex from 'vuex';
+import { createDirectStore } from 'direct-vuex';
+import { last } from 'lodash';
+
+import {
+  Round,
+  Game,
+  MessageRoundUpdated,
+  PackInformation,
+  MessageGetGame,
+  UUID,
+  MessageCreateGame,
+  MessageGameCreated,
+  PlayerWithToken,
+  Player,
+  MessageJoinGame,
+  MessagePlayerJoined,
+  GameState,
+} from '../../../types';
 import axios from '@/helpers/api.ts';
-import { Game, Player, Round, Pack } from '../../types';
-import { get } from 'lodash';
+
+export interface State {
+  packs?: PackInformation[];
+  gameState?: Partial<GameState>;
+  player?: Player;
+  currentRound?: number;
+  socket?: SocketIOClient.Socket;
+}
 
 Vue.use(Vuex);
 
-export default new Vuex.Store({
-  state: {
-    game: {} as Game,
-    player: {} as Player,
-    rounds: [] as Round[],
-    players: [] as Player[],
-    socket: {} as any,
-    roundIndex: 0 as number,
-    packs: [] as Pack[],
+function pop<T>(obj: T, key: keyof T): T[keyof T] {
+  const val = obj[key];
+  delete obj[key];
+  return val;
+}
+
+const { store, rootActionContext, moduleActionContext, rootGetterContext, moduleGetterContext } = createDirectStore({
+  state: (): State => {
+    return {};
   },
   getters: {
-    apiFunction: (state) => (payload = {}, id?: number) => {
-      return {
-        game: {
-          create: {
-            url: `/games`,
-            method: 'post',
-          },
-          get: {
-            url: `/games/${id}`,
-            method: 'get',
-          },
-          join: {
-            url: `/games/${id}/join`,
-            method: 'post',
-          },
-        },
-        packs: {
-          get: {
-            url: '/packs',
-            method: 'get',
-          },
-        },
-      };
-    },
-    callAPI: (state, getters) => ({ apiAction = {}, payload = {} }) => {
-      return axios()({ ...apiAction, data: payload });
-    },
-    currentRound: (state, getters) => {
-      return state.rounds[state.roundIndex] || {};
-    },
+    currentRound: (state): Round | undefined => last(state.gameState?.rounds),
+    currentRoundIndex: (state): number => (state.gameState?.rounds?.length || 1) - 1,
   },
   mutations: {
-    setGame(state, game) {
-      state.game = game;
+    SET_GAME_STATE(state, gameState: State['gameState']): void {
+      state.gameState = gameState;
     },
-    setPlayer(state, player) {
+    SET_GAME(state, game: Game): void {
+      state.gameState = state.gameState || {};
+      state.gameState.game = game;
+    },
+    SET_PLAYER(state, player: State['player']): void {
       state.player = player;
     },
-    setRounds(state, rounds) {
-      state.rounds = rounds;
-    },
-    setPacks(state, packs) {
+    SET_PACKS(state, packs: State['packs']): void {
       state.packs = packs;
     },
-    setRoundAtIndex(state, { round, index }) {
-      state.rounds.splice(index, 1, round);
+    SET_ROUND_AT_INDEX(state, { round, roundIndex }: MessageRoundUpdated): void {
+      const rounds = state.gameState?.rounds;
+      rounds && rounds.splice(roundIndex, 1, round);
     },
-    setPlayers(state, players) {
-      state.players = players;
-    },
-    setSocket(state, socket) {
+    SET_SOCKET(state, socket: State['socket']): void {
       state.socket = socket;
-    },
-    setRoundIndex(state, value) {
-      state.roundIndex = value;
     },
   },
   actions: {
-    executeAPI: ({ state, getters, dispatch }, { action, payload, id = null }) => {
-      const apiAction = get(getters.apiFunction(payload, id), action);
-      return getters
-        .callAPI({ apiAction, payload })
-        .then((response: any) => {
-          dispatch('resolveResponse', { action, response });
-          return response;
-        })
-        .catch((error: Error) => {
-          return error;
-        });
+    fetchPacks: async (context): Promise<void> => {
+      const { commit } = rootActionContext(context);
+      try {
+        const response = await axios.get<PackInformation[]>('/packs');
+        commit.SET_PACKS(response.data);
+      } catch (error) {
+        // TODO error handling
+        console.log(error);
+      }
     },
-    resolveResponse: ({ state, commit }, { action, response }) => {
-      const storageData = {} as any;
-      switch (action) {
-        case 'packs.get':
-          commit('setPacks', response.data);
-          break;
-        case 'game.get':
-          commit('setGame', response.data.game);
-          break;
-        case 'game.create':
-          commit('setGame', response.data.game);
-          commit('setPlayer', response.data.player);
-          storageData[state.game.id] = response.data.player.token;
-          localStorage.token = JSON.stringify(storageData);
-          break;
-        case 'game.join':
-          commit('setPlayer', response.data.player);
-          storageData[state.game.id] = response.data.player.token;
-          localStorage.token = JSON.stringify(storageData);
-          break;
-        default:
+    fetchGame: async (context, { id }: { id: UUID }): Promise<void> => {
+      const { commit } = rootActionContext(context);
+      try {
+        const response = await axios.get<MessageGetGame>(`/games/${id}`);
+        commit.SET_GAME(response.data.game);
+      } catch (error) {
+        // TODO error handling
+        console.log(error);
+      }
+    },
+    createGame: async (context, { data }: { data: MessageCreateGame }): Promise<MessageGameCreated> => {
+      const { commit } = rootActionContext(context);
+      const response = await axios.post<MessageGameCreated>(`/games`, data);
+      const game = response.data.game;
+      const token = pop<PlayerWithToken>(response.data.player, 'token') as string;
+      const player: Player = response.data.player;
+      commit.SET_GAME(game);
+      commit.SET_PLAYER(player);
+      localStorage.setItem(`token:${game.id}`, token);
+      return response.data;
+    },
+    joinGame: async (context, { id, data }: { id: UUID; data: MessageJoinGame }): Promise<void> => {
+      const { commit } = rootActionContext(context);
+      try {
+        const response = await axios.post<MessagePlayerJoined>(`/games/${id}/join`, data);
+        const token = pop<PlayerWithToken>(response.data.player, 'token') as string;
+        const player: Player = response.data.player;
+        commit.SET_PLAYER(player);
+        localStorage.setItem(`token:${id}`, token);
+      } catch (error) {
+        // TODO error handling
+        console.log(error);
       }
     },
   },
-  modules: {},
 });
+
+// Export the direct-store instead of the classic Vuex store.
+export default store;
+
+// The following exports will be used to enable types in the
+// implementation of actions and getters.
+export { rootActionContext, moduleActionContext, rootGetterContext, moduleGetterContext };
+
+// The following lines enable types in the injected store '$store'.
+export type AppStore = typeof store;
+declare module 'vuex' {
+  interface Store<S> {
+    direct: AppStore;
+  }
+}

@@ -20,7 +20,8 @@
 import Vue from 'vue';
 import InGame from '@/components/AccessGame/InGame.vue';
 import Form from '@/components/NewGame/Form.vue';
-import { PlayerWithToken } from '../../../types';
+import { Player } from '../../../types';
+import store from '../store';
 
 export default Vue.extend({
   name: 'AccessGame',
@@ -30,38 +31,26 @@ export default Vue.extend({
   },
   data() {
     return {
-      error: {} as any,
-      interval: {} as any,
       stallJoining: false as boolean,
     };
   },
   computed: {
     reloaded(): boolean {
-      return !!this.token && !this.player.id;
+      return !!this.token && !this.player?.id;
     },
-    player(): PlayerWithToken {
-      return this.$store.state.player;
+    player(): Player | undefined {
+      return store.state.player;
     },
-    socket(): any {
-      return this.$store.state.socket;
+    socket(): SocketIOClient.Socket | undefined {
+      return store.state.socket;
     },
-    token(): string {
-      if (this.player.token) {
-        return this.player.token;
-      }
-
-      let tokenData;
-      try {
-        tokenData = JSON.parse(localStorage.token);
-      } catch {
-        tokenData = {};
-      }
-      return tokenData[this.$route.params.gameId];
+    token(): string | null {
+      return localStorage.getItem(`token:${this.$route.params.gameId}`);
     },
   },
   watch: {
     reloaded: {
-      handler(value) {
+      handler(value): void {
         if (value) {
           this.stallJoining = true;
           setTimeout(() => {

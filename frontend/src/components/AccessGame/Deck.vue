@@ -26,6 +26,7 @@
 // @ is an alias to /src
 import Vue from 'vue';
 import { Player, Round, ResponseCard, Game } from '../../../../types';
+import store from '../../store';
 
 export default Vue.extend({
   name: 'Deck',
@@ -35,32 +36,31 @@ export default Vue.extend({
     };
   },
   computed: {
-    player(): Player {
-      return this.$store.state.player;
+    player(): Player | undefined {
+      return store.state.player;
     },
-    game(): Game {
-      return this.$store.state.game;
+    game(): Game | undefined {
+      return store.state.gameState?.game;
     },
-    rounds(): Round[] {
-      return this.$store.state.rounds;
+    rounds(): Round[] | undefined {
+      return store.state.gameState?.rounds;
     },
-    currentRound(): Round {
-      return this.rounds[this.rounds.length - 1] || {};
-    },
-    roundIndex(): number {
-      return this.$store.state.roundIndex;
+    currentRound(): Round | undefined {
+      return store.getters.currentRound;
     },
   },
   watch: {
-    roundIndex() {
+    roundIndex(): void {
       this.selectedCards.length = 0;
     },
   },
   methods: {
-    submitSelection() {
-      this.$store.state.socket.emit('pick_cards', { roundIndex: this.rounds.length - 1, cards: this.selectedCards });
+    submitSelection(): void {
+      store.state.socket &&
+        this.rounds &&
+        store.state.socket.emit('pick_cards', { roundIndex: this.rounds.length - 1, cards: this.selectedCards });
     },
-    clickToggleCard(card: ResponseCard) {
+    clickToggleCard(card: ResponseCard): void {
       if (!this.selectedCards.find(({ value }) => value === card.value)) {
         this.selectedCards.push(card);
       } else {

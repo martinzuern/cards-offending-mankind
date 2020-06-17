@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import Vue, { VNode } from 'vue';
 
 declare global {
@@ -7,7 +8,7 @@ declare global {
     // tslint:disable no-empty-interface
     type ElementClass = Vue;
     interface IntrinsicElements {
-      [elem: string]: any;
+      [elem: string]: unknown;
     }
   }
 }

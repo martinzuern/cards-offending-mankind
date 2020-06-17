@@ -26,47 +26,49 @@
 <script lang="ts">
 // @ is an alias to /src
 import Vue from 'vue';
-import { Player, Game, Round } from '../../../../types';
+import { OtherPlayer, Player, Game, Round } from '../../../../types';
+import store from '../../store';
 
 export default Vue.extend({
   name: 'Submissions',
   computed: {
     isJudge(): boolean {
-      return this.player.id === this.currentRound.judgeId;
+      return !!(this.player && this.currentRound && this.player.id === this.currentRound.judgeId);
     },
-    game(): Game {
-      return this.$store.state.game;
+    game(): Game | undefined {
+      return store.state.gameState?.game;
     },
-    player(): Player {
-      return this.$store.state.player;
+    player(): Player | undefined {
+      return store.state.player;
     },
-    players(): Player[] {
-      return this.$store.state.players;
+    players(): OtherPlayer[] | undefined {
+      return store.state.gameState?.players;
     },
-    rounds(): Round[] {
-      return this.$store.state.rounds;
+    rounds(): Round[] | undefined {
+      return store.state.gameState?.rounds;
     },
-    currentRound(): Round {
-      return this.$store.getters.currentRound;
+    currentRound(): Round | undefined {
+      return store.getters.currentRound;
     },
-    socket(): any {
-      return this.$store.state.socket;
+    socket(): SocketIOClient.Socket | undefined {
+      return store.state.socket;
     },
     roundIndex(): number {
-      return this.$store.state.roundIndex;
+      return store.getters.currentRoundIndex;
     },
   },
   methods: {
-    chooseWinner(index: number) {
-      this.socket.emit('choose_winner', {
-        submissionIndex: index,
-        roundIndex: this.roundIndex,
-      });
+    chooseWinner(submissionIndex: number): void {
+      this.socket &&
+        this.socket.emit('choose_winner', {
+          submissionIndex,
+          roundIndex: this.roundIndex,
+        });
     },
-    revealSubmissionForCard(index: number) {
-      if (this.isJudge) {
+    revealSubmissionForCard(submissionIndex: number): void {
+      if (this.isJudge && this.socket) {
         this.socket.emit('reveal_submission', {
-          submissionIndex: index,
+          submissionIndex,
           roundIndex: this.roundIndex,
         });
       }

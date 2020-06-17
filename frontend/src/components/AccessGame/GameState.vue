@@ -36,7 +36,7 @@
         Start Game
       </button>
       <div v-if="game.status !== 'created'" class="text-center">
-        <h5 class="mt-3">Round {{ $store.state.roundIndex + 1 }}</h5>
+        <h5 class="mt-3">Round {{ roundIndex + 1 }}</h5>
         <template v-if="rounds.length && isJudge">
           <h2>
             👩🏻‍⚖️ Relax, you are judging this round.
@@ -65,7 +65,8 @@
 // @ is an alias to /src
 import Vue from 'vue';
 import Submissions from './Submissions.vue';
-import { Player, Game, Round } from '../../../../types';
+import { OtherPlayer, Player, Game, Round } from '../../../../types';
+import store from '../../store';
 
 export default Vue.extend({
   name: 'GameState',
@@ -74,39 +75,39 @@ export default Vue.extend({
   },
   computed: {
     isJudge(): boolean {
-      return this.player.id === this.currentRound.judgeId;
+      return !!(this.player && this.currentRound && this.player.id === this.currentRound.judgeId);
     },
-    game(): Game {
-      return this.$store.state.game;
+    game(): Game | undefined {
+      return store.state.gameState?.game;
     },
-    player(): Player {
-      return this.$store.state.player;
+    player(): Player | undefined {
+      return store.state.player;
     },
-    players(): Player[] {
-      return this.$store.state.players;
+    players(): OtherPlayer[] | undefined {
+      return store.state.gameState?.players;
     },
-    rounds(): Round[] {
-      return this.$store.state.rounds;
+    rounds(): Round[] | undefined {
+      return store.state.gameState?.rounds;
     },
-    currentRound(): Round {
-      return this.$store.getters.currentRound;
+    currentRound(): Round | undefined {
+      return store.getters.currentRound;
     },
-    socket(): any {
-      return this.$store.state.socket;
+    socket(): SocketIOClient.Socket | undefined {
+      return store.state.socket;
     },
     roundIndex(): number {
-      return this.$store.state.roundIndex;
+      return store.getters.currentRoundIndex;
     },
   },
   methods: {
-    startGame(): any {
-      this.socket.emit('start_game');
+    startGame(): void {
+      this.socket && this.socket.emit('start_game');
     },
-    clickNextRound() {
-      this.socket.emit('start_next_round');
+    clickNextRound(): void {
+      this.socket && this.socket.emit('start_next_round');
     },
-    clickEndGame(index: number) {
-      this.socket.emit('end_game');
+    clickEndGame(): void {
+      this.socket && this.socket.emit('end_game');
     },
   },
 });

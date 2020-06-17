@@ -97,9 +97,10 @@
 </template>
 
 <script lang="ts">
-import { Game, Player, Pack, CreateGame } from '../../../types';
+import { Game, Player, CreateGame, PackInformation, MessageGameCreated, UUID } from '../../../types';
 import 'bootstrap/dist/css/bootstrap.css';
 import Vue from 'vue';
+import store from '../../store';
 
 export default Vue.extend({
   name: 'Form',
@@ -124,18 +125,18 @@ export default Vue.extend({
     };
   },
   computed: {
-    officialPacks(): Pack[] {
+    officialPacks(): PackInformation[] {
       return this.packs.filter((p) => p.official);
     },
-    packs(): Pack[] {
-      return this.$store.state.packs;
+    packs(): PackInformation[] {
+      return store.state.packs || [];
     },
     game: {
-      get(): Game {
-        return this.$store.state.game;
+      get(): Game | undefined {
+        return store.state.gameState?.game;
       },
       set(value: Game): void {
-        this.$store.commit('setGame', value);
+        store.commit.SET_GAME(value);
       },
     },
   },
@@ -148,52 +149,40 @@ export default Vue.extend({
   },
   methods: {
     getGameInfo(): void {
-      this.$store.dispatch('executeAPI', {
-        action: 'game.get',
-        id: this.gameId,
-      });
+      store.dispatch.fetchGame({ id: this.gameId as UUID });
     },
     getPacks(): void {
-      this.$store.dispatch('executeAPI', {
-        action: 'packs.get',
-      });
+      store.dispatch.fetchPacks();
     },
     clickNewGame(): void {
       const { game, player } = this;
-      // @ts-ignore
-      this.$store
-        .dispatch('executeAPI', {
-          action: 'game.create',
-          payload: {
-            game,
-            player,
-          },
-        })
-        .then(({ data }) => {
-          this.$router.push({ name: 'AccessGame', params: { gameId: data.game.id } });
-        })
-        .catch((errors) => {
-          this.errors = errors;
-        });
+      game &&
+        store.dispatch
+          .createGame({ data: { game, player } })
+          .then((data: MessageGameCreated) => {
+            const gameId = data.game.id;
+            this.$router.push({ name: 'AccessGame', params: { gameId } });
+          })
+          .catch((err: Error) => {
+            this.errors.push(err);
+          });
     },
-    clickJoinGame() {
-      this.$store
-        .dispatch('executeAPI', {
-          action: 'game.join',
-          // @ts-ignore
-          id: this.game.id,
-          payload: {
-            nickname: this.player.nickname,
-            password: (this.game as CreateGame).password,
-          },
-        })
-        .then(() => {
-          // @ts-ignore
-          !this.gameId && this.$router.push({ name: 'AccessGame', params: { gameId: this.game.id } });
-        })
-        .catch((errors) => {
-          this.errors = errors;
-        });
+    clickJoinGame(): void {
+      this.game &&
+        store.dispatch
+          .joinGame({
+            id: this.game.id,
+            data: {
+              nickname: this.player.nickname,
+              password: (this.game as CreateGame).password,
+            },
+          })
+          .then(() => {
+            !this.gameId && this.game && this.$router.push({ name: 'AccessGame', params: { gameId: this.game.id } });
+          })
+          .catch((err: Error) => {
+            this.errors.push(err);
+          });
     },
   },
 });

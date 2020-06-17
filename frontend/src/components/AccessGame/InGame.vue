@@ -14,6 +14,7 @@ import io from 'socket.io-client';
 import GameStateView from '@/components/AccessGame/GameState.vue';
 import Deck from '@/components/AccessGame/Deck.vue';
 import { Player, Game, Round, MessageRoundUpdated, GameState } from '../../../types';
+import store from '../../store';
 
 export default Vue.extend({
   name: 'InGame',
@@ -29,21 +30,21 @@ export default Vue.extend({
   },
   data() {
     return {
-      error: {} as any,
+      error: {} as unknown,
     };
   },
   computed: {
-    game(): Game {
-      return this.$store.state.game;
+    game(): Game | undefined {
+      return store.state.gameState?.game;
     },
-    player(): Player {
-      return this.$store.state.player;
+    player(): Player | undefined {
+      return store.state.player;
     },
-    rounds(): Round[] {
-      return this.$store.state.rounds;
+    rounds(): Round[] | undefined {
+      return store.state.gameState?.rounds;
     },
-    socket(): any {
-      return this.$store.state.socket;
+    socket(): SocketIOClient.Socket | undefined {
+      return store.state.socket;
     },
   },
   mounted() {
@@ -54,29 +55,26 @@ export default Vue.extend({
     }
   },
   methods: {
-    initSocket() {
+    initSocket(): void {
       const baseURL = new URL(process.env.VUE_APP_BACKEND_URL || window.location.origin).toString();
       try {
-        this.$store.commit('setSocket', io(baseURL, { autoConnect: false }));
-        this.socket
+        const socket = io(baseURL, { autoConnect: false });
+        socket
           .on('gamestate_updated', (data: GameState) => {
-            const { players, game, rounds } = data;
-            this.$store.commit('setPlayers', players);
-            this.$store.commit('setGame', game);
-            this.$store.commit('setRounds', rounds);
-            this.$store.commit('setRoundIndex', (rounds.length || 1) - 1);
+            store.commit.SET_GAME_STATE(data);
           })
           .on('player_updated', (data: Player) => {
-            this.$store.commit('setPlayer', data);
+            store.commit.SET_PLAYER(data);
           })
           .on('round_updated', (data: MessageRoundUpdated) => {
-            this.$store.commit('setRoundAtIndex', { round: data.round, index: data.roundIndex });
+            store.commit.SET_ROUND_AT_INDEX(data);
           })
           .on('error', (data: unknown) => {
             console.log(data);
           })
           .emit('authenticate', { token: this.token });
-        this.socket.open();
+        socket.open();
+        store.commit.SET_SOCKET(socket);
       } catch (error) {
         this.error = error;
       }
