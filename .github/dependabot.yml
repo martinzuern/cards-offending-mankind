@@ -2,9 +2,13 @@ version: 2
 updates:
   - package-ecosystem: "npm"
     directory: "/frontend/"
+    labels:
+      - "Frontend"
     schedule:
       interval: "weekly"
   - package-ecosystem: "npm"
     directory: "/backend/"
+    labels:
+      - "Backend"
     schedule:
       interval: "weekly"
