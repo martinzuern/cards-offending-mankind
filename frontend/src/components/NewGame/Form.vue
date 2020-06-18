@@ -136,7 +136,7 @@ export default Vue.extend({
         return store.state.gameState?.game;
       },
       set(value: Game): void {
-        store.commit.SET_GAME(value);
+        store.commit.setGame(value);
       },
     },
   },

@@ -61,20 +61,20 @@ export default Vue.extend({
         const socket = io(baseURL, { autoConnect: false });
         socket
           .on('gamestate_updated', (data: GameState) => {
-            store.commit.SET_GAME_STATE(data);
+            store.commit.setGameState(data);
           })
           .on('player_updated', (data: Player) => {
-            store.commit.SET_PLAYER(data);
+            store.commit.setPlayer(data);
           })
           .on('round_updated', (data: MessageRoundUpdated) => {
-            store.commit.SET_ROUND_AT_INDEX(data);
+            store.commit.setRoundAtIndex(data);
           })
           .on('error', (data: unknown) => {
             console.log(data);
           })
           .emit('authenticate', { token: this.token });
         socket.open();
-        store.commit.SET_SOCKET(socket);
+        store.commit.setSocket(socket);
       } catch (error) {
         this.error = error;
       }

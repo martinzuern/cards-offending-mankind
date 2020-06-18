@@ -47,24 +47,24 @@ const { store, rootActionContext, moduleActionContext, rootGetterContext, module
     currentRoundIndex: (state): number => (state.gameState?.rounds?.length || 1) - 1,
   },
   mutations: {
-    SET_GAME_STATE(state, gameState: State['gameState']): void {
+    setGameState(state, gameState: State['gameState']): void {
       state.gameState = gameState;
     },
-    SET_GAME(state, game: Game): void {
+    setGame(state, game: Game): void {
       state.gameState = state.gameState || {};
       state.gameState.game = game;
     },
-    SET_PLAYER(state, player: State['player']): void {
+    setPlayer(state, player: State['player']): void {
       state.player = player;
     },
-    SET_PACKS(state, packs: State['packs']): void {
+    setPacks(state, packs: State['packs']): void {
       state.packs = packs;
     },
-    SET_ROUND_AT_INDEX(state, { round, roundIndex }: MessageRoundUpdated): void {
+    setRoundAtIndex(state, { round, roundIndex }: MessageRoundUpdated): void {
       const rounds = state.gameState?.rounds;
       rounds && rounds.splice(roundIndex, 1, round);
     },
-    SET_SOCKET(state, socket: State['socket']): void {
+    setSocket(state, socket: State['socket']): void {
       state.socket = socket;
     },
   },
@@ -73,7 +73,7 @@ const { store, rootActionContext, moduleActionContext, rootGetterContext, module
       const { commit } = rootActionContext(context);
       try {
         const response = await axios.get<PackInformation[]>('/packs');
-        commit.SET_PACKS(response.data);
+        commit.setPacks(response.data);
       } catch (error) {
         // TODO error handling
         console.log(error);
@@ -83,7 +83,7 @@ const { store, rootActionContext, moduleActionContext, rootGetterContext, module
       const { commit } = rootActionContext(context);
       try {
         const response = await axios.get<MessageGetGame>(`/games/${id}`);
-        commit.SET_GAME(response.data.game);
+        commit.setGame(response.data.game);
       } catch (error) {
         // TODO error handling
         console.log(error);
@@ -95,8 +95,8 @@ const { store, rootActionContext, moduleActionContext, rootGetterContext, module
       const game = response.data.game;
       const token = pop<PlayerWithToken>(response.data.player, 'token') as string;
       const player: Player = response.data.player;
-      commit.SET_GAME(game);
-      commit.SET_PLAYER(player);
+      commit.setGame(game);
+      commit.setPlayer(player);
       localStorage.setItem(`token:${game.id}`, token);
       return response.data;
     },
@@ -106,7 +106,7 @@ const { store, rootActionContext, moduleActionContext, rootGetterContext, module
         const response = await axios.post<MessagePlayerJoined>(`/games/${id}/join`, data);
         const token = pop<PlayerWithToken>(response.data.player, 'token') as string;
         const player: Player = response.data.player;
-        commit.SET_PLAYER(player);
+        commit.setPlayer(player);
         localStorage.setItem(`token:${id}`, token);
       } catch (error) {
         // TODO error handling
