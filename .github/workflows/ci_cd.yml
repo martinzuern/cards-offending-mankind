@@ -17,6 +17,9 @@ jobs:
       - name: Run linter
         run: yarn lint
         working-directory: ./frontend
+      - name: Run typecheck
+        run: yarn lint:type
+        working-directory: ./frontend
       - name: Build frontend successfully
         run: yarn build
         working-directory: ./frontend
