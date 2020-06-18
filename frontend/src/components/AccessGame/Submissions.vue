@@ -1,11 +1,13 @@
 <template>
   <div
-    v-if="(currentRound.submissions || []).length && ['played', 'revealed', 'ended'].includes(currentRound.status)"
+    v-if="player && currentRound && (currentRound.submissions || []).length && currentRound.status !== 'created'"
     class="my-5"
   >
     <h5>Submissions</h5>
     <div v-for="(submission, submissionIndex) in currentRound.submissions" :key="submission.timestamp" class="mb-4">
-      <h6>Submission by {{ (players.find(({ id }) => id === submission.playerId) || {}).nickname || '***' }}</h6>
+      <h6>
+        Submission by {{ ((players || []).find(({ id }) => id === submission.playerId) || {}).nickname || '***' }}
+      </h6>
       <div v-for="(card, index) in submission.cards" :key="index">
         <div class="play-card white-card pt-5" @click="revealSubmissionForCard(submissionIndex)">{{ card.value }}</div>
       </div>
@@ -16,7 +18,10 @@
       >
         Winner 🎉
       </button>
-      <div v-if="submission.playerId === player.id && submission.pointsChange" class="alert alert-success mt-5">
+      <div
+        v-if="player && submission.playerId === player.id && submission.pointsChange"
+        class="alert alert-success mt-5"
+      >
         🎉 You won!
       </div>
     </div>

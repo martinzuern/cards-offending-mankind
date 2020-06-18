@@ -8,7 +8,7 @@
             <br />
             mankind
           </div>
-          <h6 v-if="game.id" class="mt-2 text-muted">
+          <h6 v-if="game && game.id" class="mt-2 text-muted">
             <template v-if="gameId && gameToken">
               Seems like you dropped out
             </template>
@@ -17,7 +17,7 @@
             </template>
           </h6>
           <div class="background-white">
-            <template v-if="gameId && game.status !== 'created'">
+            <template v-if="gameId && game && game.status !== 'created'">
               You cannot join this game as it has already started.
             </template>
             <template v-else>
@@ -34,18 +34,18 @@
                     aria-describedby="player-nickname"
                   />
                 </div>
-                <template v-if="!gameId">
+                <template v-if="!gameId && game">
                   <label for="packs">Active game packs</label>
                   <select id="packs" v-model="game.packs" multiple class="form-control mb-3">
                     <option v-for="pack in officialPacks" :key="pack.name" :value="pack">{{ pack.name }}</option>
                   </select>
                 </template>
-                <div v-if="game.hasPassword || !gameId">
+                <div v-if="(game && game.hasPassword) || !gameId">
                   <label for="password">Password <span v-if="!gameId">(optional)</span></label>
                   <div class="input-group">
                     <input
                       id="password"
-                      v-model="game.password"
+                      v-model="password"
                       type="password"
                       class="form-control"
                       placeholder="Magrathea"
@@ -57,12 +57,12 @@
                   v-if="!gameId"
                   class="d-block btn btn-secondary btn-sm mt-3"
                   type="button"
-                  @click="clickNewGame('create')"
+                  @click="clickNewGame()"
                 >
                   Create a new game
                 </button>
               </template>
-              <template v-if="!gameId">
+              <template v-if="!gameId && game">
                 <div class="pt-3">
                   <hr />
                   <a href="javascript:;" @click="joinGame = true">Join an existing game</a>
@@ -156,9 +156,10 @@ export default Vue.extend({
     },
     clickNewGame(): void {
       const { game, player } = this;
+      const createGame: CreateGame = { ...game, password: this.password };
       game &&
         store.dispatch
-          .createGame({ data: { game, player } })
+          .createGame({ data: { game: createGame, player } })
           .then((data: MessageGameCreated) => {
             const gameId = data.game.id;
             this.$router.push({ name: 'AccessGame', params: { gameId } });

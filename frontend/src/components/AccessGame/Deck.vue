@@ -1,5 +1,8 @@
 <template>
-  <div v-if="player && player.id !== currentRound.judgeId && currentRound.status === 'created'" class="deck my-5">
+  <div
+    v-if="player && currentRound && player.id !== currentRound.judgeId && currentRound.status === 'created'"
+    class="deck my-5"
+  >
     <h6 class="text-center">Your Cards</h6>
     <div class="card-grid">
       <div
