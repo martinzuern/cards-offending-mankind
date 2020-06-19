@@ -24,7 +24,7 @@ import { Player } from '../../../types';
 import store from '../store';
 
 export default Vue.extend({
-  name: 'AccessGame',
+  name: 'Game',
   components: {
     InGame,
     Form,

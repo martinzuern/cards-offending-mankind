@@ -10,7 +10,7 @@ import Vue from 'vue';
 import Form from '@/components/NewGame/Form.vue';
 
 export default Vue.extend({
-  name: 'NewGame',
+  name: 'Home',
   components: {
     Form,
   },
