@@ -10,7 +10,6 @@ import {
   Game,
   MessageRoundUpdated,
   PackInformation,
-  MessageGetGame,
   UUID,
   MessageCreateGame,
   MessageGameCreated,
@@ -76,16 +75,6 @@ const { store, rootActionContext, moduleActionContext, rootGetterContext, module
       try {
         const response = await axios.get<PackInformation[]>('/packs');
         commit.setPacks(response.data);
-      } catch (error) {
-        // TODO error handling
-        console.log(error);
-      }
-    },
-    fetchGame: async (context, { id }: { id: UUID }): Promise<void> => {
-      const { commit } = rootActionContext(context);
-      try {
-        const response = await axios.get<MessageGetGame>(`/games/${id}`);
-        commit.setGame(response.data.game);
       } catch (error) {
         // TODO error handling
         console.log(error);
