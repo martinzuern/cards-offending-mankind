@@ -51,10 +51,13 @@ export default Vue.extend({
     currentRound(): Round | undefined {
       return store.getters.currentRound;
     },
+    roundIndex(): number {
+      return store.getters.currentRoundIndex;
+    },
   },
   watch: {
     roundIndex(): void {
-      this.selectedCards.length = 0;
+      this.selectedCards = [];
     },
   },
   methods: {
