@@ -1,18 +1,18 @@
 <template>
   <div class="home">
-    <Form />
+    <CreateGame />
   </div>
 </template>
 
 <script lang="ts">
 // @ is an alias to /src
 import Vue from 'vue';
-import Form from '@/components/NewGame/Form.vue';
+import CreateGame from '@/components/CreateGame/CreateGame.vue';
 
 export default Vue.extend({
   name: 'Home',
   components: {
-    Form,
+    CreateGame,
   },
 });
 </script>

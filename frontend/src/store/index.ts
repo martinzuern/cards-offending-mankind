@@ -23,7 +23,7 @@ import {
 import axios from '@/helpers/api.ts';
 
 export interface State {
-  packs?: PackInformation[];
+  packs: PackInformation[];
   gameState?: Partial<GameState>;
   player?: Player;
   currentRound?: number;
@@ -40,7 +40,9 @@ function pop<T>(obj: T, key: keyof T): T[keyof T] {
 
 const { store, rootActionContext, moduleActionContext, rootGetterContext, moduleGetterContext } = createDirectStore({
   state: (): State => {
-    return {};
+    return {
+      packs: [],
+    };
   },
   getters: {
     currentRound: (state): Round | undefined => last(state.gameState?.rounds),
