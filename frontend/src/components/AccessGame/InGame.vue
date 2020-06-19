@@ -1,9 +1,20 @@
 <template>
   <div>
-    <div class="player-information">
-      <GameStateView />
-      <Deck />
-    </div>
+    <template v-if="userLocked">
+      <h2>
+        It appears that you or your browser triggered a reload. 🤦‍♀️
+      </h2>
+      <h6>
+        Please be patient, this can take up to 35 seconds.
+      </h6>
+    </template>
+
+    <template v-else>
+      <div class="player-information">
+        <GameStateView />
+        <Deck />
+      </div>
+    </template>
   </div>
 </template>
 
@@ -31,6 +42,7 @@ export default Vue.extend({
   data() {
     return {
       error: {} as unknown,
+      userLocked: false,
     };
   },
   computed: {
@@ -48,14 +60,12 @@ export default Vue.extend({
     },
   },
   mounted() {
-    if (this.token) {
-      console.log({ socket: this.socket });
-      console.log('Initializing Socket');
-      this.initSocket();
-    }
+    this.initSocket();
   },
   methods: {
     initSocket(): void {
+      console.log({ socket: this.socket });
+      console.log('Initializing Socket');
       const baseURL = new URL(process.env.VUE_APP_BACKEND_URL || window.location.origin).toString();
       try {
         const socket = io(baseURL, { autoConnect: false });
@@ -71,6 +81,18 @@ export default Vue.extend({
           })
           .on('error', (data: unknown) => {
             console.log(data);
+          })
+          .on('authenticated', () => {
+            this.userLocked = false;
+          })
+          .on('unauthorized', (msg: { message: string }) => {
+            console.error('unauthorized:', msg);
+            if (msg.message === 'user-locked') {
+              this.userLocked = true;
+              setTimeout(() => this.initSocket(), 5000);
+            }
+            socket.close();
+            store.commit.setSocket(undefined);
           })
           .emit('authenticate', { token: this.token });
         socket.open();

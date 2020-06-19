@@ -41,6 +41,8 @@ const { store, rootActionContext, moduleActionContext, rootGetterContext, module
   state: (): State => {
     return {
       packs: [],
+      gameState: undefined,
+      player: undefined,
     };
   },
   getters: {
