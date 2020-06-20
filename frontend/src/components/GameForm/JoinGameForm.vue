@@ -95,7 +95,8 @@ export default Vue.extend({
           data,
         })
         .catch((err) => {
-          if (err.response?.data?.errors) err.response.data.errors.map(({ message }) => this.alerts.push(message));
+          if (err.response?.data?.errors)
+            err.response.data.errors.map(({ message }: { message: string }) => this.alerts.push(message));
           else this.errors.push(err.toString());
         });
     },

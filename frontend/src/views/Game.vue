@@ -11,6 +11,7 @@ import Vue from 'vue';
 
 import InGame from '@/components/AccessGame/InGame.vue';
 import JoinGameForm from '@/components/GameForm/JoinGameForm.vue';
+import { UUID } from '../../types';
 import store from '../store';
 
 export default Vue.extend({
@@ -20,10 +21,10 @@ export default Vue.extend({
     JoinGameForm,
   },
   computed: {
-    gameId(): string {
-      return this.$route.params.gameId;
+    gameId(): UUID {
+      return this.$route.params.gameId as UUID;
     },
-    token(): string | null {
+    token(): string | undefined {
       return store.getters.tokenForGame(this.gameId);
     },
   },
