@@ -1,7 +1,7 @@
 <template>
   <GameForm>
     <template v-if="errors.length > 0">
-      <b-alert v-for="err in errors" :key="err.title" class="my-3" variant="danger" show> {{ err }} </b-alert>
+      <b-alert v-for="err in errors" :key="err" class="my-3" variant="danger" show> {{ err }} </b-alert>
     </template>
 
     <template v-else-if="!game">
@@ -88,10 +88,6 @@ export default Vue.extend({
         .joinGame({
           id: this.gameId as UUID,
           data,
-        })
-        .then(() => {
-          // reload
-          this.$router.go(0);
         })
         .catch((err) => {
           console.error(err);

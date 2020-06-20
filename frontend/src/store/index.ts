@@ -3,7 +3,7 @@ import 'socket.io-client';
 import Vue from 'vue';
 import Vuex from 'vuex';
 import { createDirectStore } from 'direct-vuex';
-import { last } from 'lodash';
+import { last, get } from 'lodash';
 
 import {
   Round,
@@ -23,9 +23,9 @@ import axios from '@/helpers/api.ts';
 
 export interface State {
   packs: PackInformation[];
+  tokens: Record<string, string>;
   gameState?: Partial<GameState>;
   player?: Player;
-  currentRound?: number;
   socket?: SocketIOClient.Socket;
 }
 
@@ -41,15 +41,22 @@ const { store, rootActionContext, moduleActionContext, rootGetterContext, module
   state: (): State => {
     return {
       packs: [],
+      tokens: {},
       gameState: undefined,
       player: undefined,
+      socket: undefined,
     };
   },
   getters: {
     currentRound: (state): Round | undefined => last(state.gameState?.rounds),
     currentRoundIndex: (state): number => (state.gameState?.rounds?.length || 1) - 1,
+    tokenForGame: (state) => (id: UUID): string | undefined => get(state.tokens, id),
   },
   mutations: {
+    initializeStore(state): void {
+      const tokens = localStorage.getItem('tokens');
+      if (tokens) state.tokens = JSON.parse(tokens);
+    },
     setGameState(state, gameState: State['gameState']): void {
       state.gameState = gameState;
     },
@@ -70,19 +77,18 @@ const { store, rootActionContext, moduleActionContext, rootGetterContext, module
     setSocket(state, socket: State['socket']): void {
       state.socket = socket;
     },
+    setToken(state, { id, token }: { id: UUID; token: string }): void {
+      state.tokens = { ...state.tokens, ...{ [id]: token } };
+      localStorage.setItem('tokens', JSON.stringify(state.tokens));
+    },
   },
   actions: {
     fetchPacks: async (context): Promise<void> => {
       const { commit } = rootActionContext(context);
-      try {
-        const response = await axios.get<PackInformation[]>('/packs');
-        commit.setPacks(response.data);
-      } catch (error) {
-        // TODO error handling
-        console.log(error);
-      }
+      const response = await axios.get<PackInformation[]>('/packs');
+      commit.setPacks(response.data);
     },
-    createGame: async (context, { data }: { data: MessageCreateGame }): Promise<MessageGameCreated> => {
+    createGame: async (context, { data }: { data: MessageCreateGame }): Promise<void> => {
       const { commit } = rootActionContext(context);
       const response = await axios.post<MessageGameCreated>(`/games`, data);
       const game = response.data.game;
@@ -90,8 +96,7 @@ const { store, rootActionContext, moduleActionContext, rootGetterContext, module
       const player: Player = response.data.player;
       commit.setGame(game);
       commit.setPlayer(player);
-      localStorage.setItem(`token:${game.id}`, token);
-      return response.data;
+      commit.setToken({ id: game.id, token });
     },
     joinGame: async (context, { id, data }: { id: UUID; data: MessageJoinGame }): Promise<void> => {
       const { commit } = rootActionContext(context);
@@ -99,7 +104,7 @@ const { store, rootActionContext, moduleActionContext, rootGetterContext, module
       const token = pop<PlayerWithToken>(response.data.player, 'token') as string;
       const player: Player = response.data.player;
       commit.setPlayer(player);
-      localStorage.setItem(`token:${id}`, token);
+      commit.setToken({ id, token });
     },
   },
 });

@@ -16,5 +16,8 @@ Vue.config.productionTip = false;
 new Vue({
   router,
   store: store.original,
+  beforeCreate(): void {
+    store.commit.initializeStore();
+  },
   render: (h): Vue.VNode => h(App),
 }).$mount('#app');

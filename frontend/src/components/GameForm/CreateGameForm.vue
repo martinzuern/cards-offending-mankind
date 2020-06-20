@@ -43,7 +43,7 @@
 import Vue from 'vue';
 
 import GameForm from './GameForm.vue';
-import { CreateGame, CreatePlayer, PackInformation, MessageCreateGame, MessageGameCreated } from '../../../types';
+import { CreateGame, CreatePlayer, PackInformation, MessageCreateGame } from '../../../types';
 import store from '../../store';
 
 export default Vue.extend({
@@ -82,9 +82,9 @@ export default Vue.extend({
       const data: MessageCreateGame = { game, player };
       store.dispatch
         .createGame({ data })
-        .then((data: MessageGameCreated) => {
-          const { id: gameId } = data.game;
-          this.$router.push({ name: 'Game', params: { gameId } });
+        .then(() => {
+          const gameId = store.state.gameState?.game?.id;
+          if (gameId) this.$router.push({ name: 'Game', params: { gameId } });
         })
         .catch((err: Error) => {
           console.error(err);

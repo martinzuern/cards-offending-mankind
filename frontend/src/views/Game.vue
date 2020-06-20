@@ -8,8 +8,10 @@
 <script lang="ts">
 // @ is an alias to /src
 import Vue from 'vue';
+
 import InGame from '@/components/AccessGame/InGame.vue';
 import JoinGameForm from '@/components/GameForm/JoinGameForm.vue';
+import store from '../store';
 
 export default Vue.extend({
   name: 'Game',
@@ -22,7 +24,7 @@ export default Vue.extend({
       return this.$route.params.gameId;
     },
     token(): string | null {
-      return localStorage.getItem(`token:${this.gameId}`);
+      return store.getters.tokenForGame(this.gameId);
     },
   },
 });
