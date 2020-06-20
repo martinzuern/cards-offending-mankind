@@ -1,7 +1,13 @@
 <template>
   <GameForm>
-    <template v-if="!game">
-      Loading ...
+    <template v-if="errors.length > 0">
+      <b-alert v-for="err in errors" :key="err.title" class="my-3" variant="danger" show> {{ err }} </b-alert>
+    </template>
+
+    <template v-else-if="!game">
+      <div class="text-center my-3">
+        <b-spinner label="Loading ..."></b-spinner>
+      </div>
     </template>
 
     <template v-else>
@@ -56,7 +62,7 @@ export default Vue.extend({
       player: {
         nickname: '',
       } as CreatePlayer,
-      errors: [] as unknown[],
+      errors: [] as string[],
     };
   },
   computed: {},
@@ -65,8 +71,15 @@ export default Vue.extend({
   },
   methods: {
     async fetchGame(): Promise<void> {
-      const response = await axios.get<MessageGetGame>(`/games/${this.gameId}`);
-      this.game = response.data.game;
+      try {
+        const response = await axios.get<MessageGetGame>(`/games/${this.gameId}`);
+        if (response.data.game.status !== 'created')
+          this.errors.push('You cannot join this game as it has already started.');
+        this.game = response.data.game;
+      } catch (err) {
+        if ([404, 400].includes(err?.response?.status)) this.errors.push('Game not found');
+        else this.errors.push(err.toString());
+      }
     },
     onSubmit(): void {
       const { player, password } = this;
