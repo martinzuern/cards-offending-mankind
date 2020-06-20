@@ -93,9 +93,10 @@ export default Vue.extend({
           // reload
           this.$router.go(0);
         })
-        .catch((err: Error) => {
+        .catch((err) => {
           console.error(err);
-          this.errors.push(err);
+          if (err.response?.data?.errors) err.response.data.errors.map(({ message }) => this.errors.push(message));
+          else this.errors.push(err.toString());
         });
     },
   },

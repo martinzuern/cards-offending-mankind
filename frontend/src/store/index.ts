@@ -95,16 +95,11 @@ const { store, rootActionContext, moduleActionContext, rootGetterContext, module
     },
     joinGame: async (context, { id, data }: { id: UUID; data: MessageJoinGame }): Promise<void> => {
       const { commit } = rootActionContext(context);
-      try {
-        const response = await axios.post<MessagePlayerJoined>(`/games/${id}/join`, data);
-        const token = pop<PlayerWithToken>(response.data.player, 'token') as string;
-        const player: Player = response.data.player;
-        commit.setPlayer(player);
-        localStorage.setItem(`token:${id}`, token);
-      } catch (error) {
-        // TODO error handling
-        console.log(error);
-      }
+      const response = await axios.post<MessagePlayerJoined>(`/games/${id}/join`, data);
+      const token = pop<PlayerWithToken>(response.data.player, 'token') as string;
+      const player: Player = response.data.player;
+      commit.setPlayer(player);
+      localStorage.setItem(`token:${id}`, token);
     },
   },
 });
