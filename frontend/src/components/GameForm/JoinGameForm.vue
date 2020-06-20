@@ -11,6 +11,10 @@
     </template>
 
     <template v-else>
+      <template v-if="alerts.length > 0">
+        <b-alert v-for="alert in alerts" :key="alert" class="my-3" variant="warning" show> {{ alert }} </b-alert>
+      </template>
+
       <b-form @submit.prevent="onSubmit">
         <b-form-group label="Your Name" label-for="nickname">
           <b-form-input
@@ -63,6 +67,7 @@ export default Vue.extend({
         nickname: '',
       } as CreatePlayer,
       errors: [] as string[],
+      alerts: [] as string[],
     };
   },
   computed: {},
@@ -90,8 +95,7 @@ export default Vue.extend({
           data,
         })
         .catch((err) => {
-          console.error(err);
-          if (err.response?.data?.errors) err.response.data.errors.map(({ message }) => this.errors.push(message));
+          if (err.response?.data?.errors) err.response.data.errors.map(({ message }) => this.alerts.push(message));
           else this.errors.push(err.toString());
         });
     },
