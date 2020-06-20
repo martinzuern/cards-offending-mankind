@@ -1,33 +1,41 @@
 <template>
   <GameForm>
-    <b-form @submit.prevent="onSubmit">
-      <b-form-group label="Your Name" label-for="nickname">
-        <b-form-input
-          id="nickname"
-          v-model="player.nickname"
-          type="text"
-          placeholder="Zaphord"
-          required
-          minlength="3"
-        ></b-form-input>
-      </b-form-group>
+    <template v-if="loading">
+      <div class="text-center my-3">
+        <b-spinner label="Loading ..."></b-spinner>
+      </div>
+    </template>
 
-      <b-form-group label="Active game packs" label-for="packs">
-        <b-form-select id="packs" v-model="game.packs" multiple required>
-          <b-form-select-option v-for="pack in officialPacks" :key="pack.name" :value="pack">
-            {{ pack.name }}
-          </b-form-select-option>
-        </b-form-select>
-      </b-form-group>
+    <template v-else>
+      <b-form @submit.prevent="onSubmit">
+        <b-form-group label="Your Name" label-for="nickname">
+          <b-form-input
+            id="nickname"
+            v-model="player.nickname"
+            type="text"
+            placeholder="Zaphord"
+            required
+            minlength="3"
+          ></b-form-input>
+        </b-form-group>
 
-      <b-form-group label="Password (optional)" label-for="password">
-        <b-form-input id="password" v-model="game.password" type="password" autocomplete="off"></b-form-input>
-      </b-form-group>
+        <b-form-group label="Active game packs" label-for="packs">
+          <b-form-select id="packs" v-model="game.packs" multiple required>
+            <b-form-select-option v-for="pack in officialPacks" :key="pack.name" :value="pack">
+              {{ pack.name }}
+            </b-form-select-option>
+          </b-form-select>
+        </b-form-group>
 
-      <b-button type="submit" variant="secondary" size="sm" class="mt-3">
-        Create a new game
-      </b-button>
-    </b-form>
+        <b-form-group label="Password (optional)" label-for="password">
+          <b-form-input id="password" v-model="game.password" type="password" autocomplete="off"></b-form-input>
+        </b-form-group>
+
+        <b-button type="submit" variant="secondary" size="sm" class="mt-3">
+          Create a new game
+        </b-button>
+      </b-form>
+    </template>
   </GameForm>
 </template>
 
@@ -53,6 +61,7 @@ export default Vue.extend({
         nickname: '',
       } as CreatePlayer,
       errors: [] as unknown[],
+      loading: false,
     };
   },
   computed: {
@@ -68,6 +77,7 @@ export default Vue.extend({
   },
   methods: {
     onSubmit(): void {
+      this.loading = true;
       const { game, player } = this;
       const data: MessageCreateGame = { game, player };
       store.dispatch
