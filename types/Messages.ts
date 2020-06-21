@@ -1,5 +1,25 @@
 import { ResponseCard } from './Cards';
-import { Round } from './Game';
+import { Round, Game, CreateGame } from './Game';
+import { PlayerWithToken, CreatePlayer } from '.';
+
+export interface MessageCreateGame {
+  game: CreateGame;
+  player: CreatePlayer;
+}
+export interface MessageGameCreated {
+  game: Game;
+  player: PlayerWithToken;
+}
+
+export interface MessageJoinGame extends CreatePlayer {
+  password?: string;
+}
+export interface MessagePlayerJoined {
+  player: PlayerWithToken;
+}
+export interface MessageGetGame {
+  game: Game;
+}
 
 export interface MessagePickCards {
   roundIndex: number;

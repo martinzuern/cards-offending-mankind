@@ -1,20 +1,21 @@
 import Vue from 'vue';
 import VueRouter, { RouteConfig } from 'vue-router';
-import NewGame from '../views/NewGame.vue';
-import AccessGame from '../views/AccessGame.vue';
+
+import Home from '../views/Home.vue';
+import Game from '../views/Game.vue';
 
 Vue.use(VueRouter);
 
 const routes: RouteConfig[] = [
   {
     path: '/',
-    name: 'NewGame',
-    component: NewGame,
+    name: 'Home',
+    component: Home,
   },
   {
     path: '/games/:gameId',
-    name: 'AccessGame',
-    component: AccessGame,
+    name: 'Game',
+    component: Game,
   },
 ];
 

@@ -38,7 +38,7 @@ export interface Game {
   // specialRules: SpecialRule[];
 }
 
-export interface CreateGame extends Omit<Game, 'id' | 'status' | 'hasPassword' | 'packs'> {
+export interface CreateGame extends Partial<Omit<Game, 'id' | 'status' | 'hasPassword' | 'packs'>> {
   password?: string;
   packs: (Pack | Pick<Pack, 'abbr'>)[];
 }

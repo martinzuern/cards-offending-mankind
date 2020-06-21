@@ -12,6 +12,7 @@ services:
       - 80:8080
     environment:
       NODE_ENV: development
+      BASE_URL: http://localhost/
     volumes:
       - ./frontend:/opt/app
       - ./types:/opt/types

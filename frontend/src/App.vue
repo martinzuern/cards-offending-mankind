@@ -38,6 +38,9 @@ $border-radius: 15px
   border-color: transparent
   border-radius: 7px
 
+.alert
+  font-weight: initial
+
 .play-card
   padding: 1rem
   border-radius: $border-radius

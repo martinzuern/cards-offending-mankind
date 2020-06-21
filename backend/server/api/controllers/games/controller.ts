@@ -5,7 +5,13 @@ import _ from 'lodash';
 import GameService from '../../../services/game.service';
 import DBService from '../../../services/db.service';
 import { HttpError } from '../../middlewares/error.handler';
-import { PlayerWithToken, UUID } from '../../../../root-types';
+import {
+  PlayerWithToken,
+  UUID,
+  MessageGameCreated,
+  MessagePlayerJoined,
+  MessageGetGame,
+} from '../../../../root-types';
 // import L from '../../../common/logger';
 
 export default class Controller {
@@ -21,10 +27,11 @@ export default class Controller {
 
     await DBService.writeGame(newGame, true);
 
-    res.status(201).json({
+    const out: MessageGameCreated = {
       game: GameService.stripGame(newGame.game),
       player: newPlayer,
-    });
+    };
+    res.status(201).json(out);
   }
 
   static async joinGame(req: Request, res: Response): Promise<void> {
@@ -49,7 +56,8 @@ export default class Controller {
       return gameState;
     });
 
-    res.json({ player: newPlayer });
+    const out: MessagePlayerJoined = { player: newPlayer };
+    res.json(out);
   }
 
   static async byId(req: Request, res: Response): Promise<void> {
@@ -58,8 +66,7 @@ export default class Controller {
 
     const game = await DBService.getGame(id);
 
-    res.json({
-      game: GameService.stripGame(game.game),
-    });
+    const out: MessageGetGame = { game: GameService.stripGame(game.game) };
+    res.json(out);
   }
 }
