@@ -10,6 +10,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import 'typeface-inter';
 import 'bootstrap/dist/css/bootstrap.css';
 
 export default Vue.extend({
@@ -25,10 +26,18 @@ $box-shadow-sketch: 0 1px 1px rgba(0, 0, 0, .04), 0 4px 5px rgba(0, 0, 0, .02), 
 $box-shadow-card: $box-shadow-sketch, 0 25px 30px -15px rgba(0, 0, 0, .08), 0 15px 18px -30px rgba(0, 0, 0, .04)
 $border-radius: 15px
 
-#app
-  font-family: Avenir, Helvetica, Arial, sans-serif
+//font
+html
+  font-family: 'Inter', Helvetica, sans-serif
   -webkit-font-smoothing: antialiased
   -moz-osx-font-smoothing: grayscale
+
+@supports (font-variation-settings: normal)
+  html
+    font-family: 'Inter var', Helvetica, sans-serif
+
+//styles
+#app
   text-align: left
   color: #2c3e50
   margin-top: 60px
