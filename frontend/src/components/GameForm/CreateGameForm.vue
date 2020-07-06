@@ -18,16 +18,22 @@
             minlength="3"
           ></b-form-input>
         </b-form-group>
-
-        <b-form-group label="Active game packs" label-for="packs">
-          <b-form-select id="packs" v-model="game.packs" multiple required>
-            <b-form-select-option v-for="pack in officialPacks" :key="pack.name" :value="pack">
-              {{ pack.name }}
-            </b-form-select-option>
-          </b-form-select>
-        </b-form-group>
-
-        <b-form-group label="Password (optional)" label-for="password">
+        <Multiselect
+          v-model="game.packs"
+          :options="officialPacks"
+          :multiple="true"
+          :preselect-first="true"
+          label="name"
+          placeholder="Select a game pack"
+        >
+          <template slot="option" slot-scope="props">
+            {{ props.option.name }}
+            <small class="mt-1">
+              Prompts {{ props.option.promptsCount }} / Responses {{ props.option.responsesCount }}
+            </small>
+          </template>
+        </Multiselect>
+        <b-form-group label="Password (optional)" label-for="password" class="mt-2">
           <b-form-input id="password" v-model="game.password" type="password" autocomplete="off"></b-form-input>
         </b-form-group>
 
@@ -41,6 +47,9 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import Multiselect from 'vue-multiselect';
+
+import 'vue-multiselect/dist/vue-multiselect.min.css';
 
 import GameForm from './GameForm.vue';
 import { CreateGame, CreatePlayer, PackInformation, MessageCreateGame } from '../../../types';
@@ -50,6 +59,7 @@ export default Vue.extend({
   name: 'CreateGameForm',
   components: {
     GameForm,
+    Multiselect,
   },
   data() {
     return {
