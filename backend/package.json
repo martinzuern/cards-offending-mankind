@@ -51,7 +51,7 @@
     "@types/pino": "^6.0.0",
     "@types/redis": "^2.8.18",
     "@types/redlock": "^4.0.1",
-    "@types/socket.io": "^2.1.4",
+    "@types/socket.io": "^2.1.11",
     "@types/socket.io-client": "^1.4.33",
     "@types/supertest": "^2.0.9",
     "@types/uuid": "^8.0.0",
