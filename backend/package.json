@@ -31,7 +31,7 @@
     "json-against-humanity": "crhallberg/json-against-humanity",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.19",
-    "pino": "^6.3.2",
+    "pino": "^6.6.1",
     "redis": "^3.0.2",
     "redlock": "^4.1.0",
     "serialize-error": "^7.0.1",
