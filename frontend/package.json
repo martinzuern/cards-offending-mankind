@@ -12,7 +12,7 @@
     "lint:type": "vue-type-check --workspace ./src"
   },
   "dependencies": {
-    "@types/lodash": "^4.14.151",
+    "@types/lodash": "^4.14.164",
     "@types/socket.io-client": "^1.4.33",
     "axios": "^0.19.2",
     "bootstrap-vue": "^2.13.0",
