@@ -28,7 +28,7 @@
     "express-openapi-validator": "^3.15.1",
     "handy-redis": "^1.8.1",
     "helmet": "^3.22.0",
-    "json-against-humanity": "crhallberg/json-against-humanity",
+    "json-against-humanity": "martinzuern/json-against-humanity",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.19",
     "pino": "^6.3.2",
