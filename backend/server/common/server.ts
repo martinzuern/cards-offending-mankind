@@ -20,16 +20,15 @@ const env = process.env.NODE_ENV || 'development';
 Sentry.init({ dsn: process.env.SENTRY_DSN });
 app.use(Sentry.Handlers.requestHandler());
 
+const publicDir = path.resolve(__dirname, '..', '..', 'public');
+
 export default class ExpressServer {
   private routes: (app: Application) => void;
   private sockets: (io: socketIo.Server) => void;
 
   constructor() {
-    const root = path.normalize(`${__dirname}/../..`);
-
     app.use(helmet());
     app.use(bodyParser.json({ limit: process.env.REQUEST_LIMIT || '100kb' }));
-    app.use(express.static(`${root}/public`));
 
     // We don't need CORS in prod, as we serve the frontend directly
     if (env !== 'production') app.use(cors());
@@ -51,6 +50,12 @@ export default class ExpressServer {
 
     try {
       await installValidator(app, this.routes);
+
+      // Serving vue.js
+      app.use(express.static(publicDir));
+      app.get('*', (_, res) => {
+        res.sendFile(path.resolve(publicDir, 'index.html'));
+      });
 
       app.use(Sentry.Handlers.errorHandler());
 
