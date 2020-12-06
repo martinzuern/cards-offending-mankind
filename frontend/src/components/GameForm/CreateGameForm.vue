@@ -7,41 +7,47 @@
     </template>
 
     <template v-else>
-      <b-form @submit.prevent="onSubmit">
+      <b-form ref="form" novalidate :validated="validated" @submit.prevent="onSubmit">
         <b-form-group label="Your Name" label-for="nickname">
           <b-form-input
             id="nickname"
             v-model="player.nickname"
             type="text"
-            placeholder="Zaphord"
+            placeholder="John Doe"
             required
             minlength="3"
-          ></b-form-input>
+          />
+          <b-form-invalid-feedback>Your name must be at least 3 characters.</b-form-invalid-feedback>
         </b-form-group>
-        <Multiselect
-          v-model="game.packs"
-          :options="officialPacks"
-          :multiple="true"
-          :close-on-select="false"
-          :clear-on-select="false"
-          placeholder="Select a pack"
-          label="name"
-          track-by="name"
-        >
-          <template slot="option" slot-scope="props">
-            {{ props.option.name }}
-            <small class="mt-1">
-              {{ props.option.promptsCount }} prompts / {{ props.option.responsesCount }} responses
-            </small>
-          </template>
-        </Multiselect>
-        <b-form-group label="Password (optional)" label-for="password" class="mt-2">
-          <b-form-input id="password" v-model="game.password" type="password" autocomplete="off"></b-form-input>
+        <b-form-group label="Game packs" label-for="packs">
+          <Multiselect
+            id="packs"
+            v-model="game.packs"
+            :options="officialPacks"
+            :multiple="true"
+            :close-on-select="false"
+            :clear-on-select="false"
+            placeholder="Select a pack"
+            label="name"
+            track-by="name"
+          >
+            <template slot="option" slot-scope="props">
+              {{ props.option.name }}
+              <small class="mt-1">
+                {{ props.option.promptsCount }} prompts / {{ props.option.responsesCount }} responses
+              </small>
+            </template>
+          </Multiselect>
+          <b-form-invalid-feedback :state="!validated || validationPacks">
+            You need at least 25 prompts and 50 responses.
+          </b-form-invalid-feedback>
         </b-form-group>
 
-        <b-button type="submit" variant="secondary" size="sm" class="mt-3">
-          Create a new game
-        </b-button>
+        <b-form-group label="Password (optional)" label-for="password" class="mt-2">
+          <b-form-input id="password" v-model="game.password" type="password" autocomplete="off" />
+        </b-form-group>
+
+        <b-button type="submit" variant="secondary" size="sm" class="mt-3">Create a new game</b-button>
       </b-form>
     </template>
   </GameForm>
@@ -74,6 +80,7 @@ export default Vue.extend({
       } as CreatePlayer,
       errors: [] as unknown[],
       loading: false,
+      validated: false,
     };
   },
   computed: {
@@ -83,12 +90,23 @@ export default Vue.extend({
     packs(): PackInformation[] {
       return store.state.packs;
     },
+    validationPacks(): boolean {
+      const prompts = this.game.packs.map(p => p?.promptsCount || 0).reduce((pv, cv) => pv + cv, 0);
+      const responses = this.game.packs.map(p => p?.responsesCount || 0).reduce((pv, cv) => pv + cv, 0);
+      return this.game.packs.length > 0 && prompts >= 25 && responses >= 50;
+    },
   },
   mounted() {
     store.dispatch.fetchPacks();
   },
   methods: {
     onSubmit(): void {
+      // Check valid form
+      if (!this.$refs.form.checkValidity() || !this.validationPacks) {
+        this.validated = true;
+        return;
+      }
+
       this.loading = true;
       const { game, player } = this;
       const data: MessageCreateGame = { game, player };
