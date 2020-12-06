@@ -22,14 +22,16 @@
           v-model="game.packs"
           :options="officialPacks"
           :multiple="true"
-          :preselect-first="true"
+          :close-on-select="false"
+          :clear-on-select="false"
+          placeholder="Select a pack"
           label="name"
-          placeholder="Select a game pack"
+          track-by="name"
         >
           <template slot="option" slot-scope="props">
             {{ props.option.name }}
             <small class="mt-1">
-              Prompts {{ props.option.promptsCount }} / Responses {{ props.option.responsesCount }}
+              {{ props.option.promptsCount }} prompts / {{ props.option.responsesCount }} responses
             </small>
           </template>
         </Multiselect>
