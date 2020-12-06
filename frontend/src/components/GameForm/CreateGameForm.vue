@@ -91,8 +91,12 @@ export default Vue.extend({
       return store.state.packs;
     },
     validationPacks(): boolean {
-      const prompts = this.game.packs.map(p => p?.promptsCount || 0).reduce((pv, cv) => pv + cv, 0);
-      const responses = this.game.packs.map(p => p?.responsesCount || 0).reduce((pv, cv) => pv + cv, 0);
+      const prompts = (this.game.packs as PackInformation[])
+        .map((p) => p?.promptsCount || 0)
+        .reduce((pv, cv) => pv + cv, 0);
+      const responses = (this.game.packs as PackInformation[])
+        .map((p) => p?.responsesCount || 0)
+        .reduce((pv, cv) => pv + cv, 0);
       return this.game.packs.length > 0 && prompts >= 25 && responses >= 50;
     },
   },
@@ -102,7 +106,7 @@ export default Vue.extend({
   methods: {
     onSubmit(): void {
       // Check valid form
-      if (!this.$refs.form.checkValidity() || !this.validationPacks) {
+      if (!this.$refs.form || !(this.$refs.form as HTMLFormElement).checkValidity() || !this.validationPacks) {
         this.validated = true;
         return;
       }
