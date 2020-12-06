@@ -31,9 +31,7 @@
           <b-form-input id="password" v-model="password" type="password" required autocomplete="off"></b-form-input>
         </b-form-group>
 
-        <b-button type="submit" variant="secondary" size="sm" class="mt-3">
-          Join game
-        </b-button>
+        <b-button type="submit" variant="secondary" size="sm" class="mt-3"> Join game </b-button>
       </b-form>
     </template>
   </GameForm>

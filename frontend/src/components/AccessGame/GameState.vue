@@ -3,7 +3,7 @@
     <template v-if="game && game.status === 'ended'">
       <div class="list-group">
         <div
-          v-for="player in (players || [])"
+          v-for="player in players || []"
           :key="player.id"
           class="list-group-item d-flex justify-content-between align-items-center"
         >
@@ -22,7 +22,7 @@
           <p v-if="players && players.length > 1" class="mt-3 mb-0">
             Other players in this game:
             <span
-              v-for="(gamePlayer, index) in (players || [])"
+              v-for="(gamePlayer, index) in players || []"
               v-if="player && gamePlayer.nickname !== player.nickname"
               :key="gamePlayer.id"
               >{{ gamePlayer.nickname }} <template v-if="players && index < players.length - 1">, </template></span
@@ -40,12 +40,8 @@
       <div v-if="game && game.status !== 'created'" class="text-center">
         <h5 class="mt-3">Round {{ roundIndex + 1 }}</h5>
         <template v-if="rounds && rounds.length && isJudge">
-          <h2>
-            👩🏻‍⚖️ Relax, you are judging this round.
-          </h2>
-          <h6 v-if="currentRound && currentRound.status === 'played'">
-            Okay, it's your turn. Judge!
-          </h6>
+          <h2>👩🏻‍⚖️ Relax, you are judging this round.</h2>
+          <h6 v-if="currentRound && currentRound.status === 'played'">Okay, it's your turn. Judge!</h6>
         </template>
       </div>
 

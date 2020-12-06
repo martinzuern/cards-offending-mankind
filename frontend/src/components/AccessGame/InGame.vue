@@ -1,12 +1,8 @@
 <template>
   <div>
     <template v-if="userLocked">
-      <h2>
-        It appears that you or your browser triggered a reload. 🤦‍♀️
-      </h2>
-      <h6>
-        Please be patient, this can take up to 35 seconds.
-      </h6>
+      <h2>It appears that you or your browser triggered a reload. 🤦‍♀️</h2>
+      <h6>Please be patient, this can take up to 35 seconds.</h6>
     </template>
 
     <template v-else>
