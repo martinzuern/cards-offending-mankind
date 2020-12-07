@@ -19,6 +19,7 @@ module.exports = {
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'no-empty': ['error', { 'allowEmptyCatch': true }],
     // '@typescript-eslint/no-unused-vars': 'error',
 
     // TODO remove the following lines and uncomment the one above
@@ -27,12 +28,10 @@ module.exports = {
     'vue/no-parsing-error': 'warn',
     '@typescript-eslint/ban-ts-ignore': 'warn',
   },
-  overrides: [
-    {
-      files: ['**/__tests__/*.{j,t}s?(x)', '**/tests/unit/**/*.spec.{j,t}s?(x)'],
-      env: {
-        jest: true,
-      },
+  overrides: [{
+    files: ['**/__tests__/*.{j,t}s?(x)', '**/tests/unit/**/*.spec.{j,t}s?(x)'],
+    env: {
+      jest: true,
     },
-  ],
+  }, ],
 };
