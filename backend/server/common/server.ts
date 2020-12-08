@@ -8,6 +8,7 @@ import socketIo from 'socket.io';
 import redisAdapter from 'socket.io-redis';
 import helmet from 'helmet';
 import * as Sentry from '@sentry/node';
+import compression from 'compression';
 
 import l from './logger';
 
@@ -28,6 +29,7 @@ export default class ExpressServer {
 
   constructor() {
     app.use(helmet());
+    app.use(compression());
     app.use(bodyParser.json({ limit: process.env.REQUEST_LIMIT || '100kb' }));
 
     // We don't need CORS in prod, as we serve the frontend directly

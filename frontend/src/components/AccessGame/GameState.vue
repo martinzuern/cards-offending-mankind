@@ -1,59 +1,66 @@
 <template>
-  <div v-if="game || player">
-    <template v-if="game && game.status === 'ended'">
+  <div v-if="game && player">
+    <!-- Game ended -->
+    <template v-if="game.status === 'ended'">
       <div class="list-group">
-        <div
-          v-for="player in players || []"
-          :key="player.id"
-          class="list-group-item d-flex justify-content-between align-items-center"
-        >
-          <strong>{{ player.nickname }}</strong>
-          <span>{{ player.points }}</span>
+        <div v-for="p in players" :key="p.id" class="list-group-item d-flex justify-content-between align-items-center">
+          <strong>{{ p.nickname }}</strong>
+          <span>{{ p.points }}</span>
         </div>
       </div>
     </template>
-    <template v-else>
-      <div v-if="game && game.status === 'created'" class="card">
+
+    <!-- Game not yet startet -->
+    <template v-else-if="game.status === 'created'">
+      <div class="card">
         <div class="card-body">
-          <h6>Invite other players to join</h6>
-          <div class="badge badge-pill badge-secondary" :class="{ 'badge-success': !!(player || {}).isHost }">
-            {{ (game || {}).id }}
-          </div>
-          <p v-if="players && players.length > 1" class="mt-3 mb-0">
-            Other players in this game:
-            <span
-              v-for="(gamePlayer, index) in players || []"
-              v-if="player && gamePlayer.nickname !== player.nickname"
-              :key="gamePlayer.id"
-              >{{ gamePlayer.nickname }} <template v-if="players && index < players.length - 1">, </template></span
-            >
+          <h6>Invite other players to join!</h6>
+
+          <b-form-group label="Share this URL with your friends." label-for="share-url" class="mt-3">
+            <b-input-group>
+              <b-form-input id="share-url" ref="shareUrl" readonly :value="gameUrl" />
+              <b-input-group-append>
+                <b-button variant="outline-success" @click="copyGameUrl">Copy</b-button>
+              </b-input-group-append>
+            </b-input-group>
+          </b-form-group>
+
+          <p class="mt-3 mb-0">
+            Players currently in this game:
+            {{ players.map((p) => p.nickname).join(', ') }}
           </p>
         </div>
       </div>
+
       <button
-        v-if="player && rounds && player.isHost && !rounds.length && players && players.length > 2"
+        v-if="player.isHost"
         class="btn btn-success d-block w-100 mt-3"
+        :disabled="!(rounds && !rounds.length && players.length >= 3)"
         @click="startGame"
       >
         Start Game
       </button>
-      <div v-if="game && game.status !== 'created'" class="text-center">
-        <h5 class="mt-3">Round {{ roundIndex + 1 }}</h5>
-        <template v-if="rounds && rounds.length && isJudge">
-          <h2>👩🏻‍⚖️ Relax, you are judging this round.</h2>
-          <h6 v-if="currentRound && currentRound.status === 'played'">Okay, it's your turn. Judge!</h6>
-        </template>
-      </div>
+    </template>
+
+    <!-- Game is running -->
+    <template v-else>
+      <h5 class="mt-3">Round {{ roundIndex + 1 }}</h5>
+
+      <!-- Player is judge -->
+      <template v-if="rounds && rounds.length && isJudge">
+        <h2>👩🏻‍⚖️ Relax, you are judging this round.</h2>
+        <h6 v-if="currentRound && currentRound.status === 'played'">Okay, it's your turn. Judge!</h6>
+      </template>
 
       <div v-if="game && game.status === 'running'" class="play-card black-card mx-auto mt-5">
         {{ ((currentRound && currentRound.prompt) || {}).value }}
       </div>
-
+      
       <Submissions v-if="currentRound && currentRound.submissions" />
 
       <div v-if="currentRound && currentRound.status === 'ended'" class="overlay mt-5">
         <button class="btn btn-success d-block mb-3 d-block w-100" @click="clickNextRound">Next Round</button>
-        <button class="btn btn-secondary d-block w-100 mt-3" @click="clickEndGame">End Game</button>
+        <button v-if="isHost" class="btn btn-secondary d-block w-100 mt-3" @click="clickEndGame">End Game</button>
       </div>
     </template>
   </div>
@@ -72,8 +79,14 @@ export default Vue.extend({
     Submissions,
   },
   computed: {
+    gameUrl(): string {
+      return location.toString();
+    },
     isJudge(): boolean {
       return !!(this.player && this.currentRound && this.player.id === this.currentRound.judgeId);
+    },
+    isHost(): boolean {
+      return !!(this.player && this.player.isHost);
     },
     game(): Game | undefined {
       return store.state.gameState?.game;
@@ -81,8 +94,8 @@ export default Vue.extend({
     player(): Player | undefined {
       return store.state.player;
     },
-    players(): OtherPlayer[] | undefined {
-      return store.state.gameState?.players;
+    players(): OtherPlayer[] {
+      return store.state.gameState?.players || [];
     },
     rounds(): Round[] | undefined {
       return store.state.gameState?.rounds;
@@ -98,6 +111,16 @@ export default Vue.extend({
     },
   },
   methods: {
+    copyGameUrl(): void {
+      const input = this.$refs.shareUrl as HTMLInputElement;
+      try {
+        input.select();
+        const success = document.execCommand('copy');
+        input.setSelectionRange(0, 0);
+        if (success) return;
+      } catch {}
+      alert('URL cannot be copied. Please copy manually.');
+    },
     startGame(): void {
       this.socket && this.socket.emit('start_game');
     },
