@@ -16,7 +16,7 @@
       </div>
     </div>
     <button
-      v-if="currentRound.status === 'created'"
+      v-if="currentRound.status === 'created' && !submitted"
       class="btn btn-success w-100 d-block mt-5"
       @click="submitSelection"
     >
@@ -36,6 +36,7 @@ export default Vue.extend({
   data() {
     return {
       selectedCards: [] as ResponseCard[],
+      submitted: false,
     };
   },
   computed: {
@@ -58,22 +59,46 @@ export default Vue.extend({
   watch: {
     roundIndex(): void {
       this.selectedCards = [];
+      this.submitted = false;
     },
   },
   methods: {
     submitSelection(): void {
-      store.state.socket &&
-        this.rounds &&
-        store.state.socket.emit('pick_cards', { roundIndex: this.rounds.length - 1, cards: this.selectedCards });
+      if (!store.state.socket || !this.rounds || !this.currentRound) return;
+
+      const toPick = this.currentRound.prompt.pick;
+      if (this.selectedCards.length !== toPick) {
+        const toPickStr = toPick === 1 ? '1 card' : `${toPick} cards`;
+        this.$bvToast.toast(`Please select exactly ${toPickStr}.`, {
+          title: 'Oops.',
+          autoHideDelay: 5000,
+          variant: 'danger',
+          appendToast: false,
+        });
+        return;
+      }
+
+      store.state.socket.emit('pick_cards', { roundIndex: this.rounds.length - 1, cards: this.selectedCards });
+      this.submitted = true;
     },
     clickToggleCard(card: ResponseCard): void {
-      if (!this.selectedCards.find(({ value }) => value === card.value)) {
-        this.selectedCards.push(card);
-      } else {
+      if (this.submitted === true) return;
+
+      const alreadySelected = this.selectedCards.find(({ value }) => value === card.value);
+      if (alreadySelected) {
         this.selectedCards.splice(
           this.selectedCards.findIndex(({ value }) => value === card.value),
           1
         );
+      } else if ((this.selectedCards?.length || 0) < (this.currentRound?.prompt?.pick || 0)) {
+        this.selectedCards.push(card);
+      } else {
+        this.$bvToast.toast('Too many cards selected, please deselect first.', {
+          title: 'Oops.',
+          autoHideDelay: 5000,
+          variant: 'danger',
+          appendToast: false,
+        });
       }
     },
   },

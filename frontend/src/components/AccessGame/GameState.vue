@@ -44,7 +44,27 @@
 
     <!-- Game is running -->
     <template v-else>
-      <h5 class="mt-3">Round {{ roundIndex + 1 }}</h5>
+      <b-row>
+        <b-col>
+          <h5 class="mt-3">Round {{ roundIndex + 1 }}</h5>
+        </b-col>
+        <b-col class="text-right">
+          <b-button class="mt-2" id="popover-leaderboard" variant="outline-secondary">🏅</b-button>
+          <b-popover target="popover-leaderboard" triggers="click blur" placement="bottomleft">
+            <template #title>Leaderboard</template>
+            <div class="list-group leaderboard-list-group" style="">
+              <div
+                v-for="p in players"
+                :key="p.id"
+                class="list-group-item d-flex justify-content-between align-items-center"
+              >
+                <strong>{{ p.nickname }}</strong>
+                <span>{{ p.points }}</span>
+              </div>
+            </div>
+          </b-popover>
+        </b-col>
+      </b-row>
 
       <!-- Player is judge -->
       <template v-if="rounds && rounds.length && isJudge">
@@ -55,7 +75,7 @@
       <div v-if="game && game.status === 'running'" class="play-card black-card mx-auto mt-5">
         {{ ((currentRound && currentRound.prompt) || {}).value }}
       </div>
-      
+
       <Submissions v-if="currentRound && currentRound.submissions" />
 
       <div v-if="currentRound && currentRound.status === 'ended'" class="overlay mt-5">
@@ -134,4 +154,7 @@ export default Vue.extend({
 });
 </script>
 
-<style lang="sass"></style>
+<style lang="sass">
+.leaderboard-list-group
+  min-width: 10vw
+</style>
