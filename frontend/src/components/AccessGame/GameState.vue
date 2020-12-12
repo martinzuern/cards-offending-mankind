@@ -45,11 +45,14 @@
     <!-- Game is running -->
     <template v-else>
       <b-row>
-        <b-col>
-          <h5 class="mt-3">Round {{ roundIndex + 1 }}</h5>
+        <b-col cols="2" class="pt-2">
+          <h5>Round {{ roundIndex + 1 }}</h5>
         </b-col>
-        <b-col class="text-right">
-          <b-button class="mt-2" id="popover-leaderboard" variant="outline-secondary">🏅</b-button>
+        <b-col class="pt-2">
+          <Countdown/>
+        </b-col>
+        <b-col cols="2" class="text-right">
+          <b-button id="popover-leaderboard" variant="outline-secondary">🏅</b-button>
           <b-popover target="popover-leaderboard" triggers="click blur" placement="bottomleft">
             <template #title>Leaderboard</template>
             <div class="list-group leaderboard-list-group" style="">
@@ -90,6 +93,7 @@
 // @ is an alias to /src
 import Vue from 'vue';
 import Submissions from './Submissions.vue';
+import Countdown from './Countdown.vue';
 import { OtherPlayer, Player, Game, Round } from '../../../../types';
 import store from '../../store';
 
@@ -97,6 +101,7 @@ export default Vue.extend({
   name: 'GameState',
   components: {
     Submissions,
+    Countdown,
   },
   computed: {
     gameUrl(): string {
