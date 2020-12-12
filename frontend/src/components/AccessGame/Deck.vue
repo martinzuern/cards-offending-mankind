@@ -16,7 +16,7 @@
       </div>
     </div>
     <button
-      v-if="currentRound.status === 'created'"
+      v-if="currentRound.status === 'created' && !submitted"
       class="btn btn-success w-100 d-block mt-5"
       @click="submitSelection"
     >
@@ -36,6 +36,7 @@ export default Vue.extend({
   data() {
     return {
       selectedCards: [] as ResponseCard[],
+      submitted: false,
     };
   },
   computed: {
@@ -58,13 +59,15 @@ export default Vue.extend({
   watch: {
     roundIndex(): void {
       this.selectedCards = [];
+      this.submitted = false;
     },
   },
   methods: {
     submitSelection(): void {
-      store.state.socket &&
-        this.rounds &&
+      if(store.state.socket && this.rounds) {
         store.state.socket.emit('pick_cards', { roundIndex: this.rounds.length - 1, cards: this.selectedCards });
+        this.submitted = true;
+      }
     },
     clickToggleCard(card: ResponseCard): void {
       if (!this.selectedCards.find(({ value }) => value === card.value)) {
