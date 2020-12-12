@@ -64,7 +64,7 @@ export default Vue.extend({
   },
   methods: {
     submitSelection(): void {
-      if (!store.state.socket || !this.rounds) return;
+      if (!store.state.socket || !this.rounds || !this.currentRound) return;
 
       const toPick = this.currentRound.prompt.pick;
       if (this.selectedCards.length !== toPick) {
@@ -90,10 +90,10 @@ export default Vue.extend({
           this.selectedCards.findIndex(({ value }) => value === card.value),
           1
         );
-      } else if (this.selectedCards.length < this.currentRound.prompt.pick) {
+      } else if ((this.selectedCards?.length || 0) < (this.currentRound?.prompt?.pick || 0)) {
         this.selectedCards.push(card);
       } else {
-        this.$bvToast.toast(`Too many cards selected, please deselect first.`, {
+        this.$bvToast.toast('Too many cards selected, please deselect first.', {
           title: 'Oops.',
           autoHideDelay: 5000,
           variant: 'danger',

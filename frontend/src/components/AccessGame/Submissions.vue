@@ -37,7 +37,7 @@ export default Vue.extend({
       return !!(this.player && this.currentRound && this.player.id === this.currentRound.judgeId);
     },
     canChooseWinner(): boolean {
-      return this.isJudge && this.currentRound.status === 'revealed';
+      return this.isJudge && this.currentRound?.status === 'revealed';
     },
     game(): Game | undefined {
       return store.state.gameState?.game;
