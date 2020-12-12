@@ -11,11 +11,7 @@
       <div v-for="(card, index) in submission.cards" :key="index">
         <div class="play-card white-card pt-5" @click="revealSubmissionForCard(submissionIndex)">{{ card.value }}</div>
       </div>
-      <button
-        v-if="isJudge && submission.isRevealed"
-        class="w-100 d-block mt-3 btn btn-success"
-        @click="chooseWinner(submissionIndex)"
-      >
+      <button v-if="canChooseWinner" class="w-100 d-block mt-3 btn btn-success" @click="chooseWinner(submissionIndex)">
         Winner 🎉
       </button>
       <div
@@ -39,6 +35,9 @@ export default Vue.extend({
   computed: {
     isJudge(): boolean {
       return !!(this.player && this.currentRound && this.player.id === this.currentRound.judgeId);
+    },
+    canChooseWinner(): boolean {
+      return this.isJudge && this.currentRound.status === 'revealed';
     },
     game(): Game | undefined {
       return store.state.gameState?.game;
