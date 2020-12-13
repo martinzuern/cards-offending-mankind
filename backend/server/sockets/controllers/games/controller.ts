@@ -77,7 +77,6 @@ export default class Controller {
     try {
       const gameState = await DBService.getGame(gameId);
       assert(gameState.players.some((el) => el.id === playerId));
-      assert(GameService.isGameJoinable(gameState.game), 'Game not joinable.');
     } catch (error) {
       return onError(error.message);
     }
