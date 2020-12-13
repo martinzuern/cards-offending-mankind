@@ -77,7 +77,6 @@ export default class Controller {
     try {
       const gameState = await DBService.getGame(gameId);
       assert(gameState.players.some((el) => el.id === playerId));
-      assert(GameService.isGameJoinable(gameState.game), 'Game not joinable.');
     } catch (error) {
       return onError(error.message);
     }
@@ -270,11 +269,21 @@ export default class Controller {
       );
       gameState.players = gameState.players.map((p, idx) => ({ ...p, isActive: isActive[idx] }));
 
-      if (gameState.players.some((p) => p.isActive)) {
+      // End if no-one is active
+      gameShouldEnd = gameShouldEnd || !gameState.players.some((p) => p.isActive);
+
+      // End if no submissions for the last two rounds
+      if (gameState.rounds.length >= 2) {
+        gameShouldEnd =
+          gameShouldEnd ||
+          _(gameState.rounds)
+            .takeRight(2)
+            .every((r) => r.submissions.length === 0);
+      }
+
+      if (!gameShouldEnd) {
         gameState = GameService.newRound(fullGameState);
         this.addTimeoutHandler(gameState);
-      } else {
-        gameShouldEnd = true;
       }
       return gameState;
     });
