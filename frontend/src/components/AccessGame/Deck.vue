@@ -68,12 +68,10 @@ export default Vue.extend({
 
       const toPick = this.currentRound.prompt.pick;
       if (this.selectedCards.length !== toPick) {
-        const toPickStr = toPick === 1 ? '1 card' : `${toPick} cards`;
-        this.$bvToast.toast(`Please select exactly ${toPickStr}.`, {
+        this.$bvToast.toast(`Please select exactly ${toPick === 1 ? '1 card' : `${toPick} cards`}.`, {
           title: 'Oops.',
           autoHideDelay: 5000,
           variant: 'danger',
-          appendToast: false,
         });
         return;
       }
@@ -90,14 +88,13 @@ export default Vue.extend({
           this.selectedCards.findIndex(({ value }) => value === card.value),
           1
         );
-      } else if ((this.selectedCards?.length || 0) < (this.currentRound?.prompt?.pick || 0)) {
+      } else if (this.selectedCards.length < (this.currentRound?.prompt?.pick || 0)) {
         this.selectedCards.push(card);
       } else {
         this.$bvToast.toast('Too many cards selected, please deselect first.', {
           title: 'Oops.',
           autoHideDelay: 5000,
           variant: 'danger',
-          appendToast: false,
         });
       }
     },
