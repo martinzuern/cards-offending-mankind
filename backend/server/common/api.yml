@@ -228,12 +228,11 @@ components:
           format: uuid
         winnerPoints:
           oneOf:
+            - type: boolean
+              enum: [false]
             - type: integer
               default: 20
               minimum: 1
-            - type: boolean
-              enum:
-                - 'false'
         timeouts:
           type: object
           properties:
@@ -281,12 +280,11 @@ components:
               minimum: 5
         winnerPoints:
           oneOf:
+            - type: boolean
+              enum: [false]
             - type: integer
               default: 20
               minimum: 1
-            - type: boolean
-              enum:
-                - 'false'
         handSize:
           type: integer
           default: 10

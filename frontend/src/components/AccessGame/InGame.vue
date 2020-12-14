@@ -58,6 +58,12 @@ export default Vue.extend({
   mounted() {
     this.initSocket();
   },
+  beforeDestroy() {
+    if (!store.state.socket) return;
+    console.log('Disconnecting Socket');
+    store.state.socket.disconnect();
+    store.commit.setSocket(undefined);
+  },
   methods: {
     initSocket(): void {
       console.log({ socket: this.socket });

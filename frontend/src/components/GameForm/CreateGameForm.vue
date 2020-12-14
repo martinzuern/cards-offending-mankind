@@ -47,6 +47,87 @@
           <b-form-input id="password" v-model="game.password" type="password" autocomplete="off" />
         </b-form-group>
 
+        <!-- Advanced settings -->
+        <b-row>
+          <b-col>
+            <b-link v-b-toggle.collapse-advanced class="mt-2">Advanced settings</b-link>
+            <b-collapse id="collapse-advanced">
+              <b-card>
+                <b-form-group label="Hand size" label-for="handSize" class="mt-2">
+                  <b-form-input id="handSize" v-model.number="game.handSize" type="number" min="2" max="20" />
+                </b-form-group>
+
+                <b-form-group label="Winner points" label-for="winnerPoints" class="mt-2">
+                  <b-input-group>
+                    <b-input-group-prepend>
+                      <b-button variant="outline-secondary" @click="game.winnerPoints = game.winnerPoints ? false : 20"
+                        >Toggle points to win</b-button
+                      >
+                    </b-input-group-prepend>
+                    <b-form-input
+                      id="winnerPoints"
+                      v-if="game.winnerPoints"
+                      v-model.number="game.winnerPoints"
+                      type="number"
+                      min="1"
+                    />
+                    <b-form-input id="winnerPoints" v-else disabled placeholder="Game continues until ended manually" />
+                  </b-input-group>
+                </b-form-group>
+
+                <b-form-group label-cols-lg="2" label="Timeouts" class="mb-0" label-class="pt-0">
+                  <b-form-group label="Playing:" label-for="timeout-playing" label-cols-sm="6" label-align-sm="right">
+                    <b-form-input
+                      id="timeout-playing"
+                      v-model.number="game.timeouts.playing"
+                      type="number"
+                      min="5"
+                      max="600"
+                    ></b-form-input>
+                  </b-form-group>
+                  <b-form-group
+                    label="Revealing:"
+                    label-for="timeout-revealing"
+                    label-cols-sm="6"
+                    label-align-sm="right"
+                  >
+                    <b-form-input
+                      id="timeout-revealing"
+                      v-model.number="game.timeouts.revealing"
+                      type="number"
+                      min="5"
+                      max="600"
+                    ></b-form-input>
+                  </b-form-group>
+                  <b-form-group label="Judging:" label-for="timeout-judging" label-cols-sm="6" label-align-sm="right">
+                    <b-form-input
+                      id="timeout-judging"
+                      v-model.number="game.timeouts.judging"
+                      type="number"
+                      min="5"
+                      max="600"
+                    ></b-form-input>
+                  </b-form-group>
+                  <b-form-group
+                    label="Between rounds:"
+                    label-for="timeout-betweenRounds"
+                    label-cols-sm="6"
+                    label-align-sm="right"
+                  >
+                    <b-form-input
+                      id="timeout-betweenRounds"
+                      v-model.number="game.timeouts.betweenRounds"
+                      type="number"
+                      min="5"
+                      max="600"
+                    ></b-form-input>
+                  </b-form-group>
+                </b-form-group>
+              </b-card>
+            </b-collapse>
+          </b-col>
+        </b-row>
+
         <b-button type="submit" variant="secondary" size="sm" class="mt-3">Create a new game</b-button>
       </b-form>
     </template>
@@ -72,9 +153,17 @@ export default Vue.extend({
   data() {
     return {
       game: {
+        timeouts: {
+          playing: 120,
+          revealing: 60,
+          judging: 120,
+          betweenRounds: 30,
+        },
+        winnerPoints: false,
+        handSize: 10,
         password: '',
         packs: [],
-      } as CreateGame,
+      } as Required<CreateGame>,
       player: {
         nickname: '',
       } as CreatePlayer,

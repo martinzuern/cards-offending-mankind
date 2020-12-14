@@ -51,7 +51,7 @@
           <h5>Round {{ roundIndex + 1 }}</h5>
         </b-col>
         <b-col class="pt-2">
-          <Countdown/>
+          <Countdown />
         </b-col>
         <b-col cols="2" class="text-right">
           <b-button id="popover-leaderboard" variant="outline-secondary">🏅</b-button>
