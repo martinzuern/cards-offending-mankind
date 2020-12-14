@@ -51,23 +51,28 @@ html
   font-weight: initial
 
 .play-card
-  padding: 1rem
+  height: 12rem
+  width: 8rem
+  padding: .8rem
   border-radius: $border-radius
   box-shadow: $box-shadow-card
   margin: .5rem
+  hyphens: auto
   font-weight: bold
 
   &.black-card
-    width: 300px
+    height: 15rem
+    width: 10rem
     background-color: black
     color: white
 
   &.white-card
-    width: 200px
     transition: all .2s ease-out
     cursor: pointer
     background-color: white
+    border: 1px solid black
     &.selected
       background-color: blue
       color: white
+      box-shadow: 0 0 9px 1px blue
 </style>
