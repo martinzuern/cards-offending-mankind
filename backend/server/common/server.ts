@@ -11,6 +11,7 @@ import * as Sentry from '@sentry/node';
 import compression from 'compression';
 
 import l from './logger';
+import errorHandler from '../api/middlewares/error.handler';
 
 import installValidator from './openapi';
 
@@ -25,6 +26,7 @@ const publicDir = path.resolve(__dirname, '..', '..', 'public');
 
 export default class ExpressServer {
   private routes: (app: Application) => void;
+
   private sockets: (io: socketIo.Server) => void;
 
   constructor() {
@@ -51,7 +53,8 @@ export default class ExpressServer {
       l.info(`up and running in ${env} @: ${os.hostname()} on port: ${p}}`);
 
     try {
-      await installValidator(app, this.routes);
+      installValidator(app);
+      this.routes(app);
 
       // Serving vue.js
       app.use(express.static(publicDir));
@@ -59,7 +62,9 @@ export default class ExpressServer {
         res.sendFile(path.resolve(publicDir, 'index.html'));
       });
 
+      // Error handler
       app.use(Sentry.Handlers.errorHandler());
+      app.use(errorHandler);
 
       const server = http.createServer(app);
       if (this.sockets) {

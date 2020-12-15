@@ -82,7 +82,7 @@ Object {
 exports[`joining game error on locked user 1`] = `
 Object {
   "data": Object {
-    "code": "unknown",
+    "code": "user-locked",
     "message": "user-locked",
     "type": "UnauthorizedError",
   },

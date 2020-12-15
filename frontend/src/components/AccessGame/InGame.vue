@@ -15,6 +15,8 @@
 </template>
 
 <script lang="ts">
+/* global SocketIOClient */
+
 // @ is an alias to /src
 import Vue from 'vue';
 import io from 'socket.io-client';
