@@ -54,8 +54,5 @@
     "vue-template-compiler": "^2.6.11",
     "vue-type-check": "^1.0.0"
   },
-  "license": "MIT",
-  "vue": {
-    "productionSourceMap": false
-  }
+  "license": "MIT"
 }

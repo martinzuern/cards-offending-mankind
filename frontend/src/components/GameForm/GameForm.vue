@@ -1,8 +1,8 @@
 <template>
   <b-container>
-    <b-row>
-      <b-col>
-        <div class="ml-0 play-card black-card w-75 mx-auto">
+    <b-row class="justify-content-md-center">
+      <b-col sm="12" lg="10" xl="8">
+        <div class="ml-0 form-card-header w-100 mx-auto">
           <div class="pt-3 mt-3 mr-3 card-back">
             Cards
             <br />
@@ -30,7 +30,6 @@ export default Vue.extend({
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="sass">
-
 .background-white
   background-color: white
   margin: 1rem -1rem -1rem
@@ -39,10 +38,19 @@ export default Vue.extend({
   border-bottom-right-radius: 15px
   color: black
 
-.card-back
-  font-size: 2.5em
-  line-height: 1em
-  font-weight: 700
+.form-card-header
+  border-radius: $border-radius
+  box-shadow: $box-shadow-card
+  padding: .8rem
+  margin: .5rem
+  font-weight: bold
+  background-color: black
+  color: white
+
+  .card-back
+    font-size: 2.5em
+    line-height: 1em
+    font-weight: 700
 
 a
   color: black

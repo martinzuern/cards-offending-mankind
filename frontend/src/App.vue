@@ -1,10 +1,24 @@
 <template>
-  <div id="app" class="container">
-    <div class="row">
-      <div class="col">
-        <router-view></router-view>
-      </div>
-    </div>
+  <div class="d-flex flex-column min-vh-100">
+    <b-container id="app" class="my-5 flex-fill">
+      <b-row>
+        <b-col>
+          <router-view></router-view>
+        </b-col>
+      </b-row>
+    </b-container>
+
+    <footer class="py-2 mt-5 bg-light bg-gradient text-black-50 w-100">
+      <b-container class="text-center">
+        <small>
+          Contains content from
+          <a href="https://cardsagainsthumanity.com" target="_blank">Cards Against Humanity®</a>
+          via <a href="https://crhallberg.com/cah/" target="_blank">JSON Against Humanity</a>, licensed under
+          <b-icon icon="badge-cc">CC</b-icon>&nbsp;
+          <a href="https://creativecommons.org/licenses/by-nc-sa/2.0/" target="_blank">BY-NC-SA 2.0</a>.
+        </small>
+      </b-container>
+    </footer>
   </div>
 </template>
 
@@ -20,12 +34,6 @@ export default Vue.extend({
 </script>
 
 <style lang="sass">
-//variables
-
-$box-shadow-sketch: 0 1px 1px rgba(0, 0, 0, .04), 0 4px 5px rgba(0, 0, 0, .02), 0 7px 9px rgba(0, 0, 0, .04)
-$box-shadow-card: $box-shadow-sketch, 0 25px 30px -15px rgba(0, 0, 0, .08), 0 15px 18px -30px rgba(0, 0, 0, .04)
-$border-radius: 15px
-
 //font
 html
   font-family: 'Inter', Helvetica, sans-serif
@@ -40,7 +48,9 @@ html
 #app
   text-align: left
   color: #2c3e50
-  margin-top: 60px
+
+small
+  font-size: 70%
 
 .card
   box-shadow: $box-shadow-card
@@ -59,6 +69,7 @@ html
   margin: .5rem
   hyphens: auto
   font-weight: bold
+  white-space: pre-wrap
 
   &.black-card
     height: 15rem
