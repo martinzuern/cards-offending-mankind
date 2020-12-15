@@ -53,7 +53,9 @@ const updateRound = async (
 
 export default class Controller {
   playerId: UUID;
+
   gameId: UUID;
+
   io: socketIo.Server;
 
   constructor(io: socketIo.Server, gameId: UUID, playerId: UUID) {
@@ -68,8 +70,8 @@ export default class Controller {
 
   static async validateJwt(
     decoded: PlayerJWT,
-    onSuccess: Function,
-    onError: Function
+    onSuccess: () => void,
+    onError: (err: string, code: string) => void
   ): Promise<unknown> {
     const { id: playerId, gameId } = decoded;
     L.info(`Player ${playerId} wants to connect to game ${gameId}.`);
@@ -78,7 +80,7 @@ export default class Controller {
       const gameState = await DBService.getGame(gameId);
       assert(gameState.players.some((el) => el.id === playerId));
     } catch (error) {
-      return onError(error.message);
+      return onError(error.message, 'unkown');
     }
 
     if (await DBService.setUserLock(playerId, true)) {
@@ -86,7 +88,7 @@ export default class Controller {
     }
 
     L.warn(`Player ${playerId} is already locked.`);
-    return onError('user-locked');
+    return onError('user-locked', 'user-locked');
   }
 
   static async onDisconnect(socket: JwtAuthenticatedSocket): Promise<void> {
@@ -254,9 +256,9 @@ export default class Controller {
     await Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);
   };
 
-  onStartNextRound = async (previosRoundIdx = 0): Promise<void> => {
+  onStartNextRound = async (previousRoundIdx = 0): Promise<void> => {
     L.info('Game %s – Player %s – Received event onStartNextRound.', this.gameId, this.playerId);
-    this.clearTimeouts(previosRoundIdx, 'betweenRounds');
+    this.clearTimeouts(previousRoundIdx, 'betweenRounds');
     let gameShouldEnd = false;
     await DBService.updateGame(this.gameId, async (fullGameState) => {
       assert(GameService.isGameRunning(fullGameState.game), 'Only running games can be updated.');

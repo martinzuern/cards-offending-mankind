@@ -17,6 +17,7 @@ export type GameTimeoutJob = {
 
 class TimeoutQueue {
   io?: socketIo.Server;
+
   timeoutQueue: Queue.Queue<GameTimeoutJob>;
 
   constructor() {
@@ -66,7 +67,7 @@ class TimeoutQueue {
     const logPrefix = `Game ${gameId} - Timeout ${eventName} at round ${roundIdx}`;
 
     const c = new Controller(this.io, gameId, 'TIMEOUT_JOB' as UUID);
-    const handlerFns: Record<RoundTimeoutKeys, Function> = {
+    const handlerFns: Record<RoundTimeoutKeys, (roundIndex: number) => Promise<void>> = {
       playing: c.setRoundPlayed,
       revealing: c.setRoundRevealed,
       judging: c.setRoundEnded,
