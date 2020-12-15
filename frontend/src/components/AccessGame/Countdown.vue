@@ -35,6 +35,7 @@ export default Vue.extend({
     currentTimeoutKey(): keyof Game['timeouts'] | undefined {
       if (!this.currentRoundTimeouts) return undefined;
       const keys = Object.keys(this.currentRoundTimeouts) as (keyof Game['timeouts'])[];
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return maxBy(keys, (o) => this.currentRoundTimeouts![o]);
     },
     totalSeconds(): number {

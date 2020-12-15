@@ -92,6 +92,8 @@
 </template>
 
 <script lang="ts">
+/* global SocketIOClient */
+
 // @ is an alias to /src
 import Vue from 'vue';
 import Submissions from './Submissions.vue';

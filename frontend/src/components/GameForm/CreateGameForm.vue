@@ -65,13 +65,13 @@
                       >
                     </b-input-group-prepend>
                     <b-form-input
-                      id="winnerPoints"
                       v-if="game.winnerPoints"
+                      id="winnerPoints"
                       v-model.number="game.winnerPoints"
                       type="number"
                       min="1"
                     />
-                    <b-form-input id="winnerPoints" v-else disabled placeholder="Game continues until ended manually" />
+                    <b-form-input v-else id="winnerPoints" disabled placeholder="Game continues until ended manually" />
                   </b-input-group>
                 </b-form-group>
 

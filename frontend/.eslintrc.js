@@ -19,19 +19,21 @@ module.exports = {
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'no-empty': ['error', { 'allowEmptyCatch': true }],
+    'no-empty': ['error', { allowEmptyCatch: true }],
     // '@typescript-eslint/no-unused-vars': 'error',
 
     // TODO remove the following lines and uncomment the one above
     '@typescript-eslint/no-unused-vars': 'warn',
     'vue/no-use-v-if-with-v-for': 'warn',
     'vue/no-parsing-error': 'warn',
-    '@typescript-eslint/ban-ts-ignore': 'warn',
+    '@typescript-eslint/ban-ts-comment': 'warn',
   },
-  overrides: [{
-    files: ['**/__tests__/*.{j,t}s?(x)', '**/tests/unit/**/*.spec.{j,t}s?(x)'],
-    env: {
-      jest: true,
+  overrides: [
+    {
+      files: ['**/__tests__/*.{j,t}s?(x)', '**/tests/unit/**/*.spec.{j,t}s?(x)'],
+      env: {
+        jest: true,
+      },
     },
-  }, ],
+  ],
 };
