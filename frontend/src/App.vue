@@ -20,12 +20,6 @@ export default Vue.extend({
 </script>
 
 <style lang="sass">
-//variables
-
-$box-shadow-sketch: 0 1px 1px rgba(0, 0, 0, .04), 0 4px 5px rgba(0, 0, 0, .02), 0 7px 9px rgba(0, 0, 0, .04)
-$box-shadow-card: $box-shadow-sketch, 0 25px 30px -15px rgba(0, 0, 0, .08), 0 15px 18px -30px rgba(0, 0, 0, .04)
-$border-radius: 15px
-
 //font
 html
   font-family: 'Inter', Helvetica, sans-serif
@@ -59,6 +53,7 @@ html
   margin: .5rem
   hyphens: auto
   font-weight: bold
+  white-space: pre-wrap
 
   &.black-card
     height: 15rem
