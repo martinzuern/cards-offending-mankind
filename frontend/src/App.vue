@@ -1,10 +1,24 @@
 <template>
-  <div id="app" class="container">
-    <div class="row">
-      <div class="col">
-        <router-view></router-view>
-      </div>
-    </div>
+  <div class="d-flex flex-column min-vh-100">
+    <b-container id="app" class="my-5 flex-fill">
+      <b-row>
+        <b-col>
+          <router-view></router-view>
+        </b-col>
+      </b-row>
+    </b-container>
+
+    <footer class="py-2 mt-5 bg-light bg-gradient text-black-50 w-100">
+      <b-container class="text-center">
+        <small>
+          Contains content from
+          <a href="https://cardsagainsthumanity.com" target="_blank">Cards Against Humanity®</a>
+          via <a href="https://crhallberg.com/cah/" target="_blank">JSON Against Humanity</a>, licensed under
+          <b-icon icon="badge-cc">CC</b-icon>&nbsp;
+          <a href="https://creativecommons.org/licenses/by-nc-sa/2.0/" target="_blank">BY-NC-SA 2.0</a>.
+        </small>
+      </b-container>
+    </footer>
   </div>
 </template>
 
@@ -34,7 +48,9 @@ html
 #app
   text-align: left
   color: #2c3e50
-  margin-top: 60px
+
+small
+  font-size: 70%
 
 .card
   box-shadow: $box-shadow-card
