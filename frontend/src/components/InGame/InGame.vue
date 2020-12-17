@@ -32,7 +32,7 @@ import Vue from 'vue';
 import io from 'socket.io-client';
 
 import store from '../../store';
-import { Player, Game, Round, OtherPlayer, MessageRoundUpdated, GameState } from '../../../types';
+import { Player, Game, Round, OtherPlayer, MessageRoundUpdated, GameState } from '../../types';
 
 import GameEnded from './GameEnded.vue';
 import GameStateView from './GameState.vue';

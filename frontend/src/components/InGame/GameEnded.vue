@@ -16,7 +16,7 @@ import Vue from 'vue';
 import assert from 'assert';
 
 import store from '../../store';
-import { OtherPlayer } from '../../../types';
+import { OtherPlayer } from '../../types';
 
 export default Vue.extend({
   name: 'GameEnded',

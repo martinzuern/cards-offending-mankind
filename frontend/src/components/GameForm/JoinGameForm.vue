@@ -41,7 +41,7 @@
 import Vue from 'vue';
 
 import GameForm from './GameForm.vue';
-import { Game, CreatePlayer, MessageGetGame, MessageJoinGame, UUID } from '../../../types';
+import { Game, CreatePlayer, MessageGetGame, MessageJoinGame, UUID } from '../../types';
 import axios from '../../helpers/api';
 import store from '../../store';
 

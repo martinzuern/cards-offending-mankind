@@ -28,7 +28,7 @@
 /* global SocketIOClient */
 // @ is an alias to /src
 import Vue from 'vue';
-import { OtherPlayer, Player, Game, Round } from '../../../../types';
+import { OtherPlayer, Player, Game, Round } from '../../types';
 import store from '../../store';
 
 export default Vue.extend({

@@ -11,7 +11,7 @@ import Vue from 'vue';
 
 import InGame from '@/components/InGame/InGame.vue';
 import JoinGameForm from '@/components/GameForm/JoinGameForm.vue';
-import { UUID } from '../../types';
+import { UUID } from '../types';
 import store from '../store';
 
 export default Vue.extend({

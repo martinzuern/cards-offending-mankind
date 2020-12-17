@@ -37,7 +37,7 @@ import Vue from 'vue';
 import assert from 'assert';
 
 import store from '../../store';
-import { Player, OtherPlayer } from '../../../types';
+import { Player, OtherPlayer } from '../../types';
 
 export default Vue.extend({
   name: 'GameCreated',

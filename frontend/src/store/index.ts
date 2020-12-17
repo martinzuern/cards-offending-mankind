@@ -18,7 +18,7 @@ import {
   MessageJoinGame,
   MessagePlayerJoined,
   GameState,
-} from '../../../types';
+} from '../types';
 import axios from '@/helpers/api.ts';
 
 export interface State {
