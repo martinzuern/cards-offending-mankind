@@ -26,8 +26,9 @@
 
 <script lang="ts">
 /* global SocketIOClient */
-// @ is an alias to /src
+
 import Vue from 'vue';
+
 import { OtherPlayer, Player, Game, Round } from '@/types';
 import store from '@/store';
 

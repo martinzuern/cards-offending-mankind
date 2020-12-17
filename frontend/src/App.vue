@@ -24,6 +24,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+
 import 'typeface-inter';
 import 'bootstrap/dist/css/bootstrap.css';
 

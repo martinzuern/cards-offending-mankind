@@ -24,9 +24,9 @@
 </template>
 
 <script lang="ts">
-// @ is an alias to /src
 import Vue from 'vue';
 import { includes } from 'lodash';
+
 import { Player, Round, ResponseCard, Game } from '@/types';
 import store from '@/store';
 

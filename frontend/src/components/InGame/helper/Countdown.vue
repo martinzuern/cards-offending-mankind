@@ -9,9 +9,9 @@
 </template>
 
 <script lang="ts">
-// @ is an alias to /src
 import Vue from 'vue';
 import { mapValues, maxBy } from 'lodash';
+
 import { Game } from '@/types';
 import store from '@/store';
 

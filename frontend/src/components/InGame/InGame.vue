@@ -5,15 +5,16 @@
       <h6>Please be patient, this can take up to 40 seconds.</h6>
     </template>
 
-    <template v-else-if="isStoreDefined && game && game.status === 'ended'">
-      <GameEnded />
+    <template v-else-if="isStoreDefined && game && game.status === 'created'">
+      <GameCreated />
     </template>
 
     <template v-else-if="isStoreDefined && game && game.status === 'running'">
-      <div>
-        <GameStateView />
-        <Deck />
-      </div>
+      <GameRunning />
+    </template>
+
+    <template v-else-if="isStoreDefined && game && game.status === 'ended'">
+      <GameEnded />
     </template>
 
     <template v-else>
@@ -27,23 +28,22 @@
 <script lang="ts">
 /* global SocketIOClient */
 
-// @ is an alias to /src
 import Vue from 'vue';
 import io from 'socket.io-client';
 
-import store from '@/store';
 import { Player, Game, Round, OtherPlayer, MessageRoundUpdated, GameState } from '@/types';
+import store from '@/store';
 
+import GameCreated from './GameCreated.vue';
+import GameRunning from './GameRunning.vue';
 import GameEnded from './GameEnded.vue';
-import GameStateView from './GameState.vue';
-import Deck from './Deck.vue';
 
 export default Vue.extend({
   name: 'InGame',
   components: {
+    GameCreated,
+    GameRunning,
     GameEnded,
-    GameStateView,
-    Deck,
   },
   props: {
     token: {

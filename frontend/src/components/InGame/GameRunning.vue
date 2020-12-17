@@ -48,12 +48,13 @@
 <script lang="ts">
 /* global SocketIOClient */
 
-// @ is an alias to /src
 import Vue from 'vue';
-import Submissions from './Submissions.vue';
-import Countdown from './Countdown.vue';
+
 import { OtherPlayer, Player, Game, Round } from '@/types';
 import store from '@/store';
+
+import Submissions from './helper/Submissions.vue';
+import Countdown from './helper/Countdown.vue';
 
 export default Vue.extend({
   name: 'GameState',
