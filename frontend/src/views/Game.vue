@@ -1,7 +1,7 @@
 <template>
   <div>
-    <JoinGameForm v-if="!token" :game-id="gameId" />
     <InGame v-if="token" :token="token" />
+    <JoinGameForm v-else :game-id="gameId" />
   </div>
 </template>
 
@@ -9,7 +9,7 @@
 // @ is an alias to /src
 import Vue from 'vue';
 
-import InGame from '@/components/AccessGame/InGame.vue';
+import InGame from '@/components/InGame/InGame.vue';
 import JoinGameForm from '@/components/GameForm/JoinGameForm.vue';
 import { UUID } from '../../types';
 import store from '../store';

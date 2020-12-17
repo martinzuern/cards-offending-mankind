@@ -1,51 +1,7 @@
 <template>
   <div v-if="game && player">
-    <!-- Game ended -->
-    <template v-if="game.status === 'ended'">
-      <h2>🏁 Game over</h2>
-      <h6>Here is the final result.</h6>
-      <div class="list-group mt-4">
-        <div v-for="p in players" :key="p.id" class="list-group-item d-flex justify-content-between align-items-center">
-          <strong>{{ p.nickname }}</strong>
-          <span>{{ p.points }}</span>
-        </div>
-      </div>
-    </template>
-
-    <!-- Game not yet startet -->
-    <template v-else-if="game.status === 'created'">
-      <div class="card">
-        <div class="card-body">
-          <h6>Invite other players to join!</h6>
-
-          <b-form-group label="Share this URL with your friends." label-for="share-url" class="mt-3">
-            <b-input-group>
-              <b-form-input id="share-url" ref="shareUrl" readonly :value="gameUrl" />
-              <b-input-group-append>
-                <b-button variant="outline-success" @click="copyGameUrl">Copy</b-button>
-              </b-input-group-append>
-            </b-input-group>
-          </b-form-group>
-
-          <p class="mt-3 mb-0">
-            Players currently in this game:
-            {{ players.map((p) => p.nickname).join(', ') }}
-          </p>
-        </div>
-      </div>
-
-      <button
-        v-if="player.isHost"
-        class="btn btn-success d-block w-100 mt-3"
-        :disabled="!(rounds && !rounds.length && players.length >= 3)"
-        @click="startGame"
-      >
-        Start Game
-      </button>
-    </template>
-
     <!-- Game is running -->
-    <template v-else>
+    <template>
       <b-row>
         <b-col cols="2" class="pt-2">
           <h5>Round {{ roundIndex + 1 }}</h5>
@@ -108,9 +64,6 @@ export default Vue.extend({
     Countdown,
   },
   computed: {
-    gameUrl(): string {
-      return location.toString();
-    },
     isJudge(): boolean {
       return !!(this.player && this.currentRound && this.player.id === this.currentRound.judgeId);
     },
@@ -140,16 +93,6 @@ export default Vue.extend({
     },
   },
   methods: {
-    copyGameUrl(): void {
-      const input = this.$refs.shareUrl as HTMLInputElement;
-      try {
-        input.select();
-        const success = document.execCommand('copy');
-        input.setSelectionRange(0, 0);
-        if (success) return;
-      } catch {}
-      alert('URL cannot be copied. Please copy manually.');
-    },
     startGame(): void {
       this.socket && this.socket.emit('start_game');
     },
