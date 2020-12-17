@@ -9,7 +9,7 @@
     "build": "vue-cli-service build --modern",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint",
-    "lint:type": "vue-type-check --workspace ./src"
+    "lint:type": "vue-type-check --workspace . --srcDir ./src"
   },
   "dependencies": {
     "@types/lodash": "^4.14.151",

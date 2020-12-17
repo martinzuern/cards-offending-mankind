@@ -52,8 +52,8 @@
 import Vue from 'vue';
 import Submissions from './Submissions.vue';
 import Countdown from './Countdown.vue';
-import { OtherPlayer, Player, Game, Round } from '../../types';
-import store from '../../store';
+import { OtherPlayer, Player, Game, Round } from '@/types';
+import store from '@/store';
 
 export default Vue.extend({
   name: 'GameState',

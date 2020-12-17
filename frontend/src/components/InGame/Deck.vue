@@ -27,8 +27,8 @@
 // @ is an alias to /src
 import Vue from 'vue';
 import { includes } from 'lodash';
-import { Player, Round, ResponseCard, Game } from '../../types';
-import store from '../../store';
+import { Player, Round, ResponseCard, Game } from '@/types';
+import store from '@/store';
 
 export default Vue.extend({
   name: 'Deck',
