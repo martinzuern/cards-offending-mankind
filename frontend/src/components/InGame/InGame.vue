@@ -5,11 +5,11 @@
       <h6>Please be patient, this can take up to 40 seconds.</h6>
     </template>
 
-    <template v-else-if="isStoreDefined && game.status === 'ended'">
+    <template v-else-if="isStoreDefined && game && game.status === 'ended'">
       <GameEnded />
     </template>
 
-    <template v-else-if="isStoreDefined && game.status === 'running'">
+    <template v-else-if="isStoreDefined && game && game.status === 'running'">
       <div>
         <GameStateView />
         <Deck />

@@ -1,49 +1,47 @@
 <template>
   <div v-if="game && player">
     <!-- Game is running -->
-    <template>
-      <b-row>
-        <b-col cols="2" class="pt-2">
-          <h5>Round {{ roundIndex + 1 }}</h5>
-        </b-col>
-        <b-col class="pt-2">
-          <Countdown />
-        </b-col>
-        <b-col cols="2" class="text-right">
-          <b-button id="popover-leaderboard" variant="outline-secondary">🏅</b-button>
-          <b-popover target="popover-leaderboard" triggers="click blur" placement="bottomleft">
-            <template #title>Leaderboard</template>
-            <div class="list-group leaderboard-list-group" style="">
-              <div
-                v-for="p in players"
-                :key="p.id"
-                class="list-group-item d-flex justify-content-between align-items-center"
-              >
-                <strong>{{ p.nickname }}</strong>
-                <span>{{ p.points }}</span>
-              </div>
+    <b-row>
+      <b-col cols="2" class="pt-2">
+        <h5>Round {{ roundIndex + 1 }}</h5>
+      </b-col>
+      <b-col class="pt-2">
+        <Countdown />
+      </b-col>
+      <b-col cols="2" class="text-right">
+        <b-button id="popover-leaderboard" variant="outline-secondary">🏅</b-button>
+        <b-popover target="popover-leaderboard" triggers="click blur" placement="bottomleft">
+          <template #title>Leaderboard</template>
+          <div class="list-group leaderboard-list-group" style="">
+            <div
+              v-for="p in players"
+              :key="p.id"
+              class="list-group-item d-flex justify-content-between align-items-center"
+            >
+              <strong>{{ p.nickname }}</strong>
+              <span>{{ p.points }}</span>
             </div>
-          </b-popover>
-        </b-col>
-      </b-row>
+          </div>
+        </b-popover>
+      </b-col>
+    </b-row>
 
-      <!-- Player is judge -->
-      <template v-if="rounds && rounds.length && isJudge">
-        <h2>👩🏻‍⚖️ Relax, you are judging this round.</h2>
-        <h6 v-if="currentRound && currentRound.status === 'played'">Okay, it's your turn. Judge!</h6>
-      </template>
-
-      <div v-if="game && game.status === 'running'" class="play-card black-card mx-auto mt-5">
-        {{ ((currentRound && currentRound.prompt) || {}).value }}
-      </div>
-
-      <Submissions v-if="currentRound && currentRound.submissions" />
-
-      <div v-if="currentRound && currentRound.status === 'ended'" class="overlay mt-5">
-        <button class="btn btn-success d-block mb-3 d-block w-100" @click="clickNextRound">Next Round</button>
-        <button v-if="isHost" class="btn btn-secondary d-block w-100 mt-3" @click="clickEndGame">End Game</button>
-      </div>
+    <!-- Player is judge -->
+    <template v-if="rounds && rounds.length && isJudge">
+      <h2>👩🏻‍⚖️ Relax, you are judging this round.</h2>
+      <h6 v-if="currentRound && currentRound.status === 'played'">Okay, it's your turn. Judge!</h6>
     </template>
+
+    <div v-if="game && game.status === 'running'" class="play-card black-card mx-auto mt-5">
+      {{ ((currentRound && currentRound.prompt) || {}).value }}
+    </div>
+
+    <Submissions v-if="currentRound && currentRound.submissions" />
+
+    <div v-if="currentRound && currentRound.status === 'ended'" class="overlay mt-5">
+      <button class="btn btn-success d-block mb-3 d-block w-100" @click="clickNextRound">Next Round</button>
+      <button v-if="isHost" class="btn btn-secondary d-block w-100 mt-3" @click="clickEndGame">End Game</button>
+    </div>
   </div>
 </template>
 
