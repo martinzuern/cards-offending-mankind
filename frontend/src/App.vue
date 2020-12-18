@@ -62,8 +62,8 @@ small
   font-weight: initial
 
 .play-card
-  height: 12rem
-  width: 8rem
+  height: $card-height
+  width: $card-width
   padding: .8rem
   border-radius: $border-radius
   box-shadow: $box-shadow-card
