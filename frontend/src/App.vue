@@ -24,6 +24,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+
 import 'typeface-inter';
 import 'bootstrap/dist/css/bootstrap.css';
 
@@ -61,15 +62,15 @@ small
   font-weight: initial
 
 .play-card
-  height: 12rem
-  width: 8rem
+  height: $card-height
+  width: $card-width
   padding: .8rem
   border-radius: $border-radius
   box-shadow: $box-shadow-card
   margin: .5rem
   hyphens: auto
   font-weight: bold
-  white-space: pre-wrap
+  white-space: pre-line
 
   &.black-card
     height: 15rem

@@ -140,9 +140,10 @@ import Multiselect from 'vue-multiselect';
 
 import 'vue-multiselect/dist/vue-multiselect.min.css';
 
+import { CreateGame, CreatePlayer, PackInformation, MessageCreateGame } from '@/types';
+import store from '@/store';
+
 import GameForm from './GameForm.vue';
-import { CreateGame, CreatePlayer, PackInformation, MessageCreateGame } from '../../../types';
-import store from '../../store';
 
 export default Vue.extend({
   name: 'CreateGameForm',

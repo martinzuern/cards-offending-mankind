@@ -1,35 +1,39 @@
 <template>
   <div>
     <template v-if="userLocked">
-      <h2>📡 Reconnecting …</h2>
+      <h2>📡 Connecting …</h2>
       <h6>Please be patient, this can take up to 40 seconds.</h6>
     </template>
 
-    <template v-else>
-      <div class="player-information">
-        <GameStateView />
-        <Deck />
-      </div>
-    </template>
+    <GameCreated v-else-if="isStoreDefined && game && game.status === 'created'" />
+    <GameRunning v-else-if="isStoreDefined && game && game.status === 'running'" />
+    <GameEnded v-else-if="isStoreDefined && game && game.status === 'ended'" />
+
+    <div v-else class="d-flex justify-content-center m-5">
+      <b-spinner label="Loading..."></b-spinner>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 /* global SocketIOClient */
 
-// @ is an alias to /src
 import Vue from 'vue';
 import io from 'socket.io-client';
-import GameStateView from '@/components/AccessGame/GameState.vue';
-import Deck from '@/components/AccessGame/Deck.vue';
-import { Player, Game, Round, MessageRoundUpdated, GameState } from '../../../types';
-import store from '../../store';
+
+import { Player, Game, Round, OtherPlayer, MessageRoundUpdated, GameState } from '@/types';
+import store from '@/store';
+
+import GameCreated from './GameCreated.vue';
+import GameRunning from './GameRunning.vue';
+import GameEnded from './GameEnded.vue';
 
 export default Vue.extend({
   name: 'InGame',
   components: {
-    GameStateView,
-    Deck,
+    GameCreated,
+    GameRunning,
+    GameEnded,
   },
   props: {
     token: {
@@ -47,24 +51,27 @@ export default Vue.extend({
     game(): Game | undefined {
       return store.state.gameState?.game;
     },
-    player(): Player | undefined {
-      return store.state.player;
+    players(): OtherPlayer[] | undefined {
+      return store.state.gameState?.players;
     },
     rounds(): Round[] | undefined {
       return store.state.gameState?.rounds;
     },
+    player(): Player | undefined {
+      return store.state.player;
+    },
     socket(): SocketIOClient.Socket | undefined {
       return store.state.socket;
+    },
+    isStoreDefined(): boolean {
+      return !!this.game && !!this.players && !!this.rounds && !!this.player && !!this.socket;
     },
   },
   mounted() {
     this.initSocket();
   },
   beforeDestroy() {
-    if (!store.state.socket) return;
-    console.log('Disconnecting Socket');
-    store.state.socket.disconnect();
-    store.commit.setSocket(undefined);
+    this.closeSocket();
   },
   methods: {
     initSocket(): void {
@@ -95,8 +102,7 @@ export default Vue.extend({
               this.userLocked = true;
               setTimeout(() => this.initSocket(), 5000);
             }
-            socket.close();
-            store.commit.setSocket(undefined);
+            this.closeSocket();
           })
           .emit('authenticate', { token: this.token });
         socket.open();
@@ -104,6 +110,12 @@ export default Vue.extend({
       } catch (error) {
         this.error = error;
       }
+    },
+    closeSocket(): void {
+      if (!store.state.socket) return;
+      console.log('Disconnecting Socket');
+      store.state.socket.disconnect();
+      store.commit.setSocket(undefined);
     },
   },
 });
