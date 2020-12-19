@@ -9,7 +9,7 @@
           v-for="card in cardList"
           :key="card.value"
           class="play-card white-card"
-          :class="index === 0 ? 'selected' : ''"
+          :class="{ selected: index === 0 }"
           @click="clickToggleCard(card)"
         >
           {{ card.value }}

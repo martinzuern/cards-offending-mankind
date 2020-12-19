@@ -4,7 +4,7 @@
       v-for="(submission, submissionIndex) in currentRound.submissions"
       :key="submissionIndex"
       class="submission my-5 py-2"
-      :class="{ canChooseWinner: canChooseWinner }"
+      :class="{ canChooseWinner }"
     >
       <h6 v-if="currentRound.status === 'ended'">
         Submission by

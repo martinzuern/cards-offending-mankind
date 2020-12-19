@@ -5,23 +5,13 @@
       <h6>Please be patient, this can take up to 40 seconds.</h6>
     </template>
 
-    <template v-else-if="isStoreDefined && game && game.status === 'created'">
-      <GameCreated />
-    </template>
+    <GameCreated v-else-if="isStoreDefined && game && game.status === 'created'" />
+    <GameRunning v-else-if="isStoreDefined && game && game.status === 'running'" />
+    <GameEnded v-else-if="isStoreDefined && game && game.status === 'ended'" />
 
-    <template v-else-if="isStoreDefined && game && game.status === 'running'">
-      <GameRunning />
-    </template>
-
-    <template v-else-if="isStoreDefined && game && game.status === 'ended'">
-      <GameEnded />
-    </template>
-
-    <template v-else>
-      <div class="d-flex justify-content-center m-5">
-        <b-spinner label="Loading..."></b-spinner>
-      </div>
-    </template>
+    <div v-else class="d-flex justify-content-center m-5">
+      <b-spinner label="Loading..."></b-spinner>
+    </div>
   </div>
 </template>
 
