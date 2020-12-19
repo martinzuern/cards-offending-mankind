@@ -75,6 +75,16 @@
                   </b-input-group>
                 </b-form-group>
 
+                <b-form-group label="Rando Cardrissian: AI Players" label-for="aiPlayers" class="mt-2">
+                  <b-form-input
+                    id="aiPlayers"
+                    v-model.number="game.specialRules.aiPlayerCount"
+                    type="number"
+                    min="0"
+                    max="3"
+                  />
+                </b-form-group>
+
                 <b-form-group label-cols-lg="2" label="Timeouts" class="mb-0" label-class="pt-0">
                   <b-form-group label="Playing:" label-for="timeout-playing" label-cols-sm="6" label-align-sm="right">
                     <b-form-input
@@ -164,6 +174,9 @@ export default Vue.extend({
         handSize: 10,
         password: '',
         packs: [],
+        specialRules: {
+          aiPlayerCount: 0,
+        },
       } as Required<CreateGame>,
       player: {
         nickname: '',
