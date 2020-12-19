@@ -1,6 +1,11 @@
 <template>
   <div class="my-5">
-    <div v-for="(submission, submissionIndex) in currentRound.submissions" :key="submissionIndex" class="my-5 py-2">
+    <div
+      v-for="(submission, submissionIndex) in currentRound.submissions"
+      :key="submissionIndex"
+      class="submission my-5 py-2"
+      :class="{ canChooseWinner: canChooseWinner }"
+    >
       <h6 v-if="currentRound.status === 'ended'">
         Submission by
         <b-badge pill variant="dark">{{ getPlayerForSubmission(submission).nickname || '***' }}</b-badge>
@@ -9,7 +14,7 @@
         <b-col v-for="(card, index) in submission.cards" :key="index" md="auto">
           <div
             class="flip-card"
-            :class="{ revealed: submission.isRevealed, canChooseWinner: canChooseWinner }"
+            :class="{ revealed: submission.isRevealed }"
             @click="selectSubmittedCard(submissionIndex)"
           >
             <div class="flip-card-inner">
@@ -17,7 +22,7 @@
               <div
                 class="flip-card-back play-card white-card"
                 :class="{ selected: submissionIndex === winnerSubmissionIndex || submission.pointsChange > 0 }"
-              >{{ card.value }}</div>
+              ><!-- eslint-disable-line -->{{ card.value }}</div>
             </div>
           </div>
         </b-col>
@@ -123,11 +128,6 @@ export default Vue.extend({
   &.revealed
     .flip-card-inner
       transform: rotateY(180deg)
-    &:hover.canChooseWinner
-      .flip-card-back
-        background-color: blue
-        color: white
-        box-shadow: 0 0 9px 1px blue
 
   .flip-card-front, .flip-card-back
     position: absolute
@@ -143,4 +143,11 @@ export default Vue.extend({
 
   .flip-card-back
     transform: rotateY(180deg)
+
+.submission
+  &.canChooseWinner:hover
+    .flip-card-back
+        background-color: blue
+        color: white
+        box-shadow: 0 0 9px 1px blue
 </style>
