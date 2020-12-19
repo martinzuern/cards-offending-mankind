@@ -116,6 +116,10 @@ export default Vue.extend({
 </script>
 
 <style lang="sass">
+@import "~bootstrap/scss/functions"
+@import "~bootstrap/scss/variables"
+@import "~bootstrap/scss/mixins"
+
 @function pow($base, $exponent)
   $result: 1
   @for $_ from 1 through $exponent
@@ -134,23 +138,38 @@ export default Vue.extend({
     &:nth-child(#{$i}):hover
       transform: translateY(-2rem) translateX(-1rem) rotate(#{$rotAngle}deg)
 
-.card-fan
-  display: flex
-  position: relative
-  margin-left: 2rem
-  justify-content: space-evenly
-
-  .white-card
-    height: 12rem
-    width: 8rem
+@include media-breakpoint-up(md)
+  .card-fan
+    display: flex
     position: relative
-    top: 30px
-    transition: transform .2s
-    margin-left: -2rem
-    font-size: #{"min(1rem, 1vw)"}
+    margin-left: 2rem
+    justify-content: space-evenly
 
-  @for $cardCount from 2 through 25
-    &.fan-count-#{$cardCount}
-      .white-card
-        @include card-angles($cardCount)
+    .white-card
+      height: 12rem
+      width: 8rem
+      position: relative
+      top: 30px
+      transition: transform .2s
+      margin-left: -2rem
+      font-size: #{"min(1rem, 1vw)"}
+
+    @for $cardCount from 2 through 25
+      &.fan-count-#{$cardCount}
+        .white-card
+          @include card-angles($cardCount)
+
+@include media-breakpoint-down(sm)
+  .card-fan
+    display: flex
+    flex-flow: wrap
+    justify-content: center
+    padding-bottom: 3rem
+
+    .white-card
+      margin-bottom: -3rem
+      font-size: 3vw
+
+      &.selected
+        order: 99
 </style>

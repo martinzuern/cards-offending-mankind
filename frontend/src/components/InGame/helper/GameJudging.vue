@@ -22,7 +22,9 @@
               <div
                 class="flip-card-back play-card white-card"
                 :class="{ selected: submissionIndex === winnerSubmissionIndex || submission.pointsChange > 0 }"
-              ><!-- eslint-disable-line -->{{ card.value }}</div>
+              >
+                {{ card.value }}
+              </div>
             </div>
           </div>
         </b-col>

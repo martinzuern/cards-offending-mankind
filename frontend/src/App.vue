@@ -70,7 +70,7 @@ small
   margin: .5rem
   hyphens: auto
   font-weight: bold
-  white-space: pre-wrap
+  white-space: pre-line
 
   &.black-card
     height: 15rem
