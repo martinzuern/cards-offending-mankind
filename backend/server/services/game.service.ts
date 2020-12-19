@@ -125,7 +125,7 @@ export default class GameService {
   ): InternalGameState {
     const newGameState = _.cloneDeep(gameState);
     const round = _.last(newGameState.rounds);
-    handSize = handSize ?? newGameState.game.handSize;
+    const handSizeParam = handSize ?? newGameState.game.handSize;
     assert(round, 'There are no rounds.');
 
     // If the round is not running, then no need to refill hands
@@ -135,7 +135,7 @@ export default class GameService {
     const newPlayers = newGameState.players.filter((p) => playerIds.includes(p.id));
 
     // Make sure we have enough cards left
-    const roundHandSize = Math.max(round.prompt.pick, handSize + round.prompt.draw - 1);
+    const roundHandSize = Math.max(round.prompt.pick, handSizeParam + round.prompt.draw - 1);
     if (newGameState.piles.responses.length < roundHandSize * newPlayers.length)
       newGameState.piles.responses = _.shuffle([
         ...newGameState.piles.responses,
