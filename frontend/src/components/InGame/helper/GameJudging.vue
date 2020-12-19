@@ -77,11 +77,25 @@ export default Vue.extend({
     roundIndex(): number {
       return store.getters.currentRoundIndex;
     },
+    myPoints(): number {
+      return this.player.points;
+    },
     isJudge(): boolean {
       return this.player.id === this.currentRound.judgeId;
     },
     canChooseWinner(): boolean {
       return this.isJudge && this.currentRound.status === 'revealed';
+    },
+  },
+  watch: {
+    myPoints: function (newPoints, oldPoints) {
+      const gain = newPoints - oldPoints;
+      if (gain <= 0) return;
+      this.$bvToast.toast(`You won ${gain} ${gain > 1 ? 'points' : 'point'}.`, {
+        title: 'Hurray 🎉',
+        autoHideDelay: 10000,
+        variant: 'success',
+      });
     },
   },
   methods: {
@@ -147,7 +161,6 @@ export default Vue.extend({
 .submission
   &.canChooseWinner:hover
     .flip-card-back
-        background-color: blue
+        background-color: #6495ED
         color: white
-        box-shadow: 0 0 9px 1px blue
 </style>
