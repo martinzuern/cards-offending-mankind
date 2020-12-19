@@ -277,7 +277,7 @@ export default class GameService {
 
     _.take(
       ['Rando Cardrissian', 'Robi-Wan Cardnobi', 'Cardbacca'],
-      game.specialRules.aiPlayerCount
+      result.game.specialRules.aiPlayerCount
     ).forEach((nickname) => {
       const p = this.initPlayer(uuidv4() as UUID, { nickname, isAI: true, isActive: true });
       result.players.push(p);

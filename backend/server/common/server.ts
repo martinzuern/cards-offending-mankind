@@ -30,7 +30,13 @@ export default class ExpressServer {
   private sockets: (io: socketIo.Server) => void;
 
   constructor() {
-    app.use(helmet());
+    app.use(
+      helmet({
+        contentSecurityPolicy: {
+          reportOnly: env !== 'production',
+        },
+      })
+    );
     app.use(compression());
     app.use(bodyParser.json({ limit: process.env.REQUEST_LIMIT || '100kb' }));
 
