@@ -120,10 +120,12 @@ export default class GameService {
 
   static refillHandForPlayers(
     gameState: InternalGameState,
-    players: { id: string }[]
+    players: { id: string }[],
+    handSize: number | undefined = undefined
   ): InternalGameState {
     const newGameState = _.cloneDeep(gameState);
     const round = _.last(newGameState.rounds);
+    const handSizeParam = handSize ?? newGameState.game.handSize;
     assert(round, 'There are no rounds.');
 
     // If the round is not running, then no need to refill hands
@@ -133,20 +135,20 @@ export default class GameService {
     const newPlayers = newGameState.players.filter((p) => playerIds.includes(p.id));
 
     // Make sure we have enough cards left
-    const handSize = newGameState.game.handSize + round.prompt.draw - 1;
-    if (newGameState.piles.responses.length < handSize * newPlayers.length)
+    const roundHandSize = Math.max(round.prompt.pick, handSizeParam + round.prompt.draw - 1);
+    if (newGameState.piles.responses.length < roundHandSize * newPlayers.length)
       newGameState.piles.responses = _.shuffle([
         ...newGameState.piles.responses,
         ...newGameState.piles.discardedResponses.splice(0),
       ]);
 
     newPlayers.forEach((player: InternalPlayer) => {
-      if (player.deck.length >= handSize) return;
+      if (player.deck.length >= roundHandSize) return;
 
       // eslint-disable-next-line no-param-reassign
       player.deck = [
         ...player.deck,
-        ...newGameState.piles.responses.splice(0, handSize - player.deck.length),
+        ...newGameState.piles.responses.splice(0, roundHandSize - player.deck.length),
       ];
     });
 
@@ -159,14 +161,14 @@ export default class GameService {
       'There are open rounds.'
     );
 
-    const newGameState = _.cloneDeep(gameState);
-    const activePlayers = newGameState.players.filter((p) => p.isActive);
+    let newGameState = _.cloneDeep(gameState);
+    const activeHumanPlayers = newGameState.players.filter((p) => p.isActive && !p.isAI);
 
     if (!newGameState.piles.prompts.length)
       newGameState.piles.prompts = _.shuffle(newGameState.piles.discardedPrompts.splice(0));
 
     const newRound: Round = {
-      judgeId: activePlayers[newGameState.rounds.length % activePlayers.length].id,
+      judgeId: activeHumanPlayers[newGameState.rounds.length % activeHumanPlayers.length].id,
       status: RoundStatus.Created,
       timeouts: {
         playing: new Date(_.now() + newGameState.game.timeouts.playing * 1000),
@@ -177,21 +179,44 @@ export default class GameService {
     };
     newGameState.rounds.push(newRound);
 
-    return this.refillHandForPlayers(newGameState, activePlayers);
+    newGameState = this.refillHandForPlayers(newGameState, activeHumanPlayers);
+
+    // Handling AI Players
+    const aiPlayers = newGameState.players.filter((p) => p.isAI);
+    newGameState = this.refillHandForPlayers(newGameState, aiPlayers, 0);
+    newGameState.players
+      .filter((p) => p.isAI)
+      .forEach((aiPlayer) => {
+        const newSubmission: RoundSubmission = {
+          playerId: aiPlayer.id,
+          timestamp: new Date(),
+          cards: aiPlayer.deck.splice(0),
+          pointsChange: 0,
+          isRevealed: false,
+        };
+        _.last(newGameState.rounds).submissions.push(newSubmission);
+      });
+
+    return newGameState;
   }
 
   static startGame(gameState: InternalGameState): InternalGameState {
     const newGameState = _.cloneDeep(gameState);
     assert(this.isGameJoinable(newGameState.game), 'Game has wrong status.');
-    const activePlayers = newGameState.players.filter((player) => player.isActive);
-    assert(activePlayers.length >= 3, 'There are not enough players.');
+    const activeHumanPlayers = newGameState.players.filter(
+      (player) => player.isActive && !player.isAI
+    );
+    const aiPlayers = newGameState.players.filter((player) => player.isAI);
+    assert(activeHumanPlayers.length >= 2, 'There are not enough human players.');
+    assert(activeHumanPlayers.length + aiPlayers.length >= 3, 'There are not enough players.');
 
     newGameState.piles = GameService.buildPile(newGameState.game);
     assert(newGameState.piles.prompts.length > 1, 'There are not enough packs.');
     const maxHandSize =
       newGameState.game.handSize + Math.max(...newGameState.piles.prompts.map((p) => p.draw)) - 1;
     assert(
-      newGameState.piles.responses.length > activePlayers.length * maxHandSize,
+      newGameState.piles.responses.length >
+        activeHumanPlayers.length * maxHandSize + aiPlayers.length,
       'There are not enough packs.'
     );
 
@@ -223,6 +248,9 @@ export default class GameService {
           },
           handSize: 10,
           winnerPoints: 20,
+          specialRules: {
+            aiPlayerCount: 0,
+          },
         },
         game,
         {
@@ -246,6 +274,14 @@ export default class GameService {
         return _.omit(res, ['prompts', 'responses']);
       }
     );
+
+    _.take(
+      ['Rando Cardrissian', 'Robi-Wan Cardnobi', 'Cardbacca'],
+      result.game.specialRules.aiPlayerCount
+    ).forEach((nickname) => {
+      const p = this.initPlayer(uuidv4() as UUID, { nickname, isAI: true, isActive: true });
+      result.players.push(p);
+    });
 
     return result;
   }

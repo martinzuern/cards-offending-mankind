@@ -272,7 +272,10 @@ export default class Controller {
       gameState.players = gameState.players.map((p, idx) => ({ ...p, isActive: isActive[idx] }));
 
       // End if no-one is active
-      gameShouldEnd = gameShouldEnd || !gameState.players.some((p) => p.isActive);
+      const activeHumanPlayerIds = gameState.players
+        .filter((p) => p.isActive && !p.isAI)
+        .map((p) => p.id);
+      gameShouldEnd = gameShouldEnd || activeHumanPlayerIds.length === 0;
 
       // End if no submissions for the last two rounds
       if (gameState.rounds.length >= 2) {
@@ -280,7 +283,10 @@ export default class Controller {
           gameShouldEnd ||
           _(gameState.rounds)
             .takeRight(2)
-            .every((r) => r.submissions.length === 0);
+            .map('submissions')
+            .flatten()
+            .filter((s) => _.includes(activeHumanPlayerIds, s.playerId))
+            .value().length === 0;
       }
 
       if (!gameShouldEnd) {

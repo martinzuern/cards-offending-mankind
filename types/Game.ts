@@ -8,19 +8,6 @@ export enum GameStatus {
   Ended = 'ended',
 }
 
-// type SpecialRuleRandoCardrissio = {
-//   type: 'RandoCardrissio';
-//   players: number;
-// };
-
-// type SpecialRuleComdeyWriter = {
-//   type: 'ComdeyWriter';
-//   allCards: boolean;
-//   numberOfCards: number;
-// };
-
-// export type SpecialRule = SpecialRuleRandoCardrissio | SpecialRuleComdeyWriter;
-
 export interface Game {
   id: UUID;
   hasPassword: boolean;
@@ -34,8 +21,9 @@ export interface Game {
     judging: number;
     betweenRounds: number;
   };
-  // We don't support specialRules yet
-  // specialRules: SpecialRule[];
+  specialRules: {
+    aiPlayerCount: 0 | 1 | 2 | 3;
+  };
 }
 
 export interface CreateGame extends Partial<Omit<Game, 'id' | 'status' | 'hasPassword' | 'packs'>> {

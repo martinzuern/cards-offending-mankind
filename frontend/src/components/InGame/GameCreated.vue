@@ -23,7 +23,7 @@
     <button
       v-if="player.isHost"
       class="btn btn-success d-block w-100 mt-3"
-      :disabled="!(players.length >= 3)"
+      :disabled="!canStartGame"
       @click="startGame"
     >
       Start Game
@@ -57,6 +57,11 @@ export default Vue.extend({
     },
     gameUrl(): string {
       return location.toString();
+    },
+    canStartGame(): boolean {
+      const activePlayers = this.players.filter((p) => p.isActive);
+      const activeHumanPlayers = this.players.filter((p) => p.isActive && !p.isAI);
+      return this.player.isHost && activePlayers.length >= 3 && activeHumanPlayers.length >= 2;
     },
   },
   methods: {

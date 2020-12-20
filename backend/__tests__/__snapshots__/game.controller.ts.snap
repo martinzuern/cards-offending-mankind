@@ -7,6 +7,9 @@ Object {
     "hasPassword": true,
     "id": Any<String>,
     "packs": Array [],
+    "specialRules": Object {
+      "aiPlayerCount": 0,
+    },
     "status": "created",
     "timeouts": Object {
       "betweenRounds": 30,
@@ -88,6 +91,9 @@ Object {
     "hasPassword": false,
     "id": Any<String>,
     "packs": Array [],
+    "specialRules": Object {
+      "aiPlayerCount": 0,
+    },
     "status": "created",
     "timeouts": Object {
       "betweenRounds": 30,

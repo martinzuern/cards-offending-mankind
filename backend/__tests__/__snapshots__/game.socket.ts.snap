@@ -2,7 +2,7 @@
 
 exports[`error starting game error when there are not enough players 1`] = `
 Object {
-  "message": "There are not enough players.",
+  "message": "There are not enough human players.",
   "type": "AssertionError",
 }
 `;
@@ -28,6 +28,9 @@ Object {
     "hasPassword": false,
     "id": Any<String>,
     "packs": Array [],
+    "specialRules": Object {
+      "aiPlayerCount": 0,
+    },
     "status": "created",
     "timeouts": Object {
       "betweenRounds": 30,
@@ -108,6 +111,9 @@ Object {
         "official": true,
       },
     ],
+    "specialRules": Object {
+      "aiPlayerCount": 0,
+    },
     "status": "created",
     "timeouts": Object {
       "betweenRounds": 30,
@@ -174,6 +180,9 @@ Object {
         "official": true,
       },
     ],
+    "specialRules": Object {
+      "aiPlayerCount": 0,
+    },
     "status": "running",
     "timeouts": Object {
       "betweenRounds": 30,

@@ -2,29 +2,19 @@
   <div>
     <h2>🏁 Game over</h2>
     <h6>Here is the final result.</h6>
-    <div class="list-group mt-4">
-      <div v-for="p in players" :key="p.id" class="list-group-item d-flex justify-content-between align-items-center">
-        <strong>{{ p.nickname }}</strong>
-        <span>{{ p.points }}</span>
-      </div>
-    </div>
+    <Leaderboard class="mt-4" />
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import assert from 'assert';
 
-import { OtherPlayer } from '@/types';
-import store from '@/store';
+import Leaderboard from './helper/Leaderboard.vue';
 
 export default Vue.extend({
   name: 'GameEnded',
-  computed: {
-    players(): OtherPlayer[] {
-      assert(store.state.gameState?.players);
-      return store.state.gameState.players;
-    },
+  components: {
+    Leaderboard,
   },
 });
 </script>

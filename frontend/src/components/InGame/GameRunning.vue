@@ -11,16 +11,7 @@
         <b-button id="popover-leaderboard" variant="outline-secondary">🏅</b-button>
         <b-popover target="popover-leaderboard" triggers="click blur" placement="bottomleft">
           <template #title>Leaderboard</template>
-          <div class="list-group leaderboard-list-group">
-            <div
-              v-for="p in players"
-              :key="p.id"
-              class="list-group-item d-flex justify-content-between align-items-center"
-            >
-              <strong>{{ p.nickname }}</strong>
-              <span>{{ p.points }}</span>
-            </div>
-          </div>
+          <Leaderboard />
         </b-popover>
       </b-col>
     </b-row>
@@ -62,6 +53,7 @@ import { OtherPlayer, Player, Game, Round } from '@/types';
 import store from '@/store';
 
 import Countdown from './helper/Countdown.vue';
+import Leaderboard from './helper/Leaderboard.vue';
 import GamePlaying from './helper/GamePlaying.vue';
 import GameJudging from './helper/GameJudging.vue';
 
@@ -69,6 +61,7 @@ export default Vue.extend({
   name: 'GameRunning',
   components: {
     Countdown,
+    Leaderboard,
     GamePlaying,
     GameJudging,
   },
@@ -122,8 +115,3 @@ export default Vue.extend({
   },
 });
 </script>
-
-<style lang="sass">
-.leaderboard-list-group
-  min-width: 14rem
-</style>

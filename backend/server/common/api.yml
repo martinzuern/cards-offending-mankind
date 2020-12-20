@@ -229,7 +229,8 @@ components:
         winnerPoints:
           oneOf:
             - type: boolean
-              enum: [false]
+              enum:
+                - false
             - type: integer
               default: 20
               minimum: 1
@@ -281,7 +282,8 @@ components:
         winnerPoints:
           oneOf:
             - type: boolean
-              enum: [false]
+              enum:
+                - false
             - type: integer
               default: 20
               minimum: 1
@@ -295,6 +297,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Pack'
+        specialRules:
+          type: object
+          properties:
+            aiPlayerCount:
+              type: integer
+              default: 0
+              minimum: 1
+              maximum: 3
     PackInformation:
       title: PackInformation
       allOf:
