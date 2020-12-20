@@ -32,10 +32,10 @@ export default Vue.extend({
 <style lang="sass">
 .background-white
   background-color: white
-  margin: 1rem -1rem -1rem
+  margin: 1rem -1.5rem -1.5rem
+  box-shadow: $box-shadow-card
   padding: 1rem
-  border-bottom-left-radius: 15px
-  border-bottom-right-radius: 15px
+  border-radius: 15px
   color: black
 
 .form-card-header
