@@ -1,8 +1,6 @@
 export interface Pack {
   abbr: string;
   name: string;
-  icon: string;
-  description: string;
   official: boolean;
 }
 

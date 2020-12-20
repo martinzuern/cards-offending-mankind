@@ -11,6 +11,18 @@ export type PlayerJWT = {
   gameId: UUID;
 };
 
+export type Deck = {
+  abbr: string;
+  official: boolean;
+  name: string;
+  prompts: {
+    text: string;
+    pick: number;
+  }[];
+  responses: {
+    text: string;
+  }[];
+};
 export interface InternalGame extends Game {
   password?: string;
 }
