@@ -50,90 +50,86 @@
         <!-- Advanced settings -->
         <b-row>
           <b-col>
-            <b-link v-b-toggle.collapse-advanced class="mt-2">Advanced settings</b-link>
+            <b-link v-b-toggle.collapse-advanced class="mt-2">
+              <b-icon icon="card-list" class="mr-1" />
+              Advanced settings
+            </b-link>
             <b-collapse id="collapse-advanced">
-              <b-card>
-                <b-form-group label="Hand size" label-for="handSize" class="mt-2">
-                  <b-form-input id="handSize" v-model.number="game.handSize" type="number" min="2" max="20" />
-                </b-form-group>
+              <b-form-group label="Hand size" label-for="handSize" class="mt-2">
+                <b-form-input id="handSize" v-model.number="game.handSize" type="number" min="2" max="20" />
+              </b-form-group>
 
-                <b-form-group label="Winner points" label-for="winnerPoints" class="mt-2">
-                  <b-input-group>
-                    <b-input-group-prepend>
-                      <b-button variant="outline-secondary" @click="game.winnerPoints = game.winnerPoints ? false : 20"
-                        >Toggle points to win</b-button
-                      >
-                    </b-input-group-prepend>
-                    <b-form-input
-                      v-if="game.winnerPoints"
-                      id="winnerPoints"
-                      v-model.number="game.winnerPoints"
-                      type="number"
-                      min="1"
-                    />
-                    <b-form-input v-else id="winnerPoints" disabled placeholder="Game continues until ended manually" />
-                  </b-input-group>
-                </b-form-group>
-
-                <b-form-group label="Rando Cardrissian: AI Players" label-for="aiPlayers" class="mt-2">
+              <b-form-group label="Winner points" label-for="winnerPoints" class="mt-2">
+                <b-input-group>
+                  <b-input-group-prepend>
+                    <b-button variant="outline-secondary" @click="game.winnerPoints = game.winnerPoints ? false : 20"
+                      >Toggle points to win</b-button
+                    >
+                  </b-input-group-prepend>
                   <b-form-input
-                    id="aiPlayers"
-                    v-model.number="game.specialRules.aiPlayerCount"
+                    v-if="game.winnerPoints"
+                    id="winnerPoints"
+                    v-model.number="game.winnerPoints"
                     type="number"
-                    min="0"
-                    max="3"
+                    min="1"
                   />
-                </b-form-group>
+                  <b-form-input v-else id="winnerPoints" disabled placeholder="Game continues until ended manually" />
+                </b-input-group>
+              </b-form-group>
 
-                <b-form-group label-cols-lg="2" label="Timeouts" class="mb-0" label-class="pt-0">
-                  <b-form-group label="Playing:" label-for="timeout-playing" label-cols-sm="6" label-align-sm="right">
-                    <b-form-input
-                      id="timeout-playing"
-                      v-model.number="game.timeouts.playing"
-                      type="number"
-                      min="5"
-                      max="600"
-                    ></b-form-input>
-                  </b-form-group>
-                  <b-form-group
-                    label="Revealing:"
-                    label-for="timeout-revealing"
-                    label-cols-sm="6"
-                    label-align-sm="right"
-                  >
-                    <b-form-input
-                      id="timeout-revealing"
-                      v-model.number="game.timeouts.revealing"
-                      type="number"
-                      min="5"
-                      max="600"
-                    ></b-form-input>
-                  </b-form-group>
-                  <b-form-group label="Judging:" label-for="timeout-judging" label-cols-sm="6" label-align-sm="right">
-                    <b-form-input
-                      id="timeout-judging"
-                      v-model.number="game.timeouts.judging"
-                      type="number"
-                      min="5"
-                      max="600"
-                    ></b-form-input>
-                  </b-form-group>
-                  <b-form-group
-                    label="Between rounds:"
-                    label-for="timeout-betweenRounds"
-                    label-cols-sm="6"
-                    label-align-sm="right"
-                  >
-                    <b-form-input
-                      id="timeout-betweenRounds"
-                      v-model.number="game.timeouts.betweenRounds"
-                      type="number"
-                      min="5"
-                      max="600"
-                    ></b-form-input>
-                  </b-form-group>
+              <b-form-group label="Rando Cardrissian: AI Players" label-for="aiPlayers" class="mt-2">
+                <b-form-input
+                  id="aiPlayers"
+                  v-model.number="game.specialRules.aiPlayerCount"
+                  type="number"
+                  min="0"
+                  max="3"
+                />
+              </b-form-group>
+
+              <b-form-group label-cols-lg="2" label="Timeouts" class="mb-0" label-class="pt-0">
+                <b-form-group label="Playing:" label-for="timeout-playing" label-cols-sm="6" label-align-sm="right">
+                  <b-form-input
+                    id="timeout-playing"
+                    v-model.number="game.timeouts.playing"
+                    type="number"
+                    min="5"
+                    max="600"
+                  ></b-form-input>
                 </b-form-group>
-              </b-card>
+                <b-form-group label="Revealing:" label-for="timeout-revealing" label-cols-sm="6" label-align-sm="right">
+                  <b-form-input
+                    id="timeout-revealing"
+                    v-model.number="game.timeouts.revealing"
+                    type="number"
+                    min="5"
+                    max="600"
+                  ></b-form-input>
+                </b-form-group>
+                <b-form-group label="Judging:" label-for="timeout-judging" label-cols-sm="6" label-align-sm="right">
+                  <b-form-input
+                    id="timeout-judging"
+                    v-model.number="game.timeouts.judging"
+                    type="number"
+                    min="5"
+                    max="600"
+                  ></b-form-input>
+                </b-form-group>
+                <b-form-group
+                  label="Between rounds:"
+                  label-for="timeout-betweenRounds"
+                  label-cols-sm="6"
+                  label-align-sm="right"
+                >
+                  <b-form-input
+                    id="timeout-betweenRounds"
+                    v-model.number="game.timeouts.betweenRounds"
+                    type="number"
+                    min="5"
+                    max="600"
+                  ></b-form-input>
+                </b-form-group>
+              </b-form-group>
             </b-collapse>
           </b-col>
         </b-row>
