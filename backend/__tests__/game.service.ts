@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import _ from 'lodash';
 
 import GameService from '../server/services/game.service';
-import { InternalGameState, UUID } from '../root-types';
+import { InternalGameState, Pack, UUID } from '../root-types';
 
 const GAME_PASSWORD = 'super-secure';
 let ukGameState: InternalGameState;
@@ -29,7 +29,7 @@ describe('GameService', () => {
     it('creates game with two packs and password', async (done) => {
       const gameState = await GameService.initGameState({
         password: GAME_PASSWORD,
-        packs: [{ abbr: 'BaseUK' }, { abbr: 'www' }],
+        packs: [{ abbr: '10' }, { abbr: '1' }],
       });
       expect(gameState).toMatchSnapshot({
         game: {
@@ -46,9 +46,7 @@ describe('GameService', () => {
       try {
         await GameService.initGameState({
           password: GAME_PASSWORD,
-          // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-          // @ts-ignore
-          packs: [{ abbr: 'BaseUK' }, {}],
+          packs: [{ abbr: '0' }, {} as Pack],
         });
       } catch (error) {
         expect(error).toMatchSnapshot();
@@ -56,7 +54,7 @@ describe('GameService', () => {
       try {
         await GameService.initGameState({
           password: GAME_PASSWORD,
-          packs: [{ abbr: 'BaseUKf' }],
+          packs: [{ abbr: 'foooooo' }],
         });
       } catch (error) {
         expect(error).toMatchSnapshot();
@@ -159,8 +157,8 @@ describe('GameService', () => {
   describe('builds pile', () => {
     it('works', () => {
       const pile = GameService.buildPile(ukGameState.game);
-      expect(pile.prompts.length).toBe(99);
-      expect(pile.responses.length).toBe(481);
+      expect(pile.prompts).toHaveLength(390);
+      expect(pile.responses).toHaveLength(1635);
       expect({
         ...pile,
         prompts: expect.any(Array),
@@ -178,7 +176,7 @@ describe('GameService', () => {
   describe('start game', () => {
     it('works', async (done) => {
       const baseGameState = await GameService.initGameState({
-        packs: [{ abbr: 'BaseUK' }],
+        packs: [{ abbr: '10' }],
       });
       baseGameState.players.push(
         _.omit(GameService.initPlayer('' as UUID, { nickname: 'foo1', isActive: true }), 'token'),
@@ -186,10 +184,10 @@ describe('GameService', () => {
         _.omit(GameService.initPlayer('' as UUID, { nickname: 'foo3', isActive: true }), 'token')
       );
       const newGameState = GameService.startGame(baseGameState);
-      expect(newGameState.players.length).toBe(3);
+      expect(newGameState.players).toHaveLength(3);
       expect(newGameState.players.every((p) => p.deck.length === 10)).toBe(true);
-      expect(newGameState.piles.responses.length).toBe(460 - 30);
-      expect(newGameState.piles.prompts.length).toBe(90 - 1);
+      expect(newGameState.piles.responses).toHaveLength(1275 - 30);
+      expect(newGameState.piles.prompts).toHaveLength(282 - 1);
       done();
     });
   });

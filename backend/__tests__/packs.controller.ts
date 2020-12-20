@@ -16,7 +16,7 @@ describe('Packs', () => {
       .expect('Content-Type', /json/)
       .expect((r) => {
         expect(r.body).toBeInstanceOf(Array);
-        expect(r.body).toHaveLength(99);
+        expect(r.body).toHaveLength(205);
         expect(r.body[0]).toMatchSnapshot();
       })
       .end(done));

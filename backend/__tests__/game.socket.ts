@@ -234,7 +234,7 @@ describe('perform game', () => {
   let socket3;
   let player3;
   beforeEach(async (done) => {
-    createdGame = await createNewGame({ packs: [{ abbr: 'BaseUK' }] });
+    createdGame = await createNewGame({ packs: [{ abbr: '10' }] });
     done();
   });
   beforeEach(async (done) => {
