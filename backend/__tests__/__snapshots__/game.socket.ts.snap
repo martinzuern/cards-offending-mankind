@@ -104,10 +104,8 @@ Object {
     "id": Any<String>,
     "packs": Array [
       Object {
-        "abbr": "BaseUK",
-        "description": "The UK edition of the base game",
-        "icon": "",
-        "name": "Base Set (UK Edition)",
+        "abbr": "10",
+        "name": "CAH Base Set",
         "official": true,
       },
     ],
@@ -173,10 +171,8 @@ Object {
     "id": Any<String>,
     "packs": Array [
       Object {
-        "abbr": "BaseUK",
-        "description": "The UK edition of the base game",
-        "icon": "",
-        "name": "Base Set (UK Edition)",
+        "abbr": "10",
+        "name": "CAH Base Set",
         "official": true,
       },
     ],
@@ -212,52 +208,52 @@ exports[`perform game works 4`] = `
 Object {
   "deck": Array [
     Object {
-      "packAbbr": "BaseUK",
+      "packAbbr": "10",
       "type": "text",
       "value": Any<String>,
     },
     Object {
-      "packAbbr": "BaseUK",
+      "packAbbr": "10",
       "type": "text",
       "value": Any<String>,
     },
     Object {
-      "packAbbr": "BaseUK",
+      "packAbbr": "10",
       "type": "text",
       "value": Any<String>,
     },
     Object {
-      "packAbbr": "BaseUK",
+      "packAbbr": "10",
       "type": "text",
       "value": Any<String>,
     },
     Object {
-      "packAbbr": "BaseUK",
+      "packAbbr": "10",
       "type": "text",
       "value": Any<String>,
     },
     Object {
-      "packAbbr": "BaseUK",
+      "packAbbr": "10",
       "type": "text",
       "value": Any<String>,
     },
     Object {
-      "packAbbr": "BaseUK",
+      "packAbbr": "10",
       "type": "text",
       "value": Any<String>,
     },
     Object {
-      "packAbbr": "BaseUK",
+      "packAbbr": "10",
       "type": "text",
       "value": Any<String>,
     },
     Object {
-      "packAbbr": "BaseUK",
+      "packAbbr": "10",
       "type": "text",
       "value": Any<String>,
     },
     Object {
-      "packAbbr": "BaseUK",
+      "packAbbr": "10",
       "type": "text",
       "value": Any<String>,
     },

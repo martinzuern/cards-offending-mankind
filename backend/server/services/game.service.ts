@@ -3,7 +3,6 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import assert from 'assert';
 import { v4 as uuidv4 } from 'uuid';
-import CardDecksRaw from 'json-against-humanity/full.md.json';
 
 import {
   InternalGameState,
@@ -28,50 +27,10 @@ import {
   RoundSubmission,
 } from '../../root-types';
 import { HttpError } from '../api/middlewares/error.handler';
+import { packInformation, cardDecks } from './packs.service';
 
 const { JWT_SECRET } = process.env;
 const JWT_EXPIRATION = '24h';
-
-type Deck = {
-  abbr: string;
-  prompts: {
-    text: string;
-    deck: string;
-    icon: string;
-    pick: number;
-  }[];
-  responses: {
-    text: string;
-    icon: string;
-    deck: string;
-  }[];
-  description: string;
-  official: boolean;
-  name: string;
-  icon: string;
-};
-
-const CardDecks: Record<string, Deck> = _.mapValues(CardDecksRaw.metadata, (value, abbr) => ({
-  ...value,
-  abbr,
-  prompts: CardDecksRaw.black.filter((el) => el.deck === abbr),
-  responses: CardDecksRaw.white.filter((el) => el.deck === abbr),
-}));
-
-const packInformation: PackInformation[] = _.chain(CardDecks)
-  .values()
-  .map((el) =>
-    _.chain(el)
-      .cloneDeep()
-      .merge({
-        promptsCount: el.prompts.length,
-        responsesCount: el.responses.length,
-      })
-      .omit(['prompts', 'responses'])
-      .value()
-  )
-  .orderBy(['official', 'responsesCount'], ['desc', 'desc'])
-  .value();
 
 export default class GameService {
   static getAvailablePacks(): PackInformation[] {
@@ -80,7 +39,7 @@ export default class GameService {
 
   static buildPile(game: InternalGame): Piles {
     const decks = game.packs.map((pack) => {
-      const res = CardDecks[pack.abbr];
+      const res = cardDecks[pack.abbr];
       assert(res, 'Invalid pack.');
       return res;
     });
@@ -96,6 +55,7 @@ export default class GameService {
         }))
       )
       .flatten()
+      .uniqBy('value')
       .shuffle()
       .value();
     const responses = _.chain(decks)
@@ -107,6 +67,7 @@ export default class GameService {
         }))
       )
       .flatten()
+      .uniqBy('value')
       .shuffle()
       .value();
 
@@ -269,7 +230,7 @@ export default class GameService {
 
     result.game.packs = result.game.packs.map(
       ({ abbr }): Pack => {
-        const res = CardDecks[abbr];
+        const res = cardDecks[abbr];
         assert(res, `Invalid pack ${abbr}.`);
         return _.omit(res, ['prompts', 'responses']);
       }
