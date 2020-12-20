@@ -134,7 +134,10 @@
           </b-col>
         </b-row>
 
-        <b-button type="submit" variant="secondary" size="sm" class="mt-3">Create a new game</b-button>
+        <b-button type="submit" variant="success" size="sm" class="mt-3">
+          <b-icon icon="check" class="mr-1" />
+          Create a new game
+        </b-button>
       </b-form>
     </template>
   </GameForm>
