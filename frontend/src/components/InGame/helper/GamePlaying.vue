@@ -6,7 +6,7 @@
         <div
           class="submission-card play-card white-card"
           :class="{ visible: !!submissions[i - 1] }"
-          :style="`--randVal: ${getRandomDegrees(i)}deg; z-index: ${i};`"
+          :style="`--randVal: ${getRandomDegrees(i)}; z-index: ${i};`"
         >
           Cards<br />Offending<br />Mankind
         </div>
@@ -202,10 +202,10 @@ export default Vue.extend({
 
 @keyframes randomMoveIn
   from
-    transform: translate(-100vw, -100vh) scale(3) rotate(var(--randVal, 0deg))
+    transform: translate(-100vw, -100vh) scale(3) rotate(calc(var(--randVal, 0) * 1deg))
     opacity: 0
   to
-    transform: translate(0px, 0px) scale(1) rotate(var(--randVal, 0deg))
+    transform: translate(0px, 0px) scale(1) rotate(calc(var(--randVal, 0) * 1deg))
     opacity: 1
 
 .submission-card
@@ -213,8 +213,11 @@ export default Vue.extend({
   display: flex
   align-items: flex-end
   visibility: hidden
+  margin-top: calc(var(--randVal, 0) * 0.25px)
+  opacity: 0
   &.visible
     visibility: visible
     animation: 1s randomMoveIn ease-out
-    transform: rotate(var(--randVal, 0deg))
+    animation-delay: calc(var(--randVal, 0) * 3ms)
+    animation-fill-mode: forwards
 </style>
