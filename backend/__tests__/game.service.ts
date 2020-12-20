@@ -157,8 +157,8 @@ describe('GameService', () => {
   describe('builds pile', () => {
     it('works', () => {
       const pile = GameService.buildPile(ukGameState.game);
-      expect(pile.prompts).toHaveLength(390);
-      expect(pile.responses).toHaveLength(1635);
+      expect(pile.prompts).toHaveLength(382);
+      expect(pile.responses).toHaveLength(1600);
       expect({
         ...pile,
         prompts: expect.any(Array),
@@ -186,8 +186,8 @@ describe('GameService', () => {
       const newGameState = GameService.startGame(baseGameState);
       expect(newGameState.players).toHaveLength(3);
       expect(newGameState.players.every((p) => p.deck.length === 10)).toBe(true);
-      expect(newGameState.piles.responses).toHaveLength(1275 - 30);
-      expect(newGameState.piles.prompts).toHaveLength(282 - 1);
+      expect(newGameState.piles.responses).toHaveLength(1270 - 30);
+      expect(newGameState.piles.prompts).toHaveLength(279 - 1);
       done();
     });
   });

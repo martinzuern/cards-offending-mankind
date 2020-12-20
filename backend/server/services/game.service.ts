@@ -55,6 +55,7 @@ export default class GameService {
         }))
       )
       .flatten()
+      .uniqBy('value')
       .shuffle()
       .value();
     const responses = _.chain(decks)
@@ -66,6 +67,7 @@ export default class GameService {
         }))
       )
       .flatten()
+      .uniqBy('value')
       .shuffle()
       .value();
 
