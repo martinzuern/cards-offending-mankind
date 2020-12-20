@@ -1,17 +1,17 @@
 <template>
   <div v-if="isJudge || hasSubmitted">
     <h6 class="mt-5 text-center">Waiting for other players to submit ...</h6>
-    <b-row>
-      <b-col v-for="i in playerCount - 1" :key="i">
-        <div
-          class="submission-card play-card white-card"
-          :class="{ visible: !!submissions[i - 1] }"
-          :style="`--randVal: ${getRandomDegrees(i)}; z-index: ${i};`"
-        >
-          Cards<br />Offending<br />Mankind
-        </div>
-      </b-col>
-    </b-row>
+    <div class="d-flex flex-nowrap justify-content-center pb-4 submission-wrap">
+      <div
+        v-for="i in playerCount - 1"
+        :key="i"
+        class="submission-card play-card white-card"
+        :class="{ visible: !!submissions[i - 1] }"
+        :style="`--randVal: ${getRandomDegrees(i)}; z-index: ${i};`"
+      >
+        Cards<br />Offending<br />Mankind
+      </div>
+    </div>
   </div>
   <div v-else>
     <div class="mt-5 card-fan" :class="`fan-count-${player.deck.length}`">
@@ -208,16 +208,26 @@ export default Vue.extend({
     transform: translate(0px, 0px) scale(1) rotate(calc(var(--randVal, 0) * 1deg))
     opacity: 1
 
-.submission-card
-  font-weight: 800
-  display: flex
-  align-items: flex-end
-  visibility: hidden
-  margin-top: calc(var(--randVal, 0) * 0.25px)
-  opacity: 0
-  &.visible
-    visibility: visible
-    animation: 1s randomMoveIn ease-out
-    animation-delay: calc(var(--randVal, 0) * 3ms)
-    animation-fill-mode: forwards
+.submission-wrap
+  overflow-x: hidden
+
+  .submission-card
+    font-weight: 800
+    display: flex
+    align-items: flex-end
+    visibility: hidden
+    margin-top: calc(var(--randVal, 0) * 0.25px)
+    opacity: 0
+    flex-shrink: 0
+    &.visible
+      visibility: visible
+      animation: 1s randomMoveIn ease-out
+      animation-delay: calc(var(--randVal, 0) * 3ms)
+      animation-fill-mode: forwards
+
+@include media-breakpoint-down(sm)
+  .submission-wrap
+    .submission-card
+      margin-right: -1.5rem
+      margin-left: -1.5rem
 </style>
