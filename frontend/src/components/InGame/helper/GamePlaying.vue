@@ -1,6 +1,17 @@
 <template>
-  <div v-if="isJudge || submitted">
+  <div v-if="isJudge || hasSubmitted">
     <h6 class="mt-5 text-center">Waiting for other players to submit ...</h6>
+    <b-row>
+      <b-col v-for="i in playerCount - 1" :key="i">
+        <div
+          class="submission-card play-card white-card"
+          :class="{ visible: !!submissions[i - 1] }"
+          :style="`--randVal: ${getRandomDegrees(i)}deg; z-index: ${i};`"
+        >
+          Cards<br />Offending<br />Mankind
+        </div>
+      </b-col>
+    </b-row>
   </div>
   <div v-else>
     <div class="mt-5 card-fan" :class="`fan-count-${player.deck.length}`">
@@ -26,9 +37,9 @@
 
 import Vue from 'vue';
 import assert from 'assert';
-import { includes } from 'lodash';
+import { includes, random } from 'lodash';
 
-import { Player, Round, ResponseCard, Game } from '@/types';
+import { Player, Round, ResponseCard, Game, RoundSubmission } from '@/types';
 import store from '@/store';
 
 export default Vue.extend({
@@ -37,6 +48,7 @@ export default Vue.extend({
     return {
       selectedCards: [] as ResponseCard[],
       submitted: false,
+      randomDegrees: {} as Record<number, number>,
     };
   },
   computed: {
@@ -48,6 +60,10 @@ export default Vue.extend({
       assert(store.state.gameState?.game);
       return store.state.gameState.game;
     },
+    playerCount(): number {
+      assert(store.state.gameState?.players);
+      return store.state.gameState.players.filter((p) => p.isActive && p.id !== this.currentRound.judgeId).length;
+    },
     currentRound(): Round {
       assert(store.getters.currentRound);
       return store.getters.currentRound;
@@ -58,6 +74,12 @@ export default Vue.extend({
     },
     roundIndex(): number {
       return store.getters.currentRoundIndex;
+    },
+    submissions(): RoundSubmission[] {
+      return this.currentRound.submissions;
+    },
+    hasSubmitted(): boolean {
+      return this.submitted || this.submissions.some((s) => s.playerId === this.player.id);
     },
     notSelectedCards(): ResponseCard[] {
       const selectedValues = this.selectedCards.map(({ value }) => value);
@@ -71,9 +93,14 @@ export default Vue.extend({
     roundIndex(): void {
       this.selectedCards = [];
       this.submitted = false;
+      this.randomDegrees = {};
     },
   },
   methods: {
+    getRandomDegrees(idx: number): number {
+      this.randomDegrees[idx] = this.randomDegrees[idx] ?? random(0, 359);
+      return this.randomDegrees[idx];
+    },
     submitSelection(): void {
       const toPick = this.currentRound.prompt.pick;
       if (this.selectedCards.length !== toPick) {
@@ -172,4 +199,22 @@ export default Vue.extend({
 
       &.selected
         order: 99
+
+@keyframes randomMoveIn
+  from
+    transform: translate(-100vw, -100vh) scale(3) rotate(var(--randVal, 0deg))
+    opacity: 0
+  to
+    transform: translate(0px, 0px) scale(1) rotate(var(--randVal, 0deg))
+    opacity: 1
+
+.submission-card
+  font-weight: 800
+  display: flex
+  align-items: flex-end
+  visibility: hidden
+  &.visible
+    visibility: visible
+    animation: 1s randomMoveIn ease-out
+    transform: rotate(var(--randVal, 0deg))
 </style>
