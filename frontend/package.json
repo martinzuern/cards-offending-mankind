@@ -41,7 +41,7 @@
     "@vue/eslint-config-standard": "^6.0.0",
     "@vue/eslint-config-typescript": "^7.0.0",
     "@vue/test-utils": "1.1.2",
-    "eslint": "^7.15.0",
+    "eslint": "^7.16.0",
     "eslint-config-prettier": "^7.0.0",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-node": "^11.1.0",
