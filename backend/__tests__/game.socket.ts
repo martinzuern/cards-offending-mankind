@@ -108,9 +108,20 @@ describe('joining game', () => {
 
   it('error on locked user', (done) => {
     socket
-      .on('unauthorized', (error) => {
-        expect(error).toMatchSnapshot();
-        done();
+      .on('gamestate_updated', () => {
+        const socket2 = ioFront.connect(httpServerUrl.toString(), {
+          reconnection: false,
+          forceNew: true,
+        });
+        socket2
+          .on('unauthorized', (error) => {
+            expect(error).toMatchSnapshot();
+            socket2.disconnect();
+            done();
+          })
+          .emit('authenticate', {
+            token: createdGame.player.token,
+          });
       })
       .emit('authenticate', {
         token: createdGame.player.token,

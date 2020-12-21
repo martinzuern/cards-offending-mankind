@@ -94,6 +94,7 @@ export default class Controller {
   static async onDisconnect(socket: JwtAuthenticatedSocket): Promise<void> {
     if (!socket.decoded_token) return;
     const { id: playerId, gameId } = socket.decoded_token;
+    L.info(`Player ${playerId} disconnected.`);
 
     await DBService.updateGame(gameId, async (fullGameState) => {
       return GameService.updatePlayer(fullGameState, playerId, {
@@ -102,8 +103,8 @@ export default class Controller {
       });
     });
 
-    await this.sendUpdated(socket, gameId, ['gamestate']);
     await DBService.deleteUserLock(playerId);
+    await this.sendUpdated(socket, gameId, ['gamestate']);
   }
 
   static async sendUpdated(
