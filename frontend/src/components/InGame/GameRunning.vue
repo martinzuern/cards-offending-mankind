@@ -100,6 +100,12 @@ export default Vue.extend({
       return this.player.isHost;
     },
   },
+  mounted() {
+    window.onbeforeunload = () => 'Do you really want to leave this game?';
+  },
+  beforeDestroy() {
+    window.onbeforeunload = null;
+  },
   methods: {
     startGame(): void {
       this.socket.emit('start_game');
