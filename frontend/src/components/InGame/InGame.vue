@@ -75,8 +75,7 @@ export default Vue.extend({
   },
   methods: {
     initSocket(): void {
-      console.log({ socket: this.socket });
-      console.log('Initializing Socket');
+      Vue.$log.debug('Initializing Socket');
       const baseURL = new URL(process.env.VUE_APP_BACKEND_URL || window.location.origin).toString();
       try {
         const socket = io(baseURL, { autoConnect: false });
@@ -91,7 +90,7 @@ export default Vue.extend({
             store.commit.setRoundAtIndex(data);
           })
           .on('error', (data: unknown) => {
-            console.log(data);
+            Vue.$log.error('Socket error: ', data);
           })
           .on('authenticated', () => {
             this.userLocked = false;
@@ -113,7 +112,7 @@ export default Vue.extend({
     },
     closeSocket(): void {
       if (!store.state.socket) return;
-      console.log('Disconnecting Socket');
+      Vue.$log.debug('Disconnecting Socket');
       store.state.socket.disconnect();
       store.commit.setSocket(undefined);
     },
