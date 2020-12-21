@@ -29,12 +29,10 @@
       {{ currentRound.prompt.value }}
     </div>
 
-    <template v-if="currentRound.status === 'created'">
-      <GamePlaying />
-    </template>
-    <template v-else>
-      <GameJudging />
-    </template>
+    <transition name="fade">
+      <GamePlaying v-if="currentRound.status === 'created'" />
+      <GameJudging v-else />
+    </transition>
 
     <div v-if="currentRound.status === 'ended'" class="overlay mt-5">
       <button class="btn btn-success d-block mb-3 d-block w-100" @click="clickNextRound">Next Round</button>
@@ -115,3 +113,13 @@ export default Vue.extend({
   },
 });
 </script>
+
+<style lang="sass">
+.fade-leave-active
+  transition: opacity .5s
+.fade-enter-active
+  transition: opacity .5s
+  transition-delay: .51s
+.fade-enter, .fade-leave-to
+  opacity: 0
+</style>
