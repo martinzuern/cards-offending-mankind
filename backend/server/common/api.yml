@@ -299,7 +299,7 @@ components:
             aiPlayerCount:
               type: integer
               default: 0
-              minimum: 1
+              minimum: 0
               maximum: 3
     PackInformation:
       title: PackInformation
