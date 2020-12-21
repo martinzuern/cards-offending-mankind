@@ -2965,10 +2965,10 @@ bootstrap-vue-helper-json@^1.1.1:
   resolved "https://registry.yarnpkg.com/bootstrap-vue-helper-json/-/bootstrap-vue-helper-json-1.1.1.tgz#fca94c9d6c73774d5f2b69183cf135b758398068"
   integrity sha512-SiHJE2jEXjAL3TewN99wDl5Ehpm5DKA75oIyiY+2EMWWMPhIuZlQ/AvDzsLktNkwhylmAVLwiW+nuBPIU7kcoQ==
 
-bootstrap-vue@^2.13.0:
-  version "2.21.0"
-  resolved "https://registry.yarnpkg.com/bootstrap-vue/-/bootstrap-vue-2.21.0.tgz#9de6da71ec8d94222c5bc54dbc28494a1cc14f7e"
-  integrity sha512-R55XY83Ro3w8OfVEWn/eOyw8eayGDdZs0qYFuvG29eW4zVb9NtB4LwgskOhIaqF3Yzac/6ra/FqQUm+uVhDYfA==
+bootstrap-vue@^2.21.1:
+  version "2.21.1"
+  resolved "https://registry.yarnpkg.com/bootstrap-vue/-/bootstrap-vue-2.21.1.tgz#20d3ced96b735917d8be71b77717eee74bb40c6f"
+  integrity sha512-hGAfy6hwA6pH/2oxKtd4GOETDW38br+K1ICw4sDDkuARxNlMwrVgIjMQFV8hGzo9NZi/bj82NZx8wRR9221qkw==
   dependencies:
     "@nuxt/opencollective" "^0.3.2"
     bootstrap ">=4.5.3 <5.0.0"
