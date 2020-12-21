@@ -431,7 +431,10 @@ export default class GameService {
 
     const submissions = round.submissions.map((s) => {
       const cards = s.isRevealed ? s.cards : s.cards.map((c) => ({ ...c, value: '***' }));
-      const playerId = '00000000-0000-0000-0000-000000000000' as UUID;
+      const playerId =
+        round.status === RoundStatus.Created
+          ? s.playerId
+          : ('00000000-0000-0000-0000-000000000000' as UUID);
       return { ...s, cards, playerId };
     });
 
