@@ -7,7 +7,7 @@
         :key="i"
         class="submission-card play-card white-card"
         :class="{ visible: !!submissions[i - 1] }"
-        :style="`--randVal: ${getRandomDegrees(i)}; z-index: ${i};`"
+        :style="{ '--randVal': getRandomDegrees(i), 'z-index': i }"
       >
         Cards<br />Offending<br />Mankind
       </div>
