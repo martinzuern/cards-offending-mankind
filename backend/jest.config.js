@@ -1,6 +1,7 @@
 module.exports = {
   preset: 'ts-jest',
-  testEnvironment: 'node'
+  testEnvironment: 'node',
+  testTimeout: 15000
 };
 
 process.env.JWT_SECRET = 'secret'
