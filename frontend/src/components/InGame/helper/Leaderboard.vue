@@ -18,6 +18,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import assert from 'assert';
+import { sortBy } from 'lodash';
 
 import { Player, OtherPlayer } from '@/types';
 import store from '@/store';
@@ -31,7 +32,7 @@ export default Vue.extend({
     },
     players(): OtherPlayer[] {
       assert(store.state.gameState?.players);
-      return store.state.gameState.players;
+      return sortBy(store.state.gameState.players, 'points').reverse();
     },
   },
 });
