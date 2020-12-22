@@ -4,7 +4,7 @@
       v-for="(submission, submissionIndex) in currentRound.submissions"
       :key="submissionIndex"
       class="submission my-5 py-2"
-      :class="{ canChooseWinner }"
+      :class="{ canChooseWinner, isJudge }"
     >
       <h6 v-if="currentRound.status === 'ended'">
         Submission by
@@ -139,6 +139,7 @@ export default Vue.extend({
     width: 100%
     height: 100%
     transition: transform 0.6s
+    transition-delay: 2s
     transform-style: preserve-3d
 
   &.revealed
@@ -161,6 +162,10 @@ export default Vue.extend({
     transform: rotateY(180deg)
 
 .submission
+  &.isJudge
+    .flip-card
+      .flip-card-inner
+        transition-delay: 0s
   &.canChooseWinner:hover
     .flip-card-back
         background-color: #6495ED

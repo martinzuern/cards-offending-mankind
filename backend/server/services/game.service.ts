@@ -2,7 +2,7 @@ import _ from 'lodash';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import assert from 'assert';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4, NIL as NIL_UUID } from 'uuid';
 
 import {
   InternalGameState,
@@ -431,7 +431,7 @@ export default class GameService {
 
     const submissions = round.submissions.map((s) => {
       const cards = s.isRevealed ? s.cards : s.cards.map((c) => ({ ...c, value: '***' }));
-      const playerId = '00000000-0000-0000-0000-000000000000' as UUID;
+      const playerId = round.status === RoundStatus.Created ? s.playerId : (NIL_UUID as UUID);
       return { ...s, cards, playerId };
     });
 
