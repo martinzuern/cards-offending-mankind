@@ -87,9 +87,9 @@
                   </b-col>
                   <b-col cols="auto" class="font-weight-normal">
                     <b-form-checkbox
-                      @change="game.winnerPoints = game.winnerPoints === false ? 20 : false"
                       :checked="game.winnerPoints !== false"
                       switch
+                      @change="game.winnerPoints = game.winnerPoints === false ? 20 : false"
                       >enabled</b-form-checkbox
                     >
                   </b-col>
