@@ -51,7 +51,12 @@
           </b-form-invalid-feedback>
         </b-form-group>
 
-        <b-form-group label="Password (optional)" label-for="password" class="mt-2">
+        <b-form-group
+          label="Password (optional)"
+          label-for="password"
+          class="mt-2"
+          description="If you set one, other players have to enter it before joining."
+        >
           <b-form-input id="password" v-model="game.password" type="password" autocomplete="off" />
         </b-form-group>
 
@@ -63,11 +68,21 @@
               Advanced settings
             </b-link>
             <b-collapse id="collapse-advanced">
-              <b-form-group label="Hand size" label-for="handSize" class="mt-2">
+              <b-form-group
+                label="Hand size"
+                label-for="handSize"
+                class="mt-2"
+                description="Number of cards dealt to each player's hand."
+              >
                 <b-form-input id="handSize" v-model.number="game.handSize" type="number" min="2" max="20" />
               </b-form-group>
 
-              <b-form-group label="Winner points" label-for="winnerPoints" class="mt-2">
+              <b-form-group
+                label="Winner points"
+                label-for="winnerPoints"
+                class="mt-2"
+                description="Once a player has reached the number of points the game ends automatically. If no number is set, it runs until it is manually ended."
+              >
                 <b-input-group>
                   <b-input-group-prepend>
                     <b-button variant="outline-secondary" @click="game.winnerPoints = game.winnerPoints ? false : 20"
@@ -85,17 +100,47 @@
                 </b-input-group>
               </b-form-group>
 
-              <b-form-group label="Rando Cardrissian: AI Players" label-for="aiPlayers" class="mt-2">
-                <b-form-input
-                  id="aiPlayers"
-                  v-model.number="game.specialRules.aiPlayerCount"
-                  type="number"
-                  min="0"
-                  max="3"
-                />
+              <b-form-group label-cols-lg="2" label="House Rules" class="mt-2" label-class="pt-0">
+                <b-form-group
+                  label="Rando Cardrissian:"
+                  label-for="aiPlayers"
+                  label-cols-sm="6"
+                  label-align-sm="right"
+                  description="Number of additional virtual players (between 0 and 3)."
+                >
+                  <b-form-input
+                    id="aiPlayers"
+                    v-model.number="game.specialRules.aiPlayerCount"
+                    type="number"
+                    min="0"
+                    max="3"
+                  />
+                </b-form-group>
+
+                <b-form-group
+                  label="Packing Heat:"
+                  label-for="pickExtra"
+                  label-cols-sm="6"
+                  label-align-sm="right"
+                  description="For cards with pick 2+, players s dealt an extra card."
+                  disabled="disabled"
+                >
+                  <b-form-input id="pickExtra" readonly value="Coming soon!"></b-form-input>
+                </b-form-group>
+
+                <b-form-group
+                  label="Rebooting the Universe:"
+                  label-for="rebootDeck"
+                  label-cols-sm="6"
+                  label-align-sm="right"
+                  description="Players can trade in a point (optionally) to discard as many cards as they want and receive new ones."
+                  disabled="disabled"
+                >
+                  <b-form-input id="rebootDeck" readonly value="Coming soon!"></b-form-input>
+                </b-form-group>
               </b-form-group>
 
-              <b-form-group label-cols-lg="2" label="Timeouts" class="mb-0" label-class="pt-0">
+              <b-form-group label-cols-lg="2" label="Timeouts" class="mt-2 mb-0" label-class="pt-0">
                 <b-form-group label="Playing:" label-for="timeout-playing" label-cols-sm="6" label-align-sm="right">
                   <b-form-input
                     id="timeout-playing"
