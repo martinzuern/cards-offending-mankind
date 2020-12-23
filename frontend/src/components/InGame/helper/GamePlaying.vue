@@ -187,6 +187,9 @@ export default Vue.extend({
           @include card-angles($cardCount)
 
 @include media-breakpoint-down(sm)
+  html, body
+    overflow-x: hidden
+
   .card-fan
     display: flex
     flex-flow: wrap
@@ -209,8 +212,6 @@ export default Vue.extend({
     opacity: 1
 
 .submission-wrap
-  overflow-x: hidden
-
   .submission-card
     font-weight: 800
     display: flex
@@ -222,7 +223,7 @@ export default Vue.extend({
     &.visible
       visibility: visible
       animation: 1s randomMoveIn ease-out
-      animation-delay: calc(var(--randVal, 0) * 3ms)
+      animation-delay: calc(var(--randVal, 0) * 4ms)
       animation-fill-mode: forwards
 
 @include media-breakpoint-down(sm)

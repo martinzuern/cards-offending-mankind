@@ -123,7 +123,7 @@ describe('joining game', () => {
       });
 
     socket
-      .on('gamestate_updated', () => {
+      .on('authenticated', () => {
         socket2.open();
       })
       .emit('authenticate', {

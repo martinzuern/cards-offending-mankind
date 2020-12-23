@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex flex-column min-vh-100">
-    <b-container id="app" class="my-5 flex-fill" :class="{ 'd-flex align-items-center': isLoginView }">
-      <b-row :class="{ 'w-100': isLoginView }">
+    <b-container id="app" class="my-5 flex-fill" :class="{ 'd-flex align-items-center': isHomeView }">
+      <b-row :class="{ 'w-100 m-0': isHomeView }">
         <b-col>
           <router-view></router-view>
         </b-col>
@@ -32,7 +32,7 @@ export default Vue.extend({
   name: 'App',
   components: {},
   computed: {
-    isLoginView(): boolean {
+    isHomeView(): boolean {
       return this.$route.name === 'Home';
     },
   },
