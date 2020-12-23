@@ -19,11 +19,19 @@
           />
           <b-form-invalid-feedback>Your name must be at least 3 characters.</b-form-invalid-feedback>
         </b-form-group>
-        <b-form-group label="Game packs" label-for="packs">
+        <b-form-group>
+          <b-row class="justify-content-between">
+            <b-col cols="auto">
+              <label for="packs">Game packs</label>
+            </b-col>
+            <b-col cols="auto" class="font-weight-normal">
+              <b-form-checkbox v-model="onlyOffical" switch>only official</b-form-checkbox>
+            </b-col>
+          </b-row>
           <Multiselect
             id="packs"
             v-model="game.packs"
-            :options="officialPacks"
+            :options="filteredPacks"
             :multiple="true"
             :close-on-select="false"
             :clear-on-select="false"
@@ -43,7 +51,12 @@
           </b-form-invalid-feedback>
         </b-form-group>
 
-        <b-form-group label="Password (optional)" label-for="password" class="mt-2">
+        <b-form-group
+          label="Password (optional)"
+          label-for="password"
+          class="mt-2"
+          description="If you set one, other players have to enter it before joining."
+        >
           <b-form-input id="password" v-model="game.password" type="password" autocomplete="off" />
         </b-form-group>
 
@@ -55,39 +68,83 @@
               Advanced settings
             </b-link>
             <b-collapse id="collapse-advanced">
-              <b-form-group label="Hand size" label-for="handSize" class="mt-2">
+              <b-form-group
+                label="Hand size"
+                label-for="handSize"
+                class="mt-2"
+                description="Number of cards dealt to each player's hand."
+              >
                 <b-form-input id="handSize" v-model.number="game.handSize" type="number" min="2" max="20" />
               </b-form-group>
 
-              <b-form-group label="Winner points" label-for="winnerPoints" class="mt-2">
-                <b-input-group>
-                  <b-input-group-prepend>
-                    <b-button variant="outline-secondary" @click="game.winnerPoints = game.winnerPoints ? false : 20"
-                      >Toggle points to win</b-button
+              <b-form-group
+                class="mt-2"
+                description="Once a player has reached the number of points the game ends automatically. If no number is set, it runs until it is manually ended."
+              >
+                <b-row class="justify-content-between">
+                  <b-col cols="auto">
+                    <label for="winnerPoints">Winner points</label>
+                  </b-col>
+                  <b-col cols="auto" class="font-weight-normal">
+                    <b-form-checkbox
+                      @change="game.winnerPoints = game.winnerPoints === false ? 20 : false"
+                      :checked="game.winnerPoints !== false"
+                      switch
+                      >enabled</b-form-checkbox
                     >
-                  </b-input-group-prepend>
-                  <b-form-input
-                    v-if="game.winnerPoints"
-                    id="winnerPoints"
-                    v-model.number="game.winnerPoints"
-                    type="number"
-                    min="1"
-                  />
-                  <b-form-input v-else id="winnerPoints" disabled placeholder="Game continues until ended manually" />
-                </b-input-group>
-              </b-form-group>
-
-              <b-form-group label="Rando Cardrissian: AI Players" label-for="aiPlayers" class="mt-2">
+                  </b-col>
+                </b-row>
                 <b-form-input
-                  id="aiPlayers"
-                  v-model.number="game.specialRules.aiPlayerCount"
+                  v-if="game.winnerPoints !== false"
+                  id="winnerPoints"
+                  v-model.number="game.winnerPoints"
                   type="number"
-                  min="0"
-                  max="3"
+                  min="1"
                 />
+                <b-form-input v-else id="winnerPoints" disabled placeholder="Game continues until ended manually" />
               </b-form-group>
 
-              <b-form-group label-cols-lg="2" label="Timeouts" class="mb-0" label-class="pt-0">
+              <b-form-group label-cols-lg="2" label="House Rules" class="mt-2" label-class="pt-0">
+                <b-form-group
+                  label="Rando Cardrissian:"
+                  label-for="aiPlayers"
+                  label-cols-sm="6"
+                  label-align-sm="right"
+                  description="Number of additional virtual players (between 0 and 3)."
+                >
+                  <b-form-input
+                    id="aiPlayers"
+                    v-model.number="game.specialRules.aiPlayerCount"
+                    type="number"
+                    min="0"
+                    max="3"
+                  />
+                </b-form-group>
+
+                <b-form-group
+                  label="Packing Heat:"
+                  label-for="pickExtra"
+                  label-cols-sm="6"
+                  label-align-sm="right"
+                  description="For cards with pick 2+, players s dealt an extra card."
+                  disabled="disabled"
+                >
+                  <b-form-input id="pickExtra" readonly value="Coming soon!"></b-form-input>
+                </b-form-group>
+
+                <b-form-group
+                  label="Rebooting the Universe:"
+                  label-for="rebootDeck"
+                  label-cols-sm="6"
+                  label-align-sm="right"
+                  description="Players can trade one point (optional) to discard as many cards as they want and get new cards."
+                  disabled="disabled"
+                >
+                  <b-form-input id="rebootDeck" readonly value="Coming soon!"></b-form-input>
+                </b-form-group>
+              </b-form-group>
+
+              <b-form-group label-cols-lg="2" label="Timeouts" class="mt-2 mb-0" label-class="pt-0">
                 <b-form-group label="Playing:" label-for="timeout-playing" label-cols-sm="6" label-align-sm="right">
                   <b-form-input
                     id="timeout-playing"
@@ -162,6 +219,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      onlyOffical: true,
       game: {
         timeouts: {
           playing: 120,
@@ -186,11 +244,12 @@ export default Vue.extend({
     };
   },
   computed: {
-    officialPacks(): PackInformation[] {
-      return this.packs.filter((p) => p.official);
-    },
     packs(): PackInformation[] {
       return store.state.packs;
+    },
+    filteredPacks(): PackInformation[] {
+      if (!this.onlyOffical) return this.packs;
+      return this.packs.filter((p) => p.official);
     },
     validationPacks(): boolean {
       const prompts = (this.game.packs as PackInformation[])
