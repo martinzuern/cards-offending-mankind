@@ -19,11 +19,19 @@
           />
           <b-form-invalid-feedback>Your name must be at least 3 characters.</b-form-invalid-feedback>
         </b-form-group>
-        <b-form-group label="Game packs" label-for="packs">
+        <b-form-group>
+          <b-row class="justify-content-between">
+            <b-col cols="auto">
+              <label for="packs">Game packs</label>
+            </b-col>
+            <b-col cols="auto" class="font-weight-normal">
+              <b-form-checkbox v-model="onlyOffical" switch>only official</b-form-checkbox>
+            </b-col>
+          </b-row>
           <Multiselect
             id="packs"
             v-model="game.packs"
-            :options="officialPacks"
+            :options="filteredPacks"
             :multiple="true"
             :close-on-select="false"
             :clear-on-select="false"
@@ -162,6 +170,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      onlyOffical: true,
       game: {
         timeouts: {
           playing: 120,
@@ -186,11 +195,12 @@ export default Vue.extend({
     };
   },
   computed: {
-    officialPacks(): PackInformation[] {
-      return this.packs.filter((p) => p.official);
-    },
     packs(): PackInformation[] {
       return store.state.packs;
+    },
+    filteredPacks(): PackInformation[] {
+      if (!this.onlyOffical) return this.packs;
+      return this.packs.filter((p) => p.official);
     },
     validationPacks(): boolean {
       const prompts = (this.game.packs as PackInformation[])
