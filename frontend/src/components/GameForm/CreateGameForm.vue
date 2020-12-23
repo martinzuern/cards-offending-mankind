@@ -78,26 +78,30 @@
               </b-form-group>
 
               <b-form-group
-                label="Winner points"
-                label-for="winnerPoints"
                 class="mt-2"
                 description="Once a player has reached the number of points the game ends automatically. If no number is set, it runs until it is manually ended."
               >
-                <b-input-group>
-                  <b-input-group-prepend>
-                    <b-button variant="outline-secondary" @click="game.winnerPoints = game.winnerPoints ? false : 20"
-                      >Toggle points to win</b-button
+                <b-row class="justify-content-between">
+                  <b-col cols="auto">
+                    <label for="winnerPoints">Winner points</label>
+                  </b-col>
+                  <b-col cols="auto" class="font-weight-normal">
+                    <b-form-checkbox
+                      @change="game.winnerPoints = game.winnerPoints === false ? 20 : false"
+                      :checked="game.winnerPoints !== false"
+                      switch
+                      >enabled</b-form-checkbox
                     >
-                  </b-input-group-prepend>
-                  <b-form-input
-                    v-if="game.winnerPoints"
-                    id="winnerPoints"
-                    v-model.number="game.winnerPoints"
-                    type="number"
-                    min="1"
-                  />
-                  <b-form-input v-else id="winnerPoints" disabled placeholder="Game continues until ended manually" />
-                </b-input-group>
+                  </b-col>
+                </b-row>
+                <b-form-input
+                  v-if="game.winnerPoints !== false"
+                  id="winnerPoints"
+                  v-model.number="game.winnerPoints"
+                  type="number"
+                  min="1"
+                />
+                <b-form-input v-else id="winnerPoints" disabled placeholder="Game continues until ended manually" />
               </b-form-group>
 
               <b-form-group label-cols-lg="2" label="House Rules" class="mt-2" label-class="pt-0">
@@ -133,7 +137,7 @@
                   label-for="rebootDeck"
                   label-cols-sm="6"
                   label-align-sm="right"
-                  description="Players can trade in a point (optionally) to discard as many cards as they want and receive new ones."
+                  description="Players can trade one point (optional) to discard as many cards as they want and get new cards."
                   disabled="disabled"
                 >
                   <b-form-input id="rebootDeck" readonly value="Coming soon!"></b-form-input>
