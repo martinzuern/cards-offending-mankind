@@ -9,6 +9,7 @@
       <strong>
         {{ p.isAI ? '🤖' : '' }}
         {{ p.nickname }}
+        <i v-if="!p.isActive">(inactive)</i>
       </strong>
       <span>{{ p.points }}</span>
     </div>
