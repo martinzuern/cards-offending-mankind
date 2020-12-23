@@ -198,7 +198,7 @@ export default Vue.extend({
 
     .white-card
       margin-bottom: -3rem
-      font-size: 3vw
+      font-size: #{"min(.8rem, 3vw)"}
 
       &.selected
         order: 99
@@ -220,6 +220,7 @@ export default Vue.extend({
     margin-top: calc(var(--randVal, 0) * 0.25px)
     opacity: 0
     flex-shrink: 0
+    cursor: auto
     &.visible
       visibility: visible
       animation: 1s randomMoveIn ease-out
