@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-row>
+    <b-row class="sticky-top">
       <b-col cols="6" md="auto" order="1" class="pt-2">
         <h5>Round {{ rounds.length }}</h5>
       </b-col>
@@ -121,6 +121,8 @@ export default Vue.extend({
 </script>
 
 <style lang="sass">
+.sticky-top
+  background: white
 .fade-leave-active
   transition: opacity .5s
 .fade-enter-active
