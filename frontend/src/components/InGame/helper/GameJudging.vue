@@ -1,34 +1,35 @@
 <template>
   <div class="my-5">
-    <div
-      v-for="(submission, submissionIndex) in currentRound.submissions"
-      :key="submissionIndex"
-      class="submission my-5 py-2"
-      :class="{ canChooseWinner, isJudge }"
-    >
-      <h6 v-if="currentRound.status === 'ended'">
-        Submission by
-        <b-badge pill variant="dark">{{ getPlayerForSubmission(submission).nickname || '***' }}</b-badge>
-      </h6>
-      <b-row>
-        <b-col v-for="(card, index) in submission.cards" :key="index" md="auto">
-          <div
-            class="flip-card"
-            :class="{ revealed: submission.isRevealed }"
-            @click="selectSubmittedCard(submissionIndex)"
-          >
-            <div class="flip-card-inner">
-              <div class="flip-card-front play-card white-card">Cards<br />Offending<br />Mankind</div>
-              <div
-                class="flip-card-back play-card white-card"
-                :class="{ selected: submissionIndex === winnerSubmissionIndex || submission.pointsChange > 0 }"
-              >
-                {{ card.value }}
+    <div class="d-flex justify-content-center flex-wrap">
+      <div
+        v-for="(submission, submissionIndex) in currentRound.submissions"
+        :key="submissionIndex"
+        class="submission m-4"
+        :class="{ canChooseWinner, isJudge }"
+      >
+        <b-badge v-if="currentRound.status === 'ended'" class="mx-0" pill variant="dark">
+          {{ getPlayerForSubmission(submission).nickname }}
+        </b-badge>
+        <b-row class="px-2">
+          <b-col v-for="(card, index) in submission.cards" :key="index" cols="auto" class="p-1">
+            <div
+              class="flip-card"
+              :class="{ revealed: submission.isRevealed }"
+              @click="selectSubmittedCard(submissionIndex)"
+            >
+              <div class="flip-card-inner">
+                <div class="flip-card-front play-card white-card">Cards<br />Offending<br />Mankind</div>
+                <div
+                  class="flip-card-back play-card white-card"
+                  :class="{ selected: submissionIndex === winnerSubmissionIndex || submission.pointsChange > 0 }"
+                >
+                  {{ card.value }}
+                </div>
               </div>
             </div>
-          </div>
-        </b-col>
-      </b-row>
+          </b-col>
+        </b-row>
+      </div>
     </div>
     <button
       v-if="canChooseWinner"
@@ -117,6 +118,8 @@ export default Vue.extend({
       if (this.currentRound.status === 'revealed') {
         this.winnerSubmissionIndex = submissionIndex;
       } else {
+        const sub = this.currentRound.submissions[submissionIndex];
+        if (!sub || sub.isRevealed) return;
         this.socket.emit('reveal_submission', {
           submissionIndex,
           roundIndex: this.roundIndex,
@@ -128,46 +131,48 @@ export default Vue.extend({
 </script>
 
 <style lang="sass">
-.flip-card
-  background-color: transparent
-  width: $card-width
-  height: $card-height
-  perspective: 1000px
+.submission
+  .flip-card
+    background-color: transparent
+    width: $card-width
+    height: $card-height
+    perspective: 1000px
 
-  .flip-card-inner
-    position: relative
-    width: 100%
-    height: 100%
-    transition: transform 0.6s
-    transition-delay: 2s
-    transform-style: preserve-3d
-
-  &.revealed
     .flip-card-inner
+      position: relative
+      width: 100%
+      height: 100%
+      transition: transform 0.6s
+      transition-delay: 2s
+      transform-style: preserve-3d
+
+    &.revealed
+      .flip-card-inner
+        transform: rotateY(180deg)
+
+    .flip-card-front, .flip-card-back
+      position: absolute
+      width: 100%
+      height: 100%
+      margin: 0 !important
+      backface-visibility: hidden
+      cursor: not-allowed
+
+    .flip-card-front
+      display: flex
+      align-items: flex-end
+      font-weight: 800
+
+    .flip-card-back
       transform: rotateY(180deg)
 
-  .flip-card-front, .flip-card-back
-    position: absolute
-    width: 100%
-    height: 100%
-    margin: 0 !important
-    backface-visibility: hidden
-
-  .flip-card-front
-    display: flex
-    align-items: flex-end
-    font-weight: 800
-
-  .flip-card-back
-    transform: rotateY(180deg)
-
-.submission
   &.isJudge
     .flip-card
       .flip-card-inner
         transition-delay: 0s
+        .flip-card-front
+          cursor: pointer
   &.canChooseWinner:hover
     .flip-card-back
-        background-color: #6495ED
-        color: white
+        cursor: pointer
 </style>
