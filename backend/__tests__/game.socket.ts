@@ -124,7 +124,9 @@ describe('joining game', () => {
 
     socket
       .on('authenticated', () => {
-        socket2.open();
+        setTimeout(() => {
+          socket2.open();
+        }, 300);
       })
       .emit('authenticate', {
         token: createdGame.player.token,

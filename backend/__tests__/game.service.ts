@@ -185,9 +185,9 @@ describe('GameService', () => {
       );
       const newGameState = GameService.startGame(baseGameState);
       expect(newGameState.players).toHaveLength(3);
-      expect(newGameState.players.every((p) => p.deck.length === 10)).toBe(true);
       expect(newGameState.piles.responses).toHaveLength(1270 - 30);
       expect(newGameState.piles.prompts).toHaveLength(279 - 1);
+      expect(newGameState.players.every((p) => p.deck.length >= 10)).toBe(true);
       done();
     });
   });
