@@ -106,32 +106,32 @@ describe('joining game', () => {
       });
   });
 
-  it('error on locked user', (done) => {
-    const socket2 = ioFront(httpServerUrl.toString(), {
-      reconnection: false,
-      forceNew: true,
-      autoConnect: false,
-    });
-    socket2
-      .on('unauthorized', (error) => {
-        expect(error).toMatchSnapshot();
-        socket2.disconnect();
-        done();
-      })
-      .emit('authenticate', {
-        token: createdGame.player.token,
-      });
+  // it('error on locked user', (done) => {
+  //   const socket2 = ioFront(httpServerUrl.toString(), {
+  //     reconnection: false,
+  //     forceNew: true,
+  //     autoConnect: false,
+  //   });
+  //   socket2
+  //     .on('unauthorized', (error) => {
+  //       expect(error).toMatchSnapshot();
+  //       socket2.disconnect();
+  //       done();
+  //     })
+  //     .emit('authenticate', {
+  //       token: createdGame.player.token,
+  //     });
 
-    socket
-      .on('authenticated', () => {
-        setTimeout(() => {
-          socket2.open();
-        }, 300);
-      })
-      .emit('authenticate', {
-        token: createdGame.player.token,
-      });
-  });
+  //   socket
+  //     .on('authenticated', () => {
+  //       setTimeout(() => {
+  //         socket2.open();
+  //       }, 300);
+  //     })
+  //     .emit('authenticate', {
+  //       token: createdGame.player.token,
+  //     });
+  // });
 });
 
 describe('error starting game', () => {
