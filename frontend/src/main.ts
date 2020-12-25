@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
+import * as Sentry from '@sentry/vue';
 
 // https://github.com/justinkames/vuejs-logger/issues/33#issuecomment-602581261
 import VueLoggerPlugin from 'vuejs-logger/dist/vue-logger';
@@ -22,6 +23,11 @@ Vue.use(VueLoggerPlugin, {
   showMethodName: true,
   separator: '|',
   showConsoleColors: true,
+});
+
+Sentry.init({
+  Vue: Vue,
+  dsn: process.env.FRONTEND_SENTRY_DSN,
 });
 
 new Vue({
