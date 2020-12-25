@@ -23,7 +23,7 @@ jobs:
       - name: Build frontend successfully
         run: yarn build
         working-directory: ./frontend
-  
+
   test-backend:
     runs-on: ubuntu-latest
     steps:
@@ -61,4 +61,4 @@ jobs:
           api_key: ${{ secrets.HEROKU_API_KEY }}
           app_name: ${{ secrets.HEROKU_APP_NAME }}
           dockerfile_path: '.'
-          # options: '' # Docker Build Options
+          options: '--build-arg short_sha=$(git rev-parse --short "$GITHUB_SHA") --build-arg frontend_sentry_dsn=$FRONTEND_SENTRY_DSN'

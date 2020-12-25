@@ -19,7 +19,7 @@ const app = express();
 const { exit } = process;
 const env = process.env.NODE_ENV || 'development';
 
-Sentry.init({ dsn: process.env.SENTRY_DSN });
+Sentry.init({ dsn: process.env.SENTRY_DSN, release: process.env.COMMIT_SHORT_SHA });
 app.use(Sentry.Handlers.requestHandler());
 
 const publicDir = path.resolve(__dirname, '..', '..', 'public');

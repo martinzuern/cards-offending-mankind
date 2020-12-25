@@ -4,8 +4,14 @@
 #  | _|  | '_| / _ \ | ' \  |  _| / -_) | ' \  / _` |
 #  |_|   |_|   \___/ |_||_|  \__| \___| |_||_| \__,_|
 ###################### Frontend ######################                                                  
-                                             
+
 FROM node:12 as build_frontent
+
+ARG short_sha='unkown'
+ENV VUE_APP_COMMIT_SHORT_SHA=$short_sha
+
+ARG frontend_sentry_dsn=''
+ENV VUE_APP_FRONTEND_SENTRY_DSN=$frontend_sentry_dsn
 
 # Trigger fallback to origin
 ENV VUE_APP_BACKEND_URL=''
@@ -40,6 +46,9 @@ RUN ls -laR ./dist
 ################### Backend ###################
 
 FROM node:12 as build_backend
+
+ARG short_sha='unkown'
+ENV COMMIT_SHORT_SHA=$short_sha
 
 # Type folder needed for typescript compilation
 WORKDIR /opt/types
