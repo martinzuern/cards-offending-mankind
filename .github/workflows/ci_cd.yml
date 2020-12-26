@@ -5,12 +5,9 @@ on: [push]
 jobs:
   test-frontend:
     runs-on: ubuntu-latest
+    container: node:12
     steps:
       - uses: actions/checkout@v2
-      - name: Use Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 12.x
       - name: Install dependencies
         run: yarn install --frozen-lockfile
         working-directory: ./frontend
@@ -26,6 +23,18 @@ jobs:
 
   test-backend:
     runs-on: ubuntu-latest
+    # container: node:12    
+    # services:
+    #   redis:
+    #     image: redis
+    #     # Set health checks to wait until redis has started
+    #     options: >-
+    #       --health-cmd "redis-cli ping"
+    #       --health-interval 10s
+    #       --health-timeout 5s
+    #       --health-retries 5
+    #     ports:
+    #       - 6379:6379
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js
@@ -50,9 +59,6 @@ jobs:
     runs-on: ubuntu-latest
     if: "'refs/heads/master' == github.ref"
     needs: [test-frontend, test-backend]
-    env:
-      SHORT_SHA: ${{ github.sha }}
-      FRONTEND_SENTRY_DSN: ${{ secrets.FRONTEND_SENTRY_DSN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -64,4 +70,6 @@ jobs:
           api_key: ${{ secrets.HEROKU_API_KEY }}
           app_name: ${{ secrets.HEROKU_APP_NAME }}
           dockerfile_path: '.'
-          options: '--build-arg SHORT_SHA --build-arg FRONTEND_SENTRY_DSN'
+          options: >-
+            --build-arg COMMIT_SHA=${{ github.sha }}
+            --build-arg FRONTEND_SENTRY_DSN=${{ secrets.FRONTEND_SENTRY_DSN }}
