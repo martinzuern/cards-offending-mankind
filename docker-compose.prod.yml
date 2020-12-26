@@ -22,8 +22,8 @@ services:
       context: '.'
       dockerfile: Dockerfile
       args:
-        - short_sha=cdc3b19
-        - frontend_sentry_dsn
+        - COMMIT_SHA=cdc3b19
+        - FRONTEND_SENTRY_DSN
     image: 'cards-offending-mankind/main:prod'
     ports:
       - 80:3000
