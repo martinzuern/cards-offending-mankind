@@ -32,7 +32,7 @@ RUN yarn build
 
 # Add licenses
 RUN mkdir -p ./dist/licenses
-RUN yarn licenses generate-disclaimer > ./dist/licenses/frontend.txt
+RUN yarn licenses generate-disclaimer --silent --production > ./dist/licenses/frontend.txt
 
 # Debug: List built files
 RUN ls -laR ./dist
@@ -63,7 +63,7 @@ RUN yarn compile
 
 # Add licenses
 RUN mkdir -p ./licenses
-RUN yarn licenses generate-disclaimer > ./licenses/backend.txt
+RUN yarn licenses generate-disclaimer --silent --production > ./licenses/backend.txt
 
 # Debug: List built files
 RUN ls -laR ./dist
