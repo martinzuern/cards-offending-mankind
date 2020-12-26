@@ -51,9 +51,6 @@ jobs:
     runs-on: ubuntu-latest
     if: "'refs/heads/master' == github.ref"
     needs: [test-frontend, test-backend]
-    env:
-      SHORT_SHA: ${{ github.sha }}
-      FRONTEND_SENTRY_DSN: ${{ secrets.FRONTEND_SENTRY_DSN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -65,4 +62,9 @@ jobs:
           api_key: ${{ secrets.HEROKU_API_KEY }}
           app_name: ${{ secrets.HEROKU_APP_NAME }}
           dockerfile_path: '.'
-          options: '--build-arg SHORT_SHA --build-arg FRONTEND_SENTRY_DSN'
+          options: |
+            ${{ format(
+              '--build-arg COMMIT_SHA={0} --build-arg FRONTEND_SENTRY_DSN={1}',
+              '${{ github.sha }}',
+              '${{ secrets.FRONTEND_SENTRY_DSN }}'
+            ) }}
