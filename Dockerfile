@@ -47,9 +47,6 @@ RUN ls -laR ./dist
 
 FROM node:12 as build_backend
 
-ARG short_sha='unkown'
-ENV COMMIT_SHORT_SHA=$short_sha
-
 # Type folder needed for typescript compilation
 WORKDIR /opt/types
 ADD ./types .
@@ -80,6 +77,9 @@ RUN ls -laR ./dist
 ######################## Final Build ########################
 
 FROM node:12
+
+ARG short_sha='unkown'
+ENV COMMIT_SHORT_SHA=$short_sha
 
 ENV NODE_ENV=production
 
