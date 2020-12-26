@@ -7,11 +7,11 @@
 
 FROM node:12 as build_frontent
 
-ARG short_sha='unkown'
-ENV VUE_APP_COMMIT_SHORT_SHA=$short_sha
+ARG COMMIT_SHA='unkown'
+ENV VUE_APP_SHA=$COMMIT_SHA
 
-ARG frontend_sentry_dsn=''
-ENV VUE_APP_FRONTEND_SENTRY_DSN=$frontend_sentry_dsn
+ARG FRONTEND_SENTRY_DSN=''
+ENV VUE_APP_FRONTEND_SENTRY_DSN=$FRONTEND_SENTRY_DSN
 
 # Trigger fallback to origin
 ENV VUE_APP_BACKEND_URL=''
@@ -78,8 +78,8 @@ RUN ls -laR ./dist
 
 FROM node:12
 
-ARG short_sha='unkown'
-ENV COMMIT_SHORT_SHA=$short_sha
+ARG COMMIT_SHA='unkown'
+ENV SHA=$COMMIT_SHA
 
 ENV NODE_ENV=production
 
