@@ -27,7 +27,7 @@ Vue.use(VueLoggerPlugin, {
 
 Sentry.init({
   Vue: Vue,
-  dsn: process.env.VUE_APP_FRONTEND_SENTRY_DSN,
+  dsn: process.env.VUE_APP_FRONTEND_SENTRY_DSN || null,
   release: process.env.VUE_APP_COMMIT_SHORT_SHA,
 });
 

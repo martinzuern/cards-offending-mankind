@@ -33,7 +33,7 @@ export default class ExpressServer {
     app.use(
       helmet({
         contentSecurityPolicy: {
-          reportOnly: env !== 'production',
+          reportOnly: true,
         },
       })
     );
