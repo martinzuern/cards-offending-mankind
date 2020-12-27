@@ -15,10 +15,10 @@
   </div>
   <div v-else>
     <div class="my-5 d-flex justify-content-center flex-wrap">
-      <div v-if="selectedCards.length === 0" class="my-5">Please select a card.</div>
+      <div v-if="selectedCards.length === 0" class="my-5">Please select {{ cardsToPickString }}.</div>
       <div
-        v-else
         v-for="card in selectedCards"
+        v-else
         :key="card.value"
         class="play-card white-card selected"
         @click="clickToggleCard(card)"
@@ -49,6 +49,7 @@
 import Vue from 'vue';
 import assert from 'assert';
 import { includes, random } from 'lodash';
+import pluralize from 'pluralize';
 
 import { Player, Round, ResponseCard, Game, RoundSubmission } from '@/types';
 import store from '@/store';
@@ -99,6 +100,12 @@ export default Vue.extend({
     isJudge(): boolean {
       return this.player.id === this.currentRound.judgeId;
     },
+    cardsToPick(): number {
+      return this.currentRound.prompt.pick;
+    },
+    cardsToPickString(): string {
+      return pluralize('card', this.cardsToPick, true);
+    },
   },
   watch: {
     roundIndex(): void {
@@ -113,9 +120,8 @@ export default Vue.extend({
       return this.randomDegrees[idx];
     },
     submitSelection(): void {
-      const toPick = this.currentRound.prompt.pick;
-      if (this.selectedCards.length !== toPick) {
-        this.$bvToast.toast(`Please select exactly ${toPick === 1 ? '1 card' : `${toPick} cards`}.`, {
+      if (this.selectedCards.length !== this.cardsToPick) {
+        this.$bvToast.toast(`Please select exactly ${this.cardsToPickString}.`, {
           title: 'Oops.',
           autoHideDelay: 5000,
           variant: 'danger',
@@ -135,10 +141,10 @@ export default Vue.extend({
           this.selectedCards.findIndex(({ value }) => value === card.value),
           1
         );
-      } else if (this.selectedCards.length < this.currentRound.prompt.pick) {
+      } else if (this.selectedCards.length < this.cardsToPick) {
         this.selectedCards.push(card);
       } else {
-        if (this.currentRound.prompt.pick === 1) {
+        if (this.cardsToPick === 1) {
           this.selectedCards = [card];
         } else {
           this.$bvToast.toast('Too many cards selected, please deselect first.', {
