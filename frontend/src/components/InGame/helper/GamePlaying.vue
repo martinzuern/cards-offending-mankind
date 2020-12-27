@@ -14,21 +14,32 @@
     </div>
   </div>
   <div v-else>
-    <div class="mt-5 card-fan" :class="`fan-count-${player.deck.length}`">
-      <template v-for="(cardList, index) in [selectedCards, notSelectedCards]">
-        <div
-          v-for="card in cardList"
-          :key="card.value"
-          class="play-card white-card"
-          :class="{ selected: index === 0 }"
-          @click="clickToggleCard(card)"
-        >
-          {{ card.value }}
-        </div>
-      </template>
+    <div class="my-5 d-flex justify-content-center flex-wrap">
+      <div v-if="selectedCards.length === 0" class="my-5">Please select a card.</div>
+      <div
+        v-else
+        v-for="card in selectedCards"
+        :key="card.value"
+        class="play-card white-card selected"
+        @click="clickToggleCard(card)"
+      >
+        {{ card.value }}
+      </div>
+    </div>
+    <div class="card-fan" :class="`fan-count-${notSelectedCards.length}`">
+      <div
+        v-for="card in notSelectedCards"
+        :key="card.value"
+        class="play-card white-card"
+        @click="clickToggleCard(card)"
+      >
+        {{ card.value }}
+      </div>
     </div>
 
-    <button class="btn btn-success w-100 d-block mt-5" @click="submitSelection">Submit Selection</button>
+    <button class="btn btn-success w-100 d-block mt-5" :disabled="selectedCards.length === 0" @click="submitSelection">
+      Submit Selection
+    </button>
   </div>
 </template>
 
@@ -199,9 +210,6 @@ export default Vue.extend({
     .white-card
       margin-bottom: -3rem
       font-size: #{"min(.8rem, 3vw)"}
-
-      &.selected
-        order: 99
 
 @keyframes randomMoveIn
   from
