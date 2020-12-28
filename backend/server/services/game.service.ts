@@ -156,6 +156,7 @@ export default class GameService {
           pointsChange: 0,
           isRevealed: false,
         };
+        newGameState.piles.discardedResponses.push(...newSubmission.cards);
         _.last(newGameState.rounds).submissions.push(newSubmission);
       });
 
