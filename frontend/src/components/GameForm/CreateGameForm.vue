@@ -134,13 +134,19 @@
 
                 <b-form-group
                   label="Rebooting the Universe:"
-                  label-for="rebootDeck"
+                  label-for="allowDiscarding"
                   label-cols-sm="6"
                   label-align-sm="right"
                   description="Players can trade one point (optional) to discard as many cards as they want and get new cards."
-                  disabled="disabled"
                 >
-                  <b-form-input id="rebootDeck" readonly value="Coming soon!"></b-form-input>
+                  <b-form-checkbox
+                    id="allowDiscarding"
+                    v-model="game.specialRules.allowDiscarding"
+                    class="font-weight-normal"
+                    switch
+                  >
+                    {{ game.specialRules.allowDiscarding ? 'Enabled' : 'Disabled' }}
+                  </b-form-checkbox>
                 </b-form-group>
               </b-form-group>
 
@@ -233,6 +239,7 @@ export default Vue.extend({
         packs: [],
         specialRules: {
           aiPlayerCount: 0,
+          allowDiscarding: false,
         },
       } as Required<CreateGame>,
       player: {
