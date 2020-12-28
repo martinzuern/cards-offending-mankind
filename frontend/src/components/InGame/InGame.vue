@@ -137,6 +137,7 @@ export default Vue.extend({
         title: 'Oops.',
         autoHideDelay: 5000,
         variant: 'danger',
+        solid: true,
       });
     },
   },

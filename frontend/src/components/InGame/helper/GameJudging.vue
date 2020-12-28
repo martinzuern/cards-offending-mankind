@@ -101,6 +101,7 @@ export default Vue.extend({
         title: 'Hurray 🎉',
         autoHideDelay: 10000,
         variant: 'success',
+        solid: true,
       });
     },
   },
