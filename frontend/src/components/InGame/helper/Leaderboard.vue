@@ -39,7 +39,7 @@ export default Vue.extend({
 });
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
 .leaderboard
   .list-group-item
     strong

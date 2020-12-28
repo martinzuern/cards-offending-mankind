@@ -28,8 +28,7 @@ export default Vue.extend({
 });
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style lang="sass">
+<style lang="sass" scoped>
 .background-white
   background-color: white
   margin: 1rem -1.5rem -1.5rem

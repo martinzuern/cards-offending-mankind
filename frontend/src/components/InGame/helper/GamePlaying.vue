@@ -1,34 +1,48 @@
 <template>
-  <div v-if="isJudge || hasSubmitted">
+  <div v-if="isJudge || hasSubmitted" class="waiting-for-submission">
     <h6 class="mt-5 text-center">Waiting for other players to submit ...</h6>
     <div class="d-flex flex-nowrap justify-content-center pb-4 submission-wrap">
-      <div
+      <Card
         v-for="i in playerCount - 1"
         :key="i"
-        class="submission-card play-card white-card"
+        class="submission-card"
         :class="{ visible: !!submissions[i - 1] }"
+        :turned-backside="true"
         :style="{ '--randVal': getRandomDegrees(i), 'z-index': i }"
-      >
-        Cards<br />Offending<br />Mankind
-      </div>
+      />
     </div>
   </div>
   <div v-else>
-    <div class="mt-5 card-fan" :class="`fan-count-${player.deck.length}`">
-      <template v-for="(cardList, index) in [selectedCards, notSelectedCards]">
-        <div
-          v-for="card in cardList"
-          :key="card.value"
-          class="play-card white-card"
-          :class="{ selected: index === 0 }"
-          @click="clickToggleCard(card)"
-        >
-          {{ card.value }}
-        </div>
-      </template>
+    <div class="my-5 d-flex justify-content-center flex-wrap">
+      <div v-if="selectedCards.length === 0" class="my-5">Please select {{ cardsToPickString }}.</div>
+      <Card
+        v-for="card in selectedCards"
+        v-else
+        :key="card.value"
+        class="selected-card"
+        :selected="true"
+        :value="card.value"
+        @click="clickToggleCard(card)"
+      />
     </div>
 
-    <button class="btn btn-success w-100 d-block mt-5" @click="submitSelection">Submit Selection</button>
+    <div ref="cardFan" class="card-fan" :class="`fan-count-${notSelectedCards.length}`">
+      <Card
+        v-for="card in notSelectedCards"
+        :key="card.value"
+        class="in-fan-card"
+        :value="card.value"
+        @click="clickToggleCard(card)"
+      />
+    </div>
+
+    <button
+      class="btn btn-success w-100 d-block mt-5 submit-cards"
+      :disabled="selectedCards.length === 0"
+      @click="submitSelection"
+    >
+      Submit Selection
+    </button>
   </div>
 </template>
 
@@ -38,12 +52,18 @@
 import Vue from 'vue';
 import assert from 'assert';
 import { includes, random } from 'lodash';
+import pluralize from 'pluralize';
 
 import { Player, Round, ResponseCard, Game, RoundSubmission } from '@/types';
 import store from '@/store';
 
+import Card from './Card.vue';
+
 export default Vue.extend({
   name: 'GamePlaying',
+  components: {
+    Card,
+  },
   data() {
     return {
       selectedCards: [] as ResponseCard[],
@@ -88,6 +108,12 @@ export default Vue.extend({
     isJudge(): boolean {
       return this.player.id === this.currentRound.judgeId;
     },
+    cardsToPick(): number {
+      return this.currentRound.prompt.pick;
+    },
+    cardsToPickString(): string {
+      return pluralize('card', this.cardsToPick, true);
+    },
   },
   watch: {
     roundIndex(): void {
@@ -102,12 +128,12 @@ export default Vue.extend({
       return this.randomDegrees[idx];
     },
     submitSelection(): void {
-      const toPick = this.currentRound.prompt.pick;
-      if (this.selectedCards.length !== toPick) {
-        this.$bvToast.toast(`Please select exactly ${toPick === 1 ? '1 card' : `${toPick} cards`}.`, {
+      if (this.selectedCards.length !== this.cardsToPick) {
+        this.$bvToast.toast(`Please select exactly ${this.cardsToPickString}.`, {
           title: 'Oops.',
           autoHideDelay: 5000,
           variant: 'danger',
+          solid: true,
         });
         return;
       }
@@ -124,16 +150,17 @@ export default Vue.extend({
           this.selectedCards.findIndex(({ value }) => value === card.value),
           1
         );
-      } else if (this.selectedCards.length < this.currentRound.prompt.pick) {
+      } else if (this.selectedCards.length < this.cardsToPick) {
         this.selectedCards.push(card);
       } else {
-        if (this.currentRound.prompt.pick === 1) {
+        if (this.cardsToPick === 1) {
           this.selectedCards = [card];
         } else {
           this.$bvToast.toast('Too many cards selected, please deselect first.', {
             title: 'Oops.',
             autoHideDelay: 5000,
             variant: 'danger',
+            solid: true,
           });
         }
       }
@@ -142,7 +169,7 @@ export default Vue.extend({
 });
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
 @import "~bootstrap/scss/functions"
 @import "~bootstrap/scss/variables"
 @import "~bootstrap/scss/mixins"
@@ -172,36 +199,30 @@ export default Vue.extend({
     margin-left: 2rem
     justify-content: space-evenly
 
-    .white-card
-      height: 12rem
-      width: 8rem
+    .in-fan-card
       position: relative
       top: 30px
       transition: transform .2s
       margin-left: -2rem
-      font-size: #{"min(1rem, 1vw)"}
 
     @for $cardCount from 2 through 25
       &.fan-count-#{$cardCount}
-        .white-card
+        .in-fan-card
           @include card-angles($cardCount)
 
 @include media-breakpoint-down(sm)
-  html, body
-    overflow-x: hidden
-
   .card-fan
     display: flex
     flex-flow: wrap
     justify-content: center
     padding-bottom: 3rem
 
-    .white-card
+    .in-fan-card
       margin-bottom: -3rem
-      font-size: #{"min(.8rem, 3vw)"}
 
-      &.selected
-        order: 99
+  .submit-cards
+    position: sticky
+    bottom: 10px
 
 @keyframes randomMoveIn
   from
@@ -219,7 +240,7 @@ export default Vue.extend({
     visibility: hidden
     margin-top: calc(var(--randVal, 0) * 0.25px)
     opacity: 0
-    flex-shrink: 0
+    flex-shrink: 1
     cursor: auto
     &.visible
       visibility: visible
@@ -228,6 +249,10 @@ export default Vue.extend({
       animation-fill-mode: forwards
 
 @include media-breakpoint-down(sm)
+  .waiting-for-submission
+    overflow-x: hidden
+    margin: 0 -1rem
+
   .submission-wrap
     .submission-card
       margin-right: -1.5rem
