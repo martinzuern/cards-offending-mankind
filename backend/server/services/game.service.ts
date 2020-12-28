@@ -139,6 +139,7 @@ export default class GameService {
       discard: [],
     };
     newGameState.rounds.push(newRound);
+    gameState.piles.discardedPrompts.push(newRound.prompt);
 
     newGameState = this.refillHandForPlayers(newGameState, activeHumanPlayers);
 
@@ -211,6 +212,7 @@ export default class GameService {
           winnerPoints: 20,
           specialRules: {
             aiPlayerCount: 0,
+            allowDiscarding: false,
           },
         },
         game,
@@ -287,6 +289,7 @@ export default class GameService {
       round.submissions.every((s) => s.playerId !== playerId),
       'Player already picked cards.'
     );
+
     const myPlayer = _.find(gameState.players, {
       id: playerId,
       isActive: true,
@@ -297,6 +300,7 @@ export default class GameService {
       const found = _.find(myPlayer.deck, card);
       assert(found, 'Invalid card');
       myPlayer.deck = _.without(myPlayer.deck, found);
+      gameState.piles.discardedResponses.push(found);
       return found;
     });
     assert(cards.length === round.prompt.pick, 'Incorrect number of cards.');
@@ -311,6 +315,42 @@ export default class GameService {
     round.submissions.push(newSubmission);
 
     return gameState;
+  }
+
+  static discardCards(
+    gameState: InternalGameState,
+    roundIndex: number,
+    playerId: UUID,
+    discardedCards: ResponseCard[]
+  ): InternalGameState {
+    const round = gameState.rounds[roundIndex];
+    assert(gameState.game.specialRules.allowDiscarding === true, 'Game does not allow discarding.');
+    assert(round.status === RoundStatus.Created, 'Incorrect round status.');
+    assert(round.judgeId !== playerId, 'Judge cannot reject cards.');
+
+    const myPlayer = _.find(gameState.players, {
+      id: playerId,
+      isActive: true,
+    }) as InternalPlayer;
+    assert(myPlayer, 'Could not find player.');
+
+    const cards = discardedCards.map((card) => {
+      const found = _.find(myPlayer.deck, card);
+      assert(found, 'Invalid card');
+      myPlayer.deck = _.without(myPlayer.deck, found);
+      gameState.piles.discardedResponses.push(found);
+      return found;
+    });
+
+    const newSubmission: RoundSubmission = {
+      playerId,
+      timestamp: new Date(),
+      cards,
+      pointsChange: 0,
+      isRevealed: false,
+    };
+    round.discard.push(newSubmission);
+    return this.refillHandForPlayers(gameState, [myPlayer]);
   }
 
   static playRound(prevGameState: InternalGameState, roundIndex: number): InternalGameState {

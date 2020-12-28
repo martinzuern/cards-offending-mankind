@@ -252,6 +252,17 @@ components:
         handSize:
           type: integer
           minimum: 2
+        specialRules:
+          type: object
+          properties:
+            aiPlayerCount:
+              type: integer
+              default: 0
+              minimum: 0
+              maximum: 3
+            allowDiscarding:
+              type: boolean
+              default: false
     CreateGame:
       title: Game
       type: object
@@ -301,6 +312,9 @@ components:
               default: 0
               minimum: 0
               maximum: 3
+            allowDiscarding:
+              type: boolean
+              default: false
     PackInformation:
       title: PackInformation
       allOf:
