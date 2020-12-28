@@ -1,43 +1,46 @@
 <template>
-  <div v-if="isJudge || hasSubmitted">
+  <div v-if="isJudge || hasSubmitted" class="waiting-for-submission">
     <h6 class="mt-5 text-center">Waiting for other players to submit ...</h6>
     <div class="d-flex flex-nowrap justify-content-center pb-4 submission-wrap">
-      <div
+      <Card
         v-for="i in playerCount - 1"
         :key="i"
-        class="submission-card play-card white-card"
+        class="submission-card"
         :class="{ visible: !!submissions[i - 1] }"
+        :turned-backside="true"
         :style="{ '--randVal': getRandomDegrees(i), 'z-index': i }"
-      >
-        Cards<br />Offending<br />Mankind
-      </div>
+      />
     </div>
   </div>
   <div v-else>
     <div class="my-5 d-flex justify-content-center flex-wrap">
       <div v-if="selectedCards.length === 0" class="my-5">Please select {{ cardsToPickString }}.</div>
-      <div
+      <Card
         v-for="card in selectedCards"
         v-else
         :key="card.value"
-        class="play-card white-card selected"
+        class="selected-card"
+        :selected="true"
+        :value="card.value"
         @click="clickToggleCard(card)"
-      >
-        {{ card.value }}
-      </div>
-    </div>
-    <div class="card-fan" :class="`fan-count-${notSelectedCards.length}`">
-      <div
-        v-for="card in notSelectedCards"
-        :key="card.value"
-        class="play-card white-card"
-        @click="clickToggleCard(card)"
-      >
-        {{ card.value }}
-      </div>
+      />
     </div>
 
-    <button class="btn btn-success w-100 d-block mt-5" :disabled="selectedCards.length === 0" @click="submitSelection">
+    <div ref="cardFan" class="card-fan" :class="`fan-count-${notSelectedCards.length}`">
+      <Card
+        v-for="card in notSelectedCards"
+        :key="card.value"
+        class="in-fan-card"
+        :value="card.value"
+        @click="clickToggleCard(card)"
+      />
+    </div>
+
+    <button
+      class="btn btn-success w-100 d-block mt-5 submit-cards"
+      :disabled="selectedCards.length === 0"
+      @click="submitSelection"
+    >
       Submit Selection
     </button>
   </div>
@@ -54,8 +57,13 @@ import pluralize from 'pluralize';
 import { Player, Round, ResponseCard, Game, RoundSubmission } from '@/types';
 import store from '@/store';
 
+import Card from './Card.vue';
+
 export default Vue.extend({
   name: 'GamePlaying',
+  components: {
+    Card,
+  },
   data() {
     return {
       selectedCards: [] as ResponseCard[],
@@ -159,7 +167,7 @@ export default Vue.extend({
 });
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
 @import "~bootstrap/scss/functions"
 @import "~bootstrap/scss/variables"
 @import "~bootstrap/scss/mixins"
@@ -189,33 +197,30 @@ export default Vue.extend({
     margin-left: 2rem
     justify-content: space-evenly
 
-    .white-card
-      height: 12rem
-      width: 8rem
+    .in-fan-card
       position: relative
       top: 30px
       transition: transform .2s
       margin-left: -2rem
-      font-size: #{"min(1rem, 1vw)"}
 
     @for $cardCount from 2 through 25
       &.fan-count-#{$cardCount}
-        .white-card
+        .in-fan-card
           @include card-angles($cardCount)
 
 @include media-breakpoint-down(sm)
-  html, body
-    overflow-x: hidden
-
   .card-fan
     display: flex
     flex-flow: wrap
     justify-content: center
     padding-bottom: 3rem
 
-    .white-card
+    .in-fan-card
       margin-bottom: -3rem
-      font-size: #{"min(.8rem, 3vw)"}
+
+  .submit-cards
+    position: sticky
+    bottom: 10px
 
 @keyframes randomMoveIn
   from
@@ -233,7 +238,7 @@ export default Vue.extend({
     visibility: hidden
     margin-top: calc(var(--randVal, 0) * 0.25px)
     opacity: 0
-    flex-shrink: 0
+    flex-shrink: 1
     cursor: auto
     &.visible
       visibility: visible
@@ -242,6 +247,10 @@ export default Vue.extend({
       animation-fill-mode: forwards
 
 @include media-breakpoint-down(sm)
+  .waiting-for-submission
+    overflow-x: hidden
+    margin: 0 -1rem
+
   .submission-wrap
     .submission-card
       margin-right: -1.5rem

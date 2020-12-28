@@ -18,13 +18,12 @@
               @click="selectSubmittedCard(submissionIndex)"
             >
               <div class="flip-card-inner">
-                <div class="flip-card-front play-card white-card">Cards<br />Offending<br />Mankind</div>
-                <div
-                  class="flip-card-back play-card white-card"
+                <Card class="flip-card-front" :turned-backside="true" />
+                <Card
+                  class="flip-card-back"
                   :class="{ selected: submissionIndex === winnerSubmissionIndex || submission.pointsChange > 0 }"
-                >
-                  {{ card.value }}
-                </div>
+                  :value="card.value"
+                />
               </div>
             </div>
           </b-col>
@@ -50,9 +49,13 @@ import assert from 'assert';
 
 import { OtherPlayer, Player, Game, Round, RoundSubmission } from '@/types';
 import store from '@/store';
+import Card from './Card.vue';
 
 export default Vue.extend({
   name: 'GameJudging',
+  components: {
+    Card,
+  },
   data() {
     return { winnerSubmissionIndex: -1 };
   },
@@ -130,7 +133,7 @@ export default Vue.extend({
 });
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
 .submission
   .flip-card
     background-color: transparent

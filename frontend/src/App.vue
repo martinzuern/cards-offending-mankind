@@ -40,7 +40,6 @@ export default Vue.extend({
 </script>
 
 <style lang="sass">
-//font
 html
   font-family: 'Inter', Helvetica, sans-serif
   -webkit-font-smoothing: antialiased
@@ -50,13 +49,14 @@ html
   html
     font-family: 'Inter var', Helvetica, sans-serif
 
-//styles
-#app
-  text-align: left
-  color: #2c3e50
-
+// Bootstrap overrides
 small
   font-size: 70%
+
+a
+  color: black
+  &:hover
+    color: lighten(black, 20)
 
 .card
   box-shadow: $box-shadow-card
@@ -65,31 +65,10 @@ small
 
 .alert
   font-weight: initial
+</style>
 
-.play-card
-  height: $card-height
-  width: $card-width
-  padding: .8rem
-  border-radius: $border-radius
-  box-shadow: $box-shadow-card
-  margin: .5rem
-  hyphens: auto
-  font-weight: bold
-  white-space: pre-line
-
-  &.black-card
-    height: 15rem
-    width: 10rem
-    background-color: black
-    color: white
-
-  &.white-card
-    transition: all .2s ease-out
-    cursor: pointer
-    background-color: white
-    border: 1px solid black
-    &.selected
-      background-color: blue
-      color: white
-      box-shadow: 0 0 9px 1px blue
+<style lang="sass" scoped>
+#app
+  text-align: left
+  color: #2c3e50
 </style>

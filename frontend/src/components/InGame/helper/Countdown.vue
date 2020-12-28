@@ -61,7 +61,7 @@ export default Vue.extend({
 });
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
 .progress-bar
   transition: width 1s linear !important
   .countdown-right

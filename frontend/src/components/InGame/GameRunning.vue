@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-row class="sticky-top">
+    <b-row class="sticky-top py-2">
       <b-col cols="6" md="auto" order="1" class="pt-2">
         <h5>Round {{ rounds.length }}</h5>
       </b-col>
@@ -25,9 +25,7 @@
       </b-col>
     </b-row>
 
-    <div class="play-card black-card mx-auto mt-5">
-      {{ currentRound.prompt.value }}
-    </div>
+    <Card class="mx-auto mt-5 prompt" :is-white="false" :value="currentRound.prompt.value" />
 
     <transition name="fade">
       <GamePlaying v-if="currentRound.status === 'created'" />
@@ -54,6 +52,7 @@ import Countdown from './helper/Countdown.vue';
 import Leaderboard from './helper/Leaderboard.vue';
 import GamePlaying from './helper/GamePlaying.vue';
 import GameJudging from './helper/GameJudging.vue';
+import Card from './helper/Card.vue';
 
 export default Vue.extend({
   name: 'GameRunning',
@@ -62,6 +61,7 @@ export default Vue.extend({
     Leaderboard,
     GamePlaying,
     GameJudging,
+    Card,
   },
   computed: {
     game(): Game {
@@ -120,9 +120,14 @@ export default Vue.extend({
 });
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
 .sticky-top
   background: white
+
+.prompt
+  width: $card-width * 1.2
+  height: $card-height * 1.2
+
 .fade-leave-active
   transition: opacity .5s
 .fade-enter-active
