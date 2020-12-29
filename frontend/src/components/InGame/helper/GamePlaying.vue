@@ -149,6 +149,9 @@ export default Vue.extend({
       this.submitted = false;
       this.randomDegrees = {};
     },
+    selectedCards(): void {
+      window.dispatchEvent(new Event('resize'));
+    },
   },
   methods: {
     getRandomDegrees(idx: number): number {
