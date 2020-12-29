@@ -42,13 +42,13 @@
 </template>
 
 <script lang="ts">
-/* global SocketIOClient */
-
 import Vue from 'vue';
 import assert from 'assert';
 
 import { OtherPlayer, Player, Game, Round, RoundSubmission } from '@/types';
 import store from '@/store';
+import SocketEmitter from '@/helpers/SocketEmitter';
+
 import Card from './Card.vue';
 
 export default Vue.extend({
@@ -76,9 +76,9 @@ export default Vue.extend({
       assert(store.getters.currentRound);
       return store.getters.currentRound;
     },
-    socket(): SocketIOClient.Socket {
+    socket(): SocketEmitter {
       assert(store.state.socket);
-      return store.state.socket;
+      return new SocketEmitter(store.state.socket);
     },
     roundIndex(): number {
       return store.getters.currentRoundIndex;
@@ -111,10 +111,8 @@ export default Vue.extend({
     },
     chooseWinner(): void {
       if (!this.isJudge) return;
-      this.socket.emit('choose_winner', {
-        submissionIndex: this.winnerSubmissionIndex,
-        roundIndex: this.roundIndex,
-      });
+      const { winnerSubmissionIndex: submissionIndex, roundIndex } = this;
+      this.socket.chooseWinner({ submissionIndex, roundIndex });
       this.winnerSubmissionIndex = -1;
     },
     selectSubmittedCard(submissionIndex: number): void {
@@ -124,10 +122,8 @@ export default Vue.extend({
       } else {
         const sub = this.currentRound.submissions[submissionIndex];
         if (!sub || sub.isRevealed) return;
-        this.socket.emit('reveal_submission', {
-          submissionIndex,
-          roundIndex: this.roundIndex,
-        });
+        const { roundIndex } = this;
+        this.socket.revealSubmission({ submissionIndex, roundIndex });
       }
     },
   },
