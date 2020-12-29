@@ -30,6 +30,7 @@ Object {
     "packs": Array [],
     "specialRules": Object {
       "aiPlayerCount": 0,
+      "allowDiscarding": false,
     },
     "status": "created",
     "timeouts": Object {
@@ -97,6 +98,7 @@ Object {
     ],
     "specialRules": Object {
       "aiPlayerCount": 0,
+      "allowDiscarding": false,
     },
     "status": "created",
     "timeouts": Object {
@@ -164,6 +166,7 @@ Object {
     ],
     "specialRules": Object {
       "aiPlayerCount": 0,
+      "allowDiscarding": false,
     },
     "status": "running",
     "timeouts": Object {
