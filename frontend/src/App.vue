@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex flex-column min-vh-100">
-    <b-container id="app" class="my-5 flex-fill" :class="{ 'd-flex align-items-center': isHomeView }">
+    <b-container id="app" class="mb-5 mt-1 flex-fill" :class="{ 'd-flex align-items-center': isHomeView }">
       <b-row :class="{ 'w-100 m-0': isHomeView }">
         <b-col>
           <router-view></router-view>
