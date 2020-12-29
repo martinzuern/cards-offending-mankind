@@ -257,7 +257,7 @@ export default Vue.extend({
         specialRules: {
           aiPlayerCount: 0,
           allowDiscarding: {
-            enabled: false,
+            enabled: true,
             penalty: 0,
           },
         },
