@@ -364,6 +364,33 @@ export default class GameService {
     return this.refillHandForPlayers(gameState, [myPlayer]);
   }
 
+  static discardPrompt(
+    gameState: InternalGameState,
+    roundIndex: number,
+    playerId: UUID
+  ): InternalGameState {
+    const newGameState = _.cloneDeep(gameState);
+    const round = newGameState.rounds[roundIndex];
+
+    assert(round.status === RoundStatus.Created, 'Incorrect round status.');
+    assert(round.judgeId === playerId, 'Only Judge can discard the prompt.');
+    assert(round.submissions.length === 0, 'Prompt cannot be discarded if there are submissions.');
+
+    const myPlayer = _.find(gameState.players, {
+      id: playerId,
+      isActive: true,
+    }) as InternalPlayer;
+    assert(myPlayer, 'Could not find player.');
+
+    if (!newGameState.piles.prompts.length)
+      newGameState.piles.prompts = _.shuffle(newGameState.piles.discardedPrompts.splice(0));
+
+    round.prompt = newGameState.piles.prompts.shift();
+    gameState.piles.discardedPrompts.push(round.prompt);
+
+    return newGameState;
+  }
+
   static playRound(prevGameState: InternalGameState, roundIndex: number): InternalGameState {
     const gameState = _.cloneDeep(prevGameState);
     const round = gameState.rounds[roundIndex];

@@ -26,6 +26,10 @@ export interface MessagePickCards {
   cards: ResponseCard[];
 }
 
+export interface MessageDiscardPrompt {
+  roundIndex: number;
+}
+
 export interface MessageRevealSubmission {
   roundIndex: number;
   submissionIndex: number;

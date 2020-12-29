@@ -17,6 +17,7 @@ import {
   Player,
   MessageRoundUpdated,
   RoundTimeoutKeys,
+  MessageDiscardPrompt,
 } from '../../../../root-types';
 import L from '../../../common/logger';
 import DBService from '../../../services/db.service';
@@ -355,6 +356,23 @@ export default class Controller {
     });
 
     await Controller.sendUpdated(this.io, this.gameId, ['player']);
+  };
+
+  onDiscardPrompt = async (data: MessageDiscardPrompt): Promise<void> => {
+    L.info(
+      'Game %s – Player %s – Received event onDiscardPrompt: %o.',
+      this.gameId,
+      this.playerId,
+      data
+    );
+    const { roundIndex } = data;
+    await updateRound(this.gameId, roundIndex, async (_round, prevGameState) => {
+      const gameState = GameService.discardPrompt(prevGameState, roundIndex, this.playerId as UUID);
+
+      return { gameState };
+    });
+
+    await Controller.sendUpdated(this.io, this.gameId, ['round']);
   };
 
   onRevealSubmission = async (data: MessageRevealSubmission): Promise<void> => {
