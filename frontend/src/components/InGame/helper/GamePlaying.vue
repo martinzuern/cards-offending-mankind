@@ -35,9 +35,9 @@
       />
     </div>
 
-    <div class="mt-5">
+    <div class="mt-5 sticky-bottom-sm">
       <div v-if="discardMode">
-        <b-row class="mt-4">
+        <b-row>
           <b-col>
             <b-button variant="secondary" block @click="toggleDiscardMode">Cancel</b-button>
           </b-col>
@@ -49,22 +49,23 @@
         </b-row>
       </div>
       <div v-else>
-        <button
-          class="btn btn-success w-100 d-block submit-cards"
-          :disabled="selectedCards.length !== cardsToPick"
-          @click="submitSelection"
-        >
-          Submit Selection
-        </button>
-        <b-button
-          v-if="game.specialRules.allowDiscarding.enabled"
-          variant="outline-secondary"
-          block
-          class="mt-2"
-          @click="toggleDiscardMode"
-        >
-          Discard cards
-        </b-button>
+        <b-row>
+          <b-col cols="auto" class="pr-1">
+            <b-button
+              v-if="game.specialRules.allowDiscarding.enabled"
+              variant="secondary"
+              block
+              @click="toggleDiscardMode"
+            >
+              Discard
+            </b-button>
+          </b-col>
+          <b-col class="pl-1">
+            <b-button variant="success" :disabled="selectedCards.length !== cardsToPick" block @click="submitSelection">
+              Submit Selection
+            </b-button>
+          </b-col>
+        </b-row>
       </div>
     </div>
   </div>
@@ -217,10 +218,6 @@ export default Vue.extend({
 </script>
 
 <style lang="sass" scoped>
-@import "~bootstrap/scss/functions"
-@import "~bootstrap/scss/variables"
-@import "~bootstrap/scss/mixins"
-
 @function pow($base, $exponent)
   $result: 1
   @for $_ from 1 through $exponent
@@ -270,10 +267,6 @@ export default Vue.extend({
 
     .in-fan-card
       margin-bottom: -3rem
-
-  .submit-cards
-    position: sticky
-    bottom: 10px
 
 @keyframes randomMoveIn
   from

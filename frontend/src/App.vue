@@ -65,6 +65,11 @@ a
 
 .alert
   font-weight: initial
+
+@include media-breakpoint-down(sm)
+  .sticky-bottom-sm
+    position: sticky
+    bottom: 1rem
 </style>
 
 <style lang="sass" scoped>
