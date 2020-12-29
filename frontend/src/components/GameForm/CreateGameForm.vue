@@ -129,7 +129,14 @@
                   description="For cards with pick 2+, players are dealt an extra card."
                   disabled="disabled"
                 >
-                  <b-form-input id="pickExtra" readonly value="Coming soon!"></b-form-input>
+                  <b-form-checkbox
+                    id="pickExtra"
+                    v-model="game.specialRules.pickExtra"
+                    class="font-weight-normal"
+                    switch
+                  >
+                    {{ game.specialRules.pickExtra ? 'Enabled' : 'Disabled' }}
+                  </b-form-checkbox>
                 </b-form-group>
 
                 <b-form-group
@@ -260,6 +267,7 @@ export default Vue.extend({
             enabled: true,
             penalty: 0,
           },
+          pickExtra: false,
         },
       } as Required<CreateGame>,
       player: {

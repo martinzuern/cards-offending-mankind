@@ -38,6 +38,8 @@ export default class GameService {
   }
 
   static buildPile(game: InternalGame): Piles {
+    const { pickExtra } = game.specialRules;
+
     const decks = game.packs.map((pack) => {
       const res = cardDecks[pack.abbr];
       assert(res, 'Invalid pack.');
@@ -50,7 +52,7 @@ export default class GameService {
           type: CardType.Text,
           value: prompt.text,
           pick: prompt.pick,
-          draw: Math.max(prompt.pick - 1, 1),
+          draw: Math.max(prompt.pick - (pickExtra ? 1 : 2), 0),
           packAbbr: deck.abbr,
         }))
       )
@@ -96,7 +98,7 @@ export default class GameService {
     const newPlayers = newGameState.players.filter((p) => playerIds.includes(p.id));
 
     // Make sure we have enough cards left
-    const roundHandSize = Math.max(round.prompt.pick, handSizeParam + round.prompt.draw - 1);
+    const roundHandSize = Math.max(round.prompt.pick, handSizeParam + round.prompt.draw);
     if (newGameState.piles.responses.length < roundHandSize * newPlayers.length)
       newGameState.piles.responses = _.shuffle([
         ...newGameState.piles.responses,
@@ -200,6 +202,7 @@ export default class GameService {
               enabled: false,
               penalty: 0,
             },
+            pickExtra: false,
           },
         },
         game,

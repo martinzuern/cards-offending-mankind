@@ -27,6 +27,7 @@ export interface Game {
       enabled: boolean;
       penalty: number;
     };
+    pickExtra: boolean;
   };
 }
 
