@@ -13,11 +13,10 @@
     </div>
   </div>
   <div v-else>
-    <div class="my-5 d-flex justify-content-center flex-wrap">
-      <div v-if="selectedCards.length === 0" class="my-5">Please select {{ cardsToPickString }}.</div>
+    <div class="mt-4 mb-2 text-center">Please select {{ discardMode ? 'cards to discard' : cardsToPickString }}.</div>
+    <div class="mb-4 d-flex justify-content-center flex-wrap selected-card-wrapper">
       <Card
         v-for="card in selectedCards"
-        v-else
         :key="card.value"
         class="selected-card"
         :selected="true"
@@ -36,13 +35,38 @@
       />
     </div>
 
-    <button
-      class="btn btn-success w-100 d-block mt-5 submit-cards"
-      :disabled="selectedCards.length === 0"
-      @click="submitSelection"
-    >
-      Submit Selection
-    </button>
+    <div class="mt-5">
+      <div v-if="discardMode">
+        <b-row class="mt-4">
+          <b-col>
+            <b-button variant="secondary" block @click="toggleDiscardMode">Cancel</b-button>
+          </b-col>
+          <b-col>
+            <b-button :disabled="selectedCards.length === 0" variant="success" block @click="discardSelection">
+              Discard {{ cardsSelectedString }}
+            </b-button>
+          </b-col>
+        </b-row>
+      </div>
+      <div v-else>
+        <button
+          class="btn btn-success w-100 d-block submit-cards"
+          :disabled="selectedCards.length === 0"
+          @click="submitSelection"
+        >
+          Submit Selection
+        </button>
+        <b-button
+          v-if="game.specialRules.allowDiscarding"
+          variant="outline-secondary"
+          block
+          class="mt-2"
+          @click="toggleDiscardMode"
+        >
+          Discard cards
+        </b-button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -66,8 +90,9 @@ export default Vue.extend({
   },
   data() {
     return {
-      selectedCards: [] as ResponseCard[],
       submitted: false,
+      discardMode: false,
+      selectedCards: [] as ResponseCard[],
       randomDegrees: {} as Record<number, number>,
     };
   },
@@ -114,6 +139,9 @@ export default Vue.extend({
     cardsToPickString(): string {
       return pluralize('card', this.cardsToPick, true);
     },
+    cardsSelectedString(): string {
+      return pluralize('card', this.selectedCards.length, true);
+    },
   },
   watch: {
     roundIndex(): void {
@@ -126,6 +154,10 @@ export default Vue.extend({
     getRandomDegrees(idx: number): number {
       this.randomDegrees[idx] = this.randomDegrees[idx] ?? random(0, 359);
       return this.randomDegrees[idx];
+    },
+    toggleDiscardMode(): void {
+      this.selectedCards = [];
+      this.discardMode = !this.discardMode;
     },
     submitSelection(): void {
       if (this.selectedCards.length !== this.cardsToPick) {
@@ -141,6 +173,13 @@ export default Vue.extend({
       this.socket.emit('pick_cards', { roundIndex: this.roundIndex, cards: this.selectedCards });
       this.submitted = true;
     },
+    discardSelection(): void {
+      if (confirm(`Do you really want to discard ${this.cardsSelectedString}?`)) {
+        this.socket.emit('discard_cards', { roundIndex: this.roundIndex, cards: this.selectedCards });
+        this.selectedCards = [];
+        this.discardMode = false;
+      }
+    },
     clickToggleCard(card: ResponseCard): void {
       if (this.submitted === true) return;
 
@@ -150,7 +189,7 @@ export default Vue.extend({
           this.selectedCards.findIndex(({ value }) => value === card.value),
           1
         );
-      } else if (this.selectedCards.length < this.cardsToPick) {
+      } else if (this.discardMode || this.selectedCards.length < this.cardsToPick) {
         this.selectedCards.push(card);
       } else {
         if (this.cardsToPick === 1) {
@@ -193,6 +232,9 @@ export default Vue.extend({
       transform: translateY(-2rem) translateX(-1rem) rotate(#{$rotAngle}deg)
 
 @include media-breakpoint-up(md)
+  .selected-card-wrapper
+    min-height: 8rem
+
   .card-fan
     display: flex
     position: relative
@@ -204,6 +246,7 @@ export default Vue.extend({
       top: 30px
       transition: transform .2s
       margin-left: -2rem
+      min-width: 5rem
 
     @for $cardCount from 2 through 25
       &.fan-count-#{$cardCount}
