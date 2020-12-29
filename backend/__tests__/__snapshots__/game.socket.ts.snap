@@ -30,7 +30,10 @@ Object {
     "packs": Array [],
     "specialRules": Object {
       "aiPlayerCount": 0,
-      "allowDiscarding": false,
+      "allowDiscarding": Object {
+        "enabled": false,
+        "penalty": 0,
+      },
     },
     "status": "created",
     "timeouts": Object {
@@ -98,7 +101,10 @@ Object {
     ],
     "specialRules": Object {
       "aiPlayerCount": 0,
-      "allowDiscarding": false,
+      "allowDiscarding": Object {
+        "enabled": false,
+        "penalty": 0,
+      },
     },
     "status": "created",
     "timeouts": Object {
@@ -166,7 +172,10 @@ Object {
     ],
     "specialRules": Object {
       "aiPlayerCount": 0,
-      "allowDiscarding": false,
+      "allowDiscarding": Object {
+        "enabled": false,
+        "penalty": 0,
+      },
     },
     "status": "running",
     "timeouts": Object {

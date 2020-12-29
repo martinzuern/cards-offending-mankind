@@ -213,7 +213,10 @@ export default class GameService {
           winnerPoints: 20,
           specialRules: {
             aiPlayerCount: 0,
-            allowDiscarding: false,
+            allowDiscarding: {
+              enabled: false,
+              penalty: 0,
+            },
           },
         },
         game,
@@ -325,7 +328,10 @@ export default class GameService {
     discardedCards: ResponseCard[]
   ): InternalGameState {
     const round = gameState.rounds[roundIndex];
-    assert(gameState.game.specialRules.allowDiscarding === true, 'Game does not allow discarding.');
+    assert(
+      gameState.game.specialRules.allowDiscarding.enabled === true,
+      'Game does not allow discarding.'
+    );
     assert(round.status === RoundStatus.Created, 'Incorrect round status.');
     assert(round.judgeId !== playerId, 'Judge cannot reject cards.');
 
@@ -347,7 +353,7 @@ export default class GameService {
       playerId,
       timestamp: new Date(),
       cards,
-      pointsChange: 0,
+      pointsChange: gameState.game.specialRules.allowDiscarding.penalty * -1,
       isRevealed: false,
     };
     round.discard.push(newSubmission);

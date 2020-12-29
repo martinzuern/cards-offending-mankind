@@ -51,13 +51,13 @@
       <div v-else>
         <button
           class="btn btn-success w-100 d-block submit-cards"
-          :disabled="selectedCards.length === 0"
+          :disabled="selectedCards.length !== cardsToPick"
           @click="submitSelection"
         >
           Submit Selection
         </button>
         <b-button
-          v-if="game.specialRules.allowDiscarding"
+          v-if="game.specialRules.allowDiscarding.enabled"
           variant="outline-secondary"
           block
           class="mt-2"
@@ -177,7 +177,12 @@ export default Vue.extend({
       this.submitted = true;
     },
     discardSelection(): void {
-      if (confirm(`Do you really want to discard ${this.cardsSelectedString}?`)) {
+      const { penalty } = this.game.specialRules.allowDiscarding;
+      const msg = [
+        `Do you really want to discard ${this.cardsSelectedString}?`,
+        penalty ? `This will cost you ${pluralize('point', penalty, true)}.` : undefined,
+      ].join('\r\n');
+      if (confirm(msg)) {
         this.socket.emit('discard_cards', { roundIndex: this.roundIndex, cards: this.selectedCards });
         this.selectedCards = [];
         this.discardMode = false;
@@ -242,7 +247,7 @@ export default Vue.extend({
     display: flex
     position: relative
     margin-left: 2rem
-    justify-content: space-evenly
+    justify-content: center
 
     .in-fan-card
       position: relative

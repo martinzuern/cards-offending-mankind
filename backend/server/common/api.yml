@@ -261,8 +261,16 @@ components:
               minimum: 0
               maximum: 3
             allowDiscarding:
-              type: boolean
-              default: false
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                  default: false
+                penalty:
+                  type: integer
+                  default: 0
+                  minimum: 0
+                  maximum: 5
     CreateGame:
       title: Game
       type: object
@@ -313,8 +321,16 @@ components:
               minimum: 0
               maximum: 3
             allowDiscarding:
-              type: boolean
-              default: false
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                  default: false
+                penalty:
+                  type: integer
+                  default: 0
+                  minimum: 0
+                  maximum: 5
     PackInformation:
       title: PackInformation
       allOf:

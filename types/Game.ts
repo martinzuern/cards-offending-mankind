@@ -23,7 +23,10 @@ export interface Game {
   };
   specialRules: {
     aiPlayerCount: 0 | 1 | 2 | 3;
-    allowDiscarding: boolean;
+    allowDiscarding: {
+      enabled: boolean;
+      penalty: number;
+    };
   };
 }
 
