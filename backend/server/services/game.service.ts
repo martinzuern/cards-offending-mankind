@@ -143,23 +143,6 @@ export default class GameService {
 
     newGameState = this.refillHandForPlayers(newGameState, activeHumanPlayers);
 
-    // Handling AI Players
-    const aiPlayers = newGameState.players.filter((p) => p.isAI);
-    newGameState = this.refillHandForPlayers(newGameState, aiPlayers, 0);
-    newGameState.players
-      .filter((p) => p.isAI)
-      .forEach((aiPlayer) => {
-        const newSubmission: RoundSubmission = {
-          playerId: aiPlayer.id,
-          timestamp: new Date(),
-          cards: aiPlayer.deck.splice(0),
-          pointsChange: 0,
-          isRevealed: false,
-        };
-        newGameState.piles.discardedResponses.push(...newSubmission.cards);
-        _.last(newGameState.rounds).submissions.push(newSubmission);
-      });
-
     return newGameState;
   }
 
@@ -286,7 +269,9 @@ export default class GameService {
     playerId: UUID,
     pickedCards: ResponseCard[]
   ): InternalGameState {
-    const round = gameState.rounds[roundIndex];
+    let newGameState = _.cloneDeep(gameState);
+
+    const round = newGameState.rounds[roundIndex];
     assert(round.status === RoundStatus.Created, 'Incorrect round status.');
     assert(round.judgeId !== playerId, 'Judge cannot pick cards.');
     assert(
@@ -294,7 +279,7 @@ export default class GameService {
       'Player already picked cards.'
     );
 
-    const myPlayer = _.find(gameState.players, {
+    const myPlayer = _.find(newGameState.players, {
       id: playerId,
       isActive: true,
     }) as InternalPlayer;
@@ -304,7 +289,7 @@ export default class GameService {
       const found = _.find(myPlayer.deck, card);
       assert(found, 'Invalid card');
       myPlayer.deck = _.without(myPlayer.deck, found);
-      gameState.piles.discardedResponses.push(found);
+      newGameState.piles.discardedResponses.push(found);
       return found;
     });
     assert(cards.length === round.prompt.pick, 'Incorrect number of cards.');
@@ -318,7 +303,26 @@ export default class GameService {
     };
     round.submissions.push(newSubmission);
 
-    return gameState;
+    // Handling AI Players after first human player picked cards
+    if (round.submissions.length === 1) {
+      const aiPlayers = newGameState.players.filter((p) => p.isAI);
+      newGameState = this.refillHandForPlayers(newGameState, aiPlayers, 0);
+      newGameState.players
+        .filter((p) => p.isAI)
+        .forEach((aiPlayer) => {
+          const s: RoundSubmission = {
+            playerId: aiPlayer.id,
+            timestamp: new Date(),
+            cards: aiPlayer.deck.splice(0),
+            pointsChange: 0,
+            isRevealed: false,
+          };
+          newGameState.rounds[roundIndex].submissions.push(s);
+          newGameState.piles.discardedResponses.push(...s.cards);
+        });
+    }
+
+    return newGameState;
   }
 
   static discardCards(
@@ -333,7 +337,7 @@ export default class GameService {
       'Game does not allow discarding.'
     );
     assert(round.status === RoundStatus.Created, 'Incorrect round status.');
-    assert(round.judgeId !== playerId, 'Judge cannot reject cards.');
+    assert(round.judgeId !== playerId, 'Judge cannot discard cards.');
 
     const myPlayer = _.find(gameState.players, {
       id: playerId,
