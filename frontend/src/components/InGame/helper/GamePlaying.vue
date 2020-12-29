@@ -11,6 +11,15 @@
         :style="{ '--randVal': getRandomDegrees(i), 'z-index': i }"
       />
     </div>
+    <div class="text-center">
+      <b-button
+        v-if="isJudge && currentRound.submissions.length === 0"
+        variant="outline-secondary"
+        @click="discardPrompt"
+      >
+        Discard prompt
+      </b-button>
+    </div>
   </div>
   <div v-else>
     <div class="mt-4 mb-2 text-center">Please select {{ discardMode ? 'cards to discard' : cardsToPickString }}.</div>
@@ -123,6 +132,9 @@ export default Vue.extend({
     submissions(): RoundSubmission[] {
       return this.currentRound.submissions;
     },
+    promptVal(): string {
+      return this.currentRound.prompt.value;
+    },
     hasSubmitted(): boolean {
       return this.submitted || this.submissions.some((s) => s.playerId === this.player.id);
     },
@@ -152,11 +164,28 @@ export default Vue.extend({
     selectedCards(): void {
       window.dispatchEvent(new Event('resize'));
     },
+    promptVal(): void {
+      if (this.isJudge) return;
+      this.selectedCards = [];
+      this.$bvToast.toast('The judge discarded the prompt.', {
+        title: 'Card changed',
+        autoHideDelay: 10000,
+        variant: 'primary',
+        solid: true,
+      });
+    },
   },
   methods: {
     getRandomDegrees(idx: number): number {
       this.randomDegrees[idx] = this.randomDegrees[idx] ?? random(0, 359);
       return this.randomDegrees[idx];
+    },
+    discardPrompt(): void {
+      if (!this.isJudge || this.currentRound.submissions.length > 0) return;
+      if (confirm('Do you really want to discard the prompt?')) {
+        const { roundIndex } = this;
+        this.socket.discardPrompt({ roundIndex });
+      }
     },
     toggleDiscardMode(): void {
       this.selectedCards = [];
