@@ -1,7 +1,7 @@
 <template>
   <div>
     <template v-if="userLocked">
-      <h2>📡 Connecting …</h2>
+      <h2 class="mt-5">📡 Connecting …</h2>
       <h6>Please be patient, this can take a couple of seconds.</h6>
     </template>
 

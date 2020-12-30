@@ -363,7 +363,7 @@ export default class Controller {
       return { gameState };
     });
 
-    return Controller.sendUpdated(this.io, this.gameId, ['round']);
+    return Controller.sendUpdated(this.io, this.gameId, ['round', 'player']);
   };
 
   onRevealSubmission = async (data: MessageRevealSubmission): Promise<void> => {

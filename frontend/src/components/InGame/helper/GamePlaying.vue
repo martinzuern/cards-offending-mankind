@@ -161,7 +161,7 @@ export default Vue.extend({
       this.submitted = false;
       this.randomDegrees = {};
     },
-    selectedCards(): void {
+    notSelectedCards(): void {
       window.dispatchEvent(new Event('resize'));
     },
     promptVal(): void {

@@ -393,7 +393,13 @@ export default class GameService {
     round.prompt = newGameState.piles.prompts.shift();
     newGameState.piles.discardedPrompts.push(round.prompt);
 
-    return newGameState;
+    // Refilling for the case that the new prompt requires more cards
+    // There is an edge case that the discarded prompt is pick 2, then we intentionally let the players
+    // to keep the extra cards
+    return this.refillHandForPlayers(
+      newGameState,
+      newGameState.players.filter((p) => p.id !== round.judgeId && p.isActive && !p.isAI)
+    );
   }
 
   static playRound(prevGameState: InternalGameState, roundIndex: number): InternalGameState {
