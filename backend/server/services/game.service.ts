@@ -100,18 +100,18 @@ export default class GameService {
     // Make sure we have enough cards left
     const roundHandSize = Math.max(round.prompt.pick, handSizeParam + round.prompt.draw);
     if (newGameState.piles.responses.length < roundHandSize * newPlayers.length)
-      newGameState.piles.responses = _.shuffle([
+      newGameState.piles.responses = [
         ...newGameState.piles.responses,
-        ...newGameState.piles.discardedResponses.splice(0),
-      ]);
+        ..._.shuffle(newGameState.piles.discardedResponses.splice(0)),
+      ];
 
-    newPlayers.forEach((player: InternalPlayer) => {
-      if (player.deck.length >= roundHandSize) return;
+    newPlayers.forEach((p: InternalPlayer) => {
+      if (p.deck.length >= roundHandSize) return;
 
       // eslint-disable-next-line no-param-reassign
-      player.deck = [
-        ...player.deck,
-        ...newGameState.piles.responses.splice(0, roundHandSize - player.deck.length),
+      p.deck = [
+        ...p.deck,
+        ...newGameState.piles.responses.splice(0, roundHandSize - p.deck.length),
       ];
     });
 
@@ -124,7 +124,7 @@ export default class GameService {
       'There are open rounds.'
     );
 
-    let newGameState = _.cloneDeep(gameState);
+    const newGameState = _.cloneDeep(gameState);
     const activeHumanPlayers = newGameState.players.filter((p) => p.isActive && !p.isAI);
 
     if (!newGameState.piles.prompts.length)
@@ -141,11 +141,9 @@ export default class GameService {
       discard: [],
     };
     newGameState.rounds.push(newRound);
-    gameState.piles.discardedPrompts.push(newRound.prompt);
+    newGameState.piles.discardedPrompts.push(newRound.prompt);
 
-    newGameState = this.refillHandForPlayers(newGameState, activeHumanPlayers);
-
-    return newGameState;
+    return this.refillHandForPlayers(newGameState, activeHumanPlayers);
   }
 
   static startGame(gameState: InternalGameState): InternalGameState {
@@ -334,15 +332,16 @@ export default class GameService {
     playerId: UUID,
     discardedCards: ResponseCard[]
   ): InternalGameState {
-    const round = gameState.rounds[roundIndex];
     assert(
       gameState.game.specialRules.allowDiscarding.enabled === true,
       'Game does not allow discarding.'
     );
+    const newGameState = _.cloneDeep(gameState);
+    const round = newGameState.rounds[roundIndex];
     assert(round.status === RoundStatus.Created, 'Incorrect round status.');
     assert(round.judgeId !== playerId, 'Judge cannot discard cards.');
 
-    const myPlayer = _.find(gameState.players, {
+    const myPlayer = _.find(newGameState.players, {
       id: playerId,
       isActive: true,
     }) as InternalPlayer;
@@ -352,7 +351,7 @@ export default class GameService {
       const found = _.find(myPlayer.deck, card);
       assert(found, 'Invalid card');
       myPlayer.deck = _.without(myPlayer.deck, found);
-      gameState.piles.discardedResponses.push(found);
+      newGameState.piles.discardedResponses.push(found);
       return found;
     });
 
@@ -360,11 +359,11 @@ export default class GameService {
       playerId,
       timestamp: new Date(),
       cards,
-      pointsChange: gameState.game.specialRules.allowDiscarding.penalty * -1,
+      pointsChange: newGameState.game.specialRules.allowDiscarding.penalty * -1,
       isRevealed: false,
     };
     round.discard.push(newSubmission);
-    return this.refillHandForPlayers(gameState, [myPlayer]);
+    return this.refillHandForPlayers(newGameState, [myPlayer]);
   }
 
   static discardPrompt(
@@ -379,7 +378,7 @@ export default class GameService {
     assert(round.judgeId === playerId, 'Only Judge can discard the prompt.');
     assert(round.submissions.length === 0, 'Prompt cannot be discarded if there are submissions.');
 
-    const myPlayer = _.find(gameState.players, {
+    const myPlayer = _.find(newGameState.players, {
       id: playerId,
       isActive: true,
     }) as InternalPlayer;
@@ -389,7 +388,7 @@ export default class GameService {
       newGameState.piles.prompts = _.shuffle(newGameState.piles.discardedPrompts.splice(0));
 
     round.prompt = newGameState.piles.prompts.shift();
-    gameState.piles.discardedPrompts.push(round.prompt);
+    newGameState.piles.discardedPrompts.push(round.prompt);
 
     return newGameState;
   }
@@ -406,14 +405,14 @@ export default class GameService {
         playing: now,
         revealing: now,
         judging: now,
-        betweenRounds: new Date(now.getTime() + prevGameState.game.timeouts.betweenRounds * 1000),
+        betweenRounds: new Date(now.getTime() + gameState.game.timeouts.betweenRounds * 1000),
       };
     } else {
       round.status = RoundStatus.Played;
       round.submissions = _.shuffle(round.submissions);
       round.timeouts = {
         playing: now,
-        revealing: new Date(now.getTime() + prevGameState.game.timeouts.revealing * 1000),
+        revealing: new Date(now.getTime() + gameState.game.timeouts.revealing * 1000),
       };
     }
     return gameState;
@@ -429,7 +428,7 @@ export default class GameService {
     round.timeouts = {
       ...round.timeouts,
       revealing: now,
-      judging: new Date(now.getTime() + prevGameState.game.timeouts.judging * 1000),
+      judging: new Date(now.getTime() + gameState.game.timeouts.judging * 1000),
     };
     round.submissions = round.submissions.map((s) => ({ ...s, isRevealed: true }));
     return gameState;
@@ -454,7 +453,7 @@ export default class GameService {
     round.timeouts = {
       ...round.timeouts,
       judging: now,
-      betweenRounds: new Date(now.getTime() + prevGameState.game.timeouts.betweenRounds * 1000),
+      betweenRounds: new Date(now.getTime() + gameState.game.timeouts.betweenRounds * 1000),
     };
 
     return gameState;
@@ -462,19 +461,21 @@ export default class GameService {
 
   static chooseWinner(round: Round, submissionIndex: number): Round {
     assert(round.status === RoundStatus.Revealed, 'Incorrect round status.');
-    const submission = round.submissions[submissionIndex];
+    const newRound = _.cloneDeep(round);
+    const submission = newRound.submissions[submissionIndex];
     assert(submission, 'Submission not found.');
     submission.pointsChange = 1;
-    return round;
+    return newRound;
   }
 
   static revealSubmission(round: Round, submissionIndex: number): Round {
     assert(round.status === RoundStatus.Played, 'Incorrect round status.');
-    const submission = round.submissions[submissionIndex];
+    const newRound = _.cloneDeep(round);
+    const submission = newRound.submissions[submissionIndex];
     assert(submission, 'Submission not found.');
     assert(submission.isRevealed === false, 'Submission already revealed.');
     submission.isRevealed = true;
-    return round;
+    return newRound;
   }
 
   static updatePlayer(

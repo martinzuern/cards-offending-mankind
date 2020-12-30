@@ -150,7 +150,7 @@ export default class Controller {
       this.addTimeoutHandler(gameState);
       return { gameState };
     });
-    await Controller.sendUpdated(this.io, this.gameId, ['round', 'player']);
+    return Controller.sendUpdated(this.io, this.gameId, ['round', 'player']);
   };
 
   setRoundRevealed = async (roundIndex: number): Promise<void> => {
@@ -159,7 +159,7 @@ export default class Controller {
       this.addTimeoutHandler(gameState);
       return { gameState };
     });
-    await Controller.sendUpdated(this.io, this.gameId, ['round']);
+    return Controller.sendUpdated(this.io, this.gameId, ['round']);
   };
 
   setRoundEnded = async (roundIndex: number): Promise<void> => {
@@ -183,10 +183,9 @@ export default class Controller {
     });
 
     if (gameShouldEnd) {
-      this.setGameEnded();
-    } else {
-      await Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);
+      return this.setGameEnded();
     }
+    return Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);
   };
 
   setGameEnded = async (): Promise<void> => {
@@ -196,7 +195,7 @@ export default class Controller {
     });
     await this.clearTimeouts();
 
-    await Controller.sendUpdated(this.io, this.gameId, ['gamestate']);
+    return Controller.sendUpdated(this.io, this.gameId, ['gamestate']);
   };
 
   // Timeout handlers
@@ -242,7 +241,7 @@ export default class Controller {
       return gameState;
     });
 
-    await Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);
+    return Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);
   };
 
   onStartGame = async (): Promise<void> => {
@@ -254,7 +253,7 @@ export default class Controller {
       return gameState;
     });
 
-    await Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);
+    return Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);
   };
 
   onStartNextRound = async (): Promise<void> => {
@@ -281,12 +280,7 @@ export default class Controller {
       if (gameState.rounds.length >= 2) {
         gameShouldEnd =
           gameShouldEnd ||
-          _(gameState.rounds)
-            .takeRight(2)
-            .map('submissions')
-            .flatten()
-            .filter((s) => _.includes(activeHumanPlayerIds, s.playerId))
-            .value().length === 0;
+          _.takeRight(gameState.rounds, 2).every((r) => r.submissions.length === 0);
       }
 
       if (!gameShouldEnd) {
@@ -297,10 +291,9 @@ export default class Controller {
     });
 
     if (gameShouldEnd) {
-      this.setGameEnded();
-    } else {
-      await Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);
+      return this.setGameEnded();
     }
+    return Controller.sendUpdated(this.io, this.gameId, ['gamestate', 'player']);
   };
 
   onPickCards = async (data: MessagePickCards): Promise<void> => {
@@ -328,10 +321,9 @@ export default class Controller {
     });
 
     if (pickComplete) {
-      this.setRoundPlayed(roundIndex);
-    } else {
-      await Controller.sendUpdated(this.io, this.gameId, ['round', 'player']);
+      return this.setRoundPlayed(roundIndex);
     }
+    return Controller.sendUpdated(this.io, this.gameId, ['round', 'player']);
   };
 
   onDiscardCards = async (data: MessagePickCards): Promise<void> => {
@@ -353,7 +345,7 @@ export default class Controller {
       return { gameState };
     });
 
-    await Controller.sendUpdated(this.io, this.gameId, ['player']);
+    return Controller.sendUpdated(this.io, this.gameId, ['player']);
   };
 
   onDiscardPrompt = async (data: MessageDiscardPrompt): Promise<void> => {
@@ -370,7 +362,7 @@ export default class Controller {
       return { gameState };
     });
 
-    await Controller.sendUpdated(this.io, this.gameId, ['round']);
+    return Controller.sendUpdated(this.io, this.gameId, ['round']);
   };
 
   onRevealSubmission = async (data: MessageRevealSubmission): Promise<void> => {
@@ -390,10 +382,9 @@ export default class Controller {
     });
 
     if (revealComplete) {
-      this.setRoundRevealed(roundIndex);
-    } else {
-      await Controller.sendUpdated(this.io, this.gameId, ['round']);
+      return this.setRoundRevealed(roundIndex);
     }
+    return Controller.sendUpdated(this.io, this.gameId, ['round']);
   };
 
   onChooseWinner = async (data: MessageChooseWinner): Promise<void> => {
@@ -408,13 +399,13 @@ export default class Controller {
       assert(round.judgeId === this.playerId, 'Only the judge can choose a winner.');
       return { round: GameService.chooseWinner(round, submissionIndex) };
     });
-    this.setRoundEnded(roundIndex);
+    return this.setRoundEnded(roundIndex);
   };
 
   onEndGame = async (): Promise<void> => {
     L.info('Game %s – Player %s – Received event onEndGame.', this.gameId, this.playerId);
     const gameState = await DBService.getGame(this.gameId);
     assert(GameService.isHost(gameState, this.playerId), 'Only a host can end a game.');
-    this.setGameEnded();
+    return this.setGameEnded();
   };
 }
