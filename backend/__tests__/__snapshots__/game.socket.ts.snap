@@ -34,6 +34,7 @@ Object {
         "enabled": false,
         "penalty": 0,
       },
+      "pickExtra": false,
     },
     "status": "created",
     "timeouts": Object {
@@ -105,6 +106,7 @@ Object {
         "enabled": false,
         "penalty": 0,
       },
+      "pickExtra": false,
     },
     "status": "created",
     "timeouts": Object {
@@ -176,6 +178,7 @@ Object {
         "enabled": false,
         "penalty": 0,
       },
+      "pickExtra": false,
     },
     "status": "running",
     "timeouts": Object {
