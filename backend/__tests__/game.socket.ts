@@ -320,7 +320,7 @@ describe('perform game', () => {
         throw new Error(JSON.stringify(error));
       })
       .on('player_updated', (data) => {
-        if (playerUpdateCounter === 0 || !data.deck) {
+        if (playerUpdateCounter === 0 || !data.deck.length) {
           expect(data).toMatchSnapshot({
             id: expect.any(String),
           });
