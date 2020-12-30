@@ -32,13 +32,12 @@
 </template>
 
 <script lang="ts">
-/* global SocketIOClient */
-
 import Vue from 'vue';
 import assert from 'assert';
 
 import { Player, OtherPlayer } from '@/types';
 import store from '@/store';
+import SocketEmitter from '@/helpers/SocketEmitter';
 
 export default Vue.extend({
   name: 'GameCreated',
@@ -51,9 +50,9 @@ export default Vue.extend({
       assert(store.state.gameState?.players);
       return store.state.gameState.players;
     },
-    socket(): SocketIOClient.Socket {
+    socket(): SocketEmitter {
       assert(store.state.socket);
-      return store.state.socket;
+      return new SocketEmitter(store.state.socket);
     },
     gameUrl(): string {
       return location.toString();
@@ -66,7 +65,7 @@ export default Vue.extend({
   },
   methods: {
     startGame(): void {
-      this.socket.emit('start_game');
+      this.socket.startGame();
     },
     copyGameUrl(): void {
       const input = this.$refs.shareUrl as HTMLInputElement | undefined;

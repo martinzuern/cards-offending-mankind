@@ -46,12 +46,10 @@ class TimeoutQueue {
     return this.timeoutQueue.add(data, { delay, jobId });
   }
 
-  async clearJob(data: GameTimeoutJob): Promise<boolean> {
+  async clearJobsForGame(gameId: UUID): Promise<boolean> {
     try {
-      L.debug('Clear job: %o', data);
-      const jobId = TimeoutQueue.jobId(data);
-      const job = await this.timeoutQueue.getJob(jobId);
-      if (job) await job.moveToCompleted(null, true, true);
+      L.debug('Clear jobs for game: %o', gameId);
+      await this.timeoutQueue.removeJobs(`${gameId}-*`);
       return true;
     } catch (error) {
       Sentry.captureException(error);

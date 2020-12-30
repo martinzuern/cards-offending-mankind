@@ -11,6 +11,15 @@
         :style="{ '--randVal': getRandomDegrees(i), 'z-index': i }"
       />
     </div>
+    <div class="text-center">
+      <b-button
+        v-if="isJudge && currentRound.submissions.length === 0"
+        variant="outline-secondary"
+        @click="discardPrompt"
+      >
+        Discard prompt
+      </b-button>
+    </div>
   </div>
   <div v-else>
     <div class="mt-4 mb-2 text-center">Please select {{ discardMode ? 'cards to discard' : cardsToPickString }}.</div>
@@ -72,8 +81,6 @@
 </template>
 
 <script lang="ts">
-/* global SocketIOClient */
-
 import Vue from 'vue';
 import assert from 'assert';
 import { includes, random } from 'lodash';
@@ -81,6 +88,7 @@ import pluralize from 'pluralize';
 
 import { Player, Round, ResponseCard, Game, RoundSubmission } from '@/types';
 import store from '@/store';
+import SocketEmitter from '@/helpers/SocketEmitter';
 
 import Card from './Card.vue';
 
@@ -114,15 +122,18 @@ export default Vue.extend({
       assert(store.getters.currentRound);
       return store.getters.currentRound;
     },
-    socket(): SocketIOClient.Socket {
+    socket(): SocketEmitter {
       assert(store.state.socket);
-      return store.state.socket;
+      return new SocketEmitter(store.state.socket);
     },
     roundIndex(): number {
       return store.getters.currentRoundIndex;
     },
     submissions(): RoundSubmission[] {
       return this.currentRound.submissions;
+    },
+    promptVal(): string {
+      return this.currentRound.prompt.value;
     },
     hasSubmitted(): boolean {
       return this.submitted || this.submissions.some((s) => s.playerId === this.player.id);
@@ -150,8 +161,18 @@ export default Vue.extend({
       this.submitted = false;
       this.randomDegrees = {};
     },
-    selectedCards(): void {
+    notSelectedCards(): void {
       window.dispatchEvent(new Event('resize'));
+    },
+    promptVal(): void {
+      if (this.isJudge) return;
+      this.selectedCards = [];
+      this.$bvToast.toast('The judge discarded the prompt.', {
+        title: 'Card changed',
+        autoHideDelay: 10000,
+        variant: 'primary',
+        solid: true,
+      });
     },
   },
   methods: {
@@ -159,12 +180,20 @@ export default Vue.extend({
       this.randomDegrees[idx] = this.randomDegrees[idx] ?? random(0, 359);
       return this.randomDegrees[idx];
     },
+    discardPrompt(): void {
+      if (!this.isJudge || this.currentRound.submissions.length > 0) return;
+      if (confirm('Do you really want to discard the prompt?')) {
+        const { roundIndex } = this;
+        this.socket.discardPrompt({ roundIndex });
+      }
+    },
     toggleDiscardMode(): void {
       this.selectedCards = [];
       this.discardMode = !this.discardMode;
     },
     submitSelection(): void {
-      if (this.selectedCards.length !== this.cardsToPick) {
+      const { roundIndex, selectedCards: cards } = this;
+      if (cards.length !== this.cardsToPick) {
         this.$bvToast.toast(`Please select exactly ${this.cardsToPickString}.`, {
           title: 'Oops.',
           autoHideDelay: 5000,
@@ -173,18 +202,18 @@ export default Vue.extend({
         });
         return;
       }
-
-      this.socket.emit('pick_cards', { roundIndex: this.roundIndex, cards: this.selectedCards });
+      this.socket.pickCards({ roundIndex, cards });
       this.submitted = true;
     },
     discardSelection(): void {
       const { penalty } = this.game.specialRules.allowDiscarding;
+      const { roundIndex, selectedCards: cards } = this;
       const msg = [
         `Do you really want to discard ${this.cardsSelectedString}?`,
         penalty ? `This will cost you ${pluralize('point', penalty, true)}.` : undefined,
       ].join('\r\n');
       if (confirm(msg)) {
-        this.socket.emit('discard_cards', { roundIndex: this.roundIndex, cards: this.selectedCards });
+        this.socket.discardCards({ roundIndex, cards });
         this.selectedCards = [];
         this.discardMode = false;
       }

@@ -40,13 +40,12 @@
 </template>
 
 <script lang="ts">
-/* global SocketIOClient */
-
 import Vue from 'vue';
 import assert from 'assert';
 
 import { OtherPlayer, Player, Game, Round } from '@/types';
 import store from '@/store';
+import SocketEmitter from '@/helpers/SocketEmitter';
 
 import Countdown from './helper/Countdown.vue';
 import Leaderboard from './helper/Leaderboard.vue';
@@ -80,9 +79,9 @@ export default Vue.extend({
       assert(store.getters.currentRound);
       return store.getters.currentRound;
     },
-    socket(): SocketIOClient.Socket {
+    socket(): SocketEmitter {
       assert(store.state.socket);
-      return store.state.socket;
+      return new SocketEmitter(store.state.socket);
     },
     rounds(): Round[] {
       assert(store.state.gameState?.rounds);
@@ -107,14 +106,11 @@ export default Vue.extend({
     window.onbeforeunload = null;
   },
   methods: {
-    startGame(): void {
-      this.socket.emit('start_game');
-    },
     clickNextRound(): void {
-      this.socket.emit('start_next_round');
+      this.socket.startNextRound();
     },
     clickEndGame(): void {
-      this.socket.emit('end_game');
+      this.socket.endGame();
     },
   },
 });

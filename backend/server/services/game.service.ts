@@ -38,6 +38,8 @@ export default class GameService {
   }
 
   static buildPile(game: InternalGame): Piles {
+    const { pickExtra } = game.specialRules;
+
     const decks = game.packs.map((pack) => {
       const res = cardDecks[pack.abbr];
       assert(res, 'Invalid pack.');
@@ -50,7 +52,7 @@ export default class GameService {
           type: CardType.Text,
           value: prompt.text,
           pick: prompt.pick,
-          draw: Math.max(prompt.pick - 1, 1),
+          draw: Math.max(prompt.pick - (pickExtra ? 1 : 2), 0),
           packAbbr: deck.abbr,
         }))
       )
@@ -96,20 +98,20 @@ export default class GameService {
     const newPlayers = newGameState.players.filter((p) => playerIds.includes(p.id));
 
     // Make sure we have enough cards left
-    const roundHandSize = Math.max(round.prompt.pick, handSizeParam + round.prompt.draw - 1);
+    const roundHandSize = Math.max(round.prompt.pick, handSizeParam + round.prompt.draw);
     if (newGameState.piles.responses.length < roundHandSize * newPlayers.length)
-      newGameState.piles.responses = _.shuffle([
+      newGameState.piles.responses = [
         ...newGameState.piles.responses,
-        ...newGameState.piles.discardedResponses.splice(0),
-      ]);
+        ..._.shuffle(newGameState.piles.discardedResponses.splice(0)),
+      ];
 
-    newPlayers.forEach((player: InternalPlayer) => {
-      if (player.deck.length >= roundHandSize) return;
+    newPlayers.forEach((p: InternalPlayer) => {
+      if (p.deck.length >= roundHandSize) return;
 
       // eslint-disable-next-line no-param-reassign
-      player.deck = [
-        ...player.deck,
-        ...newGameState.piles.responses.splice(0, roundHandSize - player.deck.length),
+      p.deck = [
+        ...p.deck,
+        ...newGameState.piles.responses.splice(0, roundHandSize - p.deck.length),
       ];
     });
 
@@ -122,7 +124,7 @@ export default class GameService {
       'There are open rounds.'
     );
 
-    let newGameState = _.cloneDeep(gameState);
+    const newGameState = _.cloneDeep(gameState);
     const activeHumanPlayers = newGameState.players.filter((p) => p.isActive && !p.isAI);
 
     if (!newGameState.piles.prompts.length)
@@ -139,28 +141,12 @@ export default class GameService {
       discard: [],
     };
     newGameState.rounds.push(newRound);
-    gameState.piles.discardedPrompts.push(newRound.prompt);
+    newGameState.piles.discardedPrompts.push(newRound.prompt);
 
-    newGameState = this.refillHandForPlayers(newGameState, activeHumanPlayers);
-
-    // Handling AI Players
-    const aiPlayers = newGameState.players.filter((p) => p.isAI);
-    newGameState = this.refillHandForPlayers(newGameState, aiPlayers, 0);
-    newGameState.players
-      .filter((p) => p.isAI)
-      .forEach((aiPlayer) => {
-        const newSubmission: RoundSubmission = {
-          playerId: aiPlayer.id,
-          timestamp: new Date(),
-          cards: aiPlayer.deck.splice(0),
-          pointsChange: 0,
-          isRevealed: false,
-        };
-        newGameState.piles.discardedResponses.push(...newSubmission.cards);
-        _.last(newGameState.rounds).submissions.push(newSubmission);
-      });
-
-    return newGameState;
+    return this.refillHandForPlayers(
+      newGameState,
+      activeHumanPlayers.filter((p) => p.id !== newRound.judgeId)
+    );
   }
 
   static startGame(gameState: InternalGameState): InternalGameState {
@@ -217,6 +203,7 @@ export default class GameService {
               enabled: false,
               penalty: 0,
             },
+            pickExtra: false,
           },
         },
         game,
@@ -286,7 +273,9 @@ export default class GameService {
     playerId: UUID,
     pickedCards: ResponseCard[]
   ): InternalGameState {
-    const round = gameState.rounds[roundIndex];
+    let newGameState = _.cloneDeep(gameState);
+
+    const round = newGameState.rounds[roundIndex];
     assert(round.status === RoundStatus.Created, 'Incorrect round status.');
     assert(round.judgeId !== playerId, 'Judge cannot pick cards.');
     assert(
@@ -294,7 +283,7 @@ export default class GameService {
       'Player already picked cards.'
     );
 
-    const myPlayer = _.find(gameState.players, {
+    const myPlayer = _.find(newGameState.players, {
       id: playerId,
       isActive: true,
     }) as InternalPlayer;
@@ -304,7 +293,7 @@ export default class GameService {
       const found = _.find(myPlayer.deck, card);
       assert(found, 'Invalid card');
       myPlayer.deck = _.without(myPlayer.deck, found);
-      gameState.piles.discardedResponses.push(found);
+      newGameState.piles.discardedResponses.push(found);
       return found;
     });
     assert(cards.length === round.prompt.pick, 'Incorrect number of cards.');
@@ -318,7 +307,26 @@ export default class GameService {
     };
     round.submissions.push(newSubmission);
 
-    return gameState;
+    // Handling AI Players after first human player picked cards
+    if (round.submissions.length === 1) {
+      const aiPlayers = newGameState.players.filter((p) => p.isAI);
+      newGameState = this.refillHandForPlayers(newGameState, aiPlayers, 0);
+      newGameState.players
+        .filter((p) => p.isAI)
+        .forEach((aiPlayer) => {
+          const s: RoundSubmission = {
+            playerId: aiPlayer.id,
+            timestamp: new Date(),
+            cards: aiPlayer.deck.splice(0),
+            pointsChange: 0,
+            isRevealed: false,
+          };
+          newGameState.rounds[roundIndex].submissions.push(s);
+          newGameState.piles.discardedResponses.push(...s.cards);
+        });
+    }
+
+    return newGameState;
   }
 
   static discardCards(
@@ -327,15 +335,16 @@ export default class GameService {
     playerId: UUID,
     discardedCards: ResponseCard[]
   ): InternalGameState {
-    const round = gameState.rounds[roundIndex];
     assert(
       gameState.game.specialRules.allowDiscarding.enabled === true,
       'Game does not allow discarding.'
     );
+    const newGameState = _.cloneDeep(gameState);
+    const round = newGameState.rounds[roundIndex];
     assert(round.status === RoundStatus.Created, 'Incorrect round status.');
-    assert(round.judgeId !== playerId, 'Judge cannot reject cards.');
+    assert(round.judgeId !== playerId, 'Judge cannot discard cards.');
 
-    const myPlayer = _.find(gameState.players, {
+    const myPlayer = _.find(newGameState.players, {
       id: playerId,
       isActive: true,
     }) as InternalPlayer;
@@ -345,7 +354,7 @@ export default class GameService {
       const found = _.find(myPlayer.deck, card);
       assert(found, 'Invalid card');
       myPlayer.deck = _.without(myPlayer.deck, found);
-      gameState.piles.discardedResponses.push(found);
+      newGameState.piles.discardedResponses.push(found);
       return found;
     });
 
@@ -353,11 +362,44 @@ export default class GameService {
       playerId,
       timestamp: new Date(),
       cards,
-      pointsChange: gameState.game.specialRules.allowDiscarding.penalty * -1,
+      pointsChange: newGameState.game.specialRules.allowDiscarding.penalty * -1,
       isRevealed: false,
     };
     round.discard.push(newSubmission);
-    return this.refillHandForPlayers(gameState, [myPlayer]);
+    return this.refillHandForPlayers(newGameState, [myPlayer]);
+  }
+
+  static discardPrompt(
+    gameState: InternalGameState,
+    roundIndex: number,
+    playerId: UUID
+  ): InternalGameState {
+    const newGameState = _.cloneDeep(gameState);
+    const round = newGameState.rounds[roundIndex];
+
+    assert(round.status === RoundStatus.Created, 'Incorrect round status.');
+    assert(round.judgeId === playerId, 'Only Judge can discard the prompt.');
+    assert(round.submissions.length === 0, 'Prompt cannot be discarded if there are submissions.');
+
+    const myPlayer = _.find(newGameState.players, {
+      id: playerId,
+      isActive: true,
+    }) as InternalPlayer;
+    assert(myPlayer, 'Could not find player.');
+
+    if (!newGameState.piles.prompts.length)
+      newGameState.piles.prompts = _.shuffle(newGameState.piles.discardedPrompts.splice(0));
+
+    round.prompt = newGameState.piles.prompts.shift();
+    newGameState.piles.discardedPrompts.push(round.prompt);
+
+    // Refilling for the case that the new prompt requires more cards
+    // There is an edge case that the discarded prompt is pick 2, then we intentionally let the players
+    // to keep the extra cards
+    return this.refillHandForPlayers(
+      newGameState,
+      newGameState.players.filter((p) => p.id !== round.judgeId && p.isActive && !p.isAI)
+    );
   }
 
   static playRound(prevGameState: InternalGameState, roundIndex: number): InternalGameState {
@@ -372,14 +414,14 @@ export default class GameService {
         playing: now,
         revealing: now,
         judging: now,
-        betweenRounds: new Date(now.getTime() + prevGameState.game.timeouts.betweenRounds * 1000),
+        betweenRounds: new Date(now.getTime() + gameState.game.timeouts.betweenRounds * 1000),
       };
     } else {
       round.status = RoundStatus.Played;
       round.submissions = _.shuffle(round.submissions);
       round.timeouts = {
         playing: now,
-        revealing: new Date(now.getTime() + prevGameState.game.timeouts.revealing * 1000),
+        revealing: new Date(now.getTime() + gameState.game.timeouts.revealing * 1000),
       };
     }
     return gameState;
@@ -395,7 +437,7 @@ export default class GameService {
     round.timeouts = {
       ...round.timeouts,
       revealing: now,
-      judging: new Date(now.getTime() + prevGameState.game.timeouts.judging * 1000),
+      judging: new Date(now.getTime() + gameState.game.timeouts.judging * 1000),
     };
     round.submissions = round.submissions.map((s) => ({ ...s, isRevealed: true }));
     return gameState;
@@ -420,7 +462,7 @@ export default class GameService {
     round.timeouts = {
       ...round.timeouts,
       judging: now,
-      betweenRounds: new Date(now.getTime() + prevGameState.game.timeouts.betweenRounds * 1000),
+      betweenRounds: new Date(now.getTime() + gameState.game.timeouts.betweenRounds * 1000),
     };
 
     return gameState;
@@ -428,19 +470,21 @@ export default class GameService {
 
   static chooseWinner(round: Round, submissionIndex: number): Round {
     assert(round.status === RoundStatus.Revealed, 'Incorrect round status.');
-    const submission = round.submissions[submissionIndex];
+    const newRound = _.cloneDeep(round);
+    const submission = newRound.submissions[submissionIndex];
     assert(submission, 'Submission not found.');
     submission.pointsChange = 1;
-    return round;
+    return newRound;
   }
 
   static revealSubmission(round: Round, submissionIndex: number): Round {
     assert(round.status === RoundStatus.Played, 'Incorrect round status.');
-    const submission = round.submissions[submissionIndex];
+    const newRound = _.cloneDeep(round);
+    const submission = newRound.submissions[submissionIndex];
     assert(submission, 'Submission not found.');
     assert(submission.isRevealed === false, 'Submission already revealed.');
     submission.isRevealed = true;
-    return round;
+    return newRound;
   }
 
   static updatePlayer(

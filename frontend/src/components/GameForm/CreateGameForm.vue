@@ -1,6 +1,6 @@
 <template>
   <GameForm>
-    <template v-if="loading">
+    <template v-if="isLoading">
       <div class="text-center my-3">
         <b-spinner label="Loading ..."></b-spinner>
       </div>
@@ -129,7 +129,14 @@
                   description="For cards with pick 2+, players are dealt an extra card."
                   disabled="disabled"
                 >
-                  <b-form-input id="pickExtra" readonly value="Coming soon!"></b-form-input>
+                  <b-form-checkbox
+                    id="pickExtra"
+                    v-model="game.specialRules.pickExtra"
+                    class="font-weight-normal"
+                    switch
+                  >
+                    {{ game.specialRules.pickExtra ? 'Enabled' : 'Disabled' }}
+                  </b-form-checkbox>
                 </b-form-group>
 
                 <b-form-group
@@ -257,9 +264,10 @@ export default Vue.extend({
         specialRules: {
           aiPlayerCount: 0,
           allowDiscarding: {
-            enabled: false,
+            enabled: true,
             penalty: 0,
           },
+          pickExtra: false,
         },
       } as Required<CreateGame>,
       player: {
@@ -273,6 +281,9 @@ export default Vue.extend({
   computed: {
     packs(): PackInformation[] {
       return store.state.packs;
+    },
+    isLoading(): boolean {
+      return this.loading || this.packs.length === 0;
     },
     filteredPacks(): PackInformation[] {
       if (!this.onlyOffical) return this.packs;

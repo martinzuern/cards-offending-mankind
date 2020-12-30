@@ -185,9 +185,10 @@ describe('GameService', () => {
       );
       const newGameState = GameService.startGame(baseGameState);
       expect(newGameState.players).toHaveLength(3);
-      expect(newGameState.piles.responses).toHaveLength(1270 - 30);
+      expect(newGameState.piles.responses).toHaveLength(1270 - 20);
       expect(newGameState.piles.prompts).toHaveLength(279 - 1);
-      expect(newGameState.players.every((p) => p.deck.length >= 10)).toBe(true);
+      const { judgeId } = newGameState.rounds[newGameState.rounds.length - 1];
+      expect(newGameState.players.every((p) => p.id === judgeId || p.deck.length >= 10)).toBe(true);
       done();
     });
   });

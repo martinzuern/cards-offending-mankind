@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 
-// eslint-disable-next-line no-unused-vars, no-shadow
-export default function errorHandler(err, req: Request, res: Response, next: NextFunction): void {
+export default function errorHandler(err, _: Request, res: Response, next: NextFunction): void {
   if (res.headersSent) {
     return next(err);
   }

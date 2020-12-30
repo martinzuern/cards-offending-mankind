@@ -271,6 +271,9 @@ components:
                   default: 0
                   minimum: 0
                   maximum: 5
+            pickExtra:
+              type: boolean
+              default: false
     CreateGame:
       title: Game
       type: object
@@ -331,6 +334,9 @@ components:
                   default: 0
                   minimum: 0
                   maximum: 5
+            pickExtra:
+              type: boolean
+              default: false
     PackInformation:
       title: PackInformation
       allOf:
