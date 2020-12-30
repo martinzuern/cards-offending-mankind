@@ -36,7 +36,7 @@ const updateRound = async (
   updateFn: (
     round: Round,
     gameState: InternalGameState
-  ) => Promise<{ round?: Partial<Round>; gameState?: Partial<InternalGameState> }>
+  ) => Promise<{ round?: Round; gameState?: InternalGameState }>
 ): Promise<void> => {
   await DBService.updateGame(gameId, async (gameState) => {
     assert(gameState.game.status === GameStatus.Running, 'Only running games can be updated.');
@@ -46,8 +46,9 @@ const updateRound = async (
     assert(round.status !== RoundStatus.Ended, 'Round already ended.');
 
     const { round: newRound, gameState: newGameState } = await updateFn(round, gameState);
-    const result: InternalGameState = _.merge(gameState, newGameState);
-    result.rounds[roundIndex] = _.merge(result.rounds[roundIndex], newRound);
+
+    const result: InternalGameState = newGameState || gameState;
+    if (newRound) result.rounds[roundIndex] = newRound;
     return result;
   });
 };
