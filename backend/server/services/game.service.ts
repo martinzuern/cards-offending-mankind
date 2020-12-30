@@ -143,7 +143,10 @@ export default class GameService {
     newGameState.rounds.push(newRound);
     newGameState.piles.discardedPrompts.push(newRound.prompt);
 
-    return this.refillHandForPlayers(newGameState, activeHumanPlayers);
+    return this.refillHandForPlayers(
+      newGameState,
+      activeHumanPlayers.filter((p) => p.id !== newRound.judgeId)
+    );
   }
 
   static startGame(gameState: InternalGameState): InternalGameState {
