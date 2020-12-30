@@ -22,7 +22,11 @@ export interface Game {
     betweenRounds: number;
   };
   specialRules: {
-    aiPlayerCount: 0 | 1 | 2 | 3;
+    aiPlayerCount: 0 | 1 | 2 | 3;
+    allowDiscarding: {
+      enabled: boolean;
+      penalty: number;
+    };
   };
 }
 

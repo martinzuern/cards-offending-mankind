@@ -126,7 +126,7 @@
                   label-for="pickExtra"
                   label-cols-sm="6"
                   label-align-sm="right"
-                  description="For cards with pick 2+, players s dealt an extra card."
+                  description="For cards with pick 2+, players are dealt an extra card."
                   disabled="disabled"
                 >
                   <b-form-input id="pickExtra" readonly value="Coming soon!"></b-form-input>
@@ -134,13 +134,36 @@
 
                 <b-form-group
                   label="Rebooting the Universe:"
-                  label-for="rebootDeck"
+                  label-for="allowDiscarding"
                   label-cols-sm="6"
                   label-align-sm="right"
-                  description="Players can trade one point (optional) to discard as many cards as they want and get new cards."
-                  disabled="disabled"
+                  description="Players can trade the specified number of points to discard as many cards as they want and get new cards."
                 >
-                  <b-form-input id="rebootDeck" readonly value="Coming soon!"></b-form-input>
+                  <b-form-checkbox
+                    id="allowDiscarding"
+                    v-model="game.specialRules.allowDiscarding.enabled"
+                    class="font-weight-normal"
+                    switch
+                  >
+                    {{ game.specialRules.allowDiscarding.enabled ? 'Enabled' : 'Disabled' }}
+                  </b-form-checkbox>
+                  <b-form-group
+                    label="Discarding Penalty:"
+                    label-for="discardingPenalty"
+                    label-size="sm"
+                    class="my-1 font-weight-normal"
+                    label-cols-sm="7"
+                  >
+                    <b-form-input
+                      id="discardingPenalty"
+                      v-model.number="game.specialRules.allowDiscarding.penalty"
+                      :disabled="!game.specialRules.allowDiscarding.enabled"
+                      size="sm"
+                      type="number"
+                      min="0"
+                      max="5"
+                    />
+                  </b-form-group>
                 </b-form-group>
               </b-form-group>
 
@@ -233,6 +256,10 @@ export default Vue.extend({
         packs: [],
         specialRules: {
           aiPlayerCount: 0,
+          allowDiscarding: {
+            enabled: false,
+            penalty: 0,
+          },
         },
       } as Required<CreateGame>,
       player: {

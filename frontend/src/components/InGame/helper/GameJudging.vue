@@ -32,7 +32,7 @@
     </div>
     <button
       v-if="canChooseWinner"
-      class="w-100 d-block mt-3 btn btn-success"
+      class="w-100 d-block mt-3 btn btn-success sticky-bottom-sm"
       :disabled="winnerSubmissionIndex < 0"
       @click="chooseWinner()"
     >

@@ -32,9 +32,9 @@
       <GameJudging v-else />
     </transition>
 
-    <div v-if="currentRound.status === 'ended'" class="overlay mt-5">
-      <button class="btn btn-success d-block mb-3 d-block w-100" @click="clickNextRound">Next Round</button>
-      <button v-if="isHost" class="btn btn-secondary d-block w-100 mt-3" @click="clickEndGame">End Game</button>
+    <div v-if="currentRound.status === 'ended'" class="overlay mt-5 sticky-bottom-sm">
+      <button class="btn btn-success d-block d-block w-100" @click="clickNextRound">Next Round</button>
+      <button v-if="isHost" class="btn btn-secondary d-block w-100 mt-2" @click="clickEndGame">End Game</button>
     </div>
   </div>
 </template>

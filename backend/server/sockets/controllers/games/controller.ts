@@ -335,6 +335,28 @@ export default class Controller {
     }
   };
 
+  onDiscardCards = async (data: MessagePickCards): Promise<void> => {
+    L.info(
+      'Game %s – Player %s – Received event onDiscardCards: %o.',
+      this.gameId,
+      this.playerId,
+      data
+    );
+    const { roundIndex, cards: discardedCards } = data;
+    await updateRound(this.gameId, roundIndex, async (_round, prevGameState) => {
+      const gameState = GameService.discardCards(
+        prevGameState,
+        roundIndex,
+        this.playerId as UUID,
+        discardedCards
+      );
+
+      return { gameState };
+    });
+
+    await Controller.sendUpdated(this.io, this.gameId, ['player']);
+  };
+
   onRevealSubmission = async (data: MessageRevealSubmission): Promise<void> => {
     L.info(
       'Game %s – Player %s – Received event onRevealSubmission: %o.',

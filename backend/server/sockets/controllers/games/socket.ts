@@ -40,6 +40,7 @@ export default function sockets(io: socketIo.Server): void {
     wrapper(c.onJoinGame)(socket);
     socket.on('start_game', wrapper(c.onStartGame));
     socket.on('pick_cards', wrapper(c.onPickCards));
+    socket.on('discard_cards', wrapper(c.onDiscardCards));
     socket.on('reveal_submission', wrapper(c.onRevealSubmission));
     socket.on('choose_winner', wrapper(c.onChooseWinner));
     socket.on('start_next_round', wrapper(c.onStartNextRound));
