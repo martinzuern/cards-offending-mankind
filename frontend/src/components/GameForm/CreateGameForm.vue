@@ -1,6 +1,6 @@
 <template>
   <GameForm>
-    <template v-if="loading">
+    <template v-if="isLoading">
       <div class="text-center my-3">
         <b-spinner label="Loading ..."></b-spinner>
       </div>
@@ -281,6 +281,9 @@ export default Vue.extend({
   computed: {
     packs(): PackInformation[] {
       return store.state.packs;
+    },
+    isLoading(): boolean {
+      return this.loading || this.packs.length === 0;
     },
     filteredPacks(): PackInformation[] {
       if (!this.onlyOffical) return this.packs;
