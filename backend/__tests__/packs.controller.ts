@@ -1,17 +1,22 @@
 import request from 'supertest';
 import ServerInstance from '../server';
+import type { Application } from 'express';
 
-let Server: unknown;
+let App: Application;
+let Teardown: () => Promise<void>;
 
 beforeAll(async (done) => {
-  const { app } = await ServerInstance;
-  Server = app;
+  const { app, closeServer } = await ServerInstance;
+  App = app;
+  Teardown = closeServer;
   done();
 });
 
+afterAll((done) => Teardown().then(done));
+
 describe('Packs', () => {
   it('should get all packs', (done) =>
-    request(Server)
+    request(App)
       .get('/api/v1/packs')
       .expect('Content-Type', /json/)
       .expect((r) => {

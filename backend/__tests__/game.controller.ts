@@ -1,21 +1,26 @@
 import request from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
 import ServerInstance from '../server';
+import type { Application } from 'express';
 
-let Server: unknown;
+let App: Application;
+let Teardown: () => Promise<void>;
 
 beforeAll(async (done) => {
-  const { app } = await ServerInstance;
-  Server = app;
+  const { app, closeServer } = await ServerInstance;
+  App = app;
+  Teardown = closeServer;
   done();
 });
+
+afterAll((done) => Teardown().then(() => done()));
 
 describe('Game without password', () => {
   let createdGame;
 
   describe('create', () => {
     it('should return error if missing params', (done) =>
-      request(Server)
+      request(App)
         .post('/api/v1/games')
         .send({})
         .expect('Content-Type', /json/)
@@ -26,7 +31,7 @@ describe('Game without password', () => {
         .end(done));
 
     it('should return new game', (done) =>
-      request(Server)
+      request(App)
         .post('/api/v1/games')
         .send({ player: { nickname: 'foo' }, game: {} })
         .expect('Content-Type', /json/)
@@ -48,7 +53,7 @@ describe('Game without password', () => {
 
   describe('get', () => {
     it('renders 400 if not valid uuidv4', (done) =>
-      request(Server)
+      request(App)
         .get('/api/v1/games/foo')
         .expect('Content-Type', /json/)
         .expect(400)
@@ -58,7 +63,7 @@ describe('Game without password', () => {
         .end(done));
 
     it('renders 404 if not found', (done) =>
-      request(Server)
+      request(App)
         .get(`/api/v1/games/${uuidv4()}`)
         .expect('Content-Type', /json/)
         .expect(404)
@@ -68,7 +73,7 @@ describe('Game without password', () => {
         .end(done));
 
     it('allows to get game', (done) =>
-      request(Server)
+      request(App)
         .get(`/api/v1/games/${createdGame.game.id}`)
         .expect('Content-Type', /json/)
         .expect(200)
@@ -80,7 +85,7 @@ describe('Game without password', () => {
 
   describe('join', () => {
     it('barfs if no nickname given', (done) =>
-      request(Server)
+      request(App)
         .post(`/api/v1/games/${createdGame.game.id}/join`)
         .send({})
         .expect('Content-Type', /json/)
@@ -91,7 +96,7 @@ describe('Game without password', () => {
         .end(done));
 
     it('barfs if nickname already in use', (done) =>
-      request(Server)
+      request(App)
         .post(`/api/v1/games/${createdGame.game.id}/join`)
         .send({ nickname: 'foo' })
         .expect('Content-Type', /json/)
@@ -102,7 +107,7 @@ describe('Game without password', () => {
         .end(done));
 
     it('allows to join game', (done) =>
-      request(Server)
+      request(App)
         .post(`/api/v1/games/${createdGame.game.id}/join`)
         .send({ nickname: 'foo2' })
         .expect('Content-Type', /json/)
@@ -125,7 +130,7 @@ describe('Game with password', () => {
 
   describe('create', () => {
     it('should return new game', (done) =>
-      request(Server)
+      request(App)
         .post('/api/v1/games')
         .send({ player: { nickname: 'foo' }, game: { password } })
         .expect('Content-Type', /json/)
@@ -148,7 +153,7 @@ describe('Game with password', () => {
 
   describe('get', () => {
     it('allows to get game', (done) =>
-      request(Server)
+      request(App)
         .get(`/api/v1/games/${createdGame.game.id}`)
         .expect('Content-Type', /json/)
         .expect(200)
@@ -160,7 +165,7 @@ describe('Game with password', () => {
 
   describe('join', () => {
     it('barfs if no password given', (done) =>
-      request(Server)
+      request(App)
         .post(`/api/v1/games/${createdGame.game.id}/join`)
         .send({ nickname: 'foo2' })
         .expect('Content-Type', /json/)
@@ -171,7 +176,7 @@ describe('Game with password', () => {
         .end(done));
 
     it('barfs if wrong password given', (done) =>
-      request(Server)
+      request(App)
         .post(`/api/v1/games/${createdGame.game.id}/join`)
         .send({ nickname: 'foo2', password: 'wrong' })
         .expect('Content-Type', /json/)
@@ -182,7 +187,7 @@ describe('Game with password', () => {
         .end(done));
 
     it('allows to join game', (done) =>
-      request(Server)
+      request(App)
         .post(`/api/v1/games/${createdGame.game.id}/join`)
         .send({ nickname: 'foo2', password })
         .expect('Content-Type', /json/)

@@ -14,6 +14,8 @@ import l from './logger';
 import errorHandler from '../api/middlewares/error.handler';
 
 import installValidator from './openapi';
+import TimeoutQueue from '../sockets/controllers/games/queue';
+import DBService from '../services/db.service';
 
 const app = express();
 const { exit } = process;
@@ -54,11 +56,13 @@ export default class ExpressServer {
     return this;
   }
 
-  async listen(port: number): Promise<{ app: Application; server: http.Server }> {
-    const welcome = (p: number) => (): void =>
-      l.info(`up and running in ${env} @: ${os.hostname()} on port: ${p}}`);
-
+  async listen(
+    port: number
+  ): Promise<{ app: Application; server: http.Server; closeServer: () => Promise<void> }> {
     try {
+      // Init DB Connections
+      await Promise.all([DBService.start(), TimeoutQueue.start()]);
+
       installValidator(app);
       this.routes(app);
 
@@ -73,19 +77,36 @@ export default class ExpressServer {
       app.use(errorHandler);
 
       const server = http.createServer(app);
-      if (this.sockets) {
-        const io = socketIo(server);
-        io.adapter(redisAdapter(process.env.REDIS_URL));
-        this.sockets(io);
-      }
+
+      const io = socketIo(server);
+      const ioAdapter = redisAdapter(process.env.REDIS_URL);
+      io.adapter(ioAdapter);
+      this.sockets(io);
+
+      const closeServer = async () => {
+        l.warn('Closing server ...');
+        // let clients disconnect
+        Object.values(io.sockets.connected).forEach((e) => e.disconnect(true));
+        server.close();
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        await ioAdapter.pubClient.quit();
+        await ioAdapter.subClient.quit();
+        await TimeoutQueue.shutdown();
+        await DBService.shutdown();
+        l.warn('Teardown completed.');
+      };
+
+      process.on('SIGTERM', closeServer);
 
       if (env !== 'test') {
-        server.listen(port, welcome(port));
+        server.listen(port, (): void =>
+          l.info(`up and running in ${env} @: ${os.hostname()} on port: ${port}}`)
+        );
       }
 
-      return { app, server };
+      return { app, server, closeServer };
     } catch (error) {
-      l.error(error);
+      l.fatal(error);
       return exit(1);
     }
   }

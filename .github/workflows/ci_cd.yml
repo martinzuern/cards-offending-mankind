@@ -6,6 +6,7 @@ jobs:
   test-frontend:
     runs-on: ubuntu-latest
     container: node:12
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies
@@ -23,28 +24,22 @@ jobs:
 
   test-backend:
     runs-on: ubuntu-latest
-    # container: node:12
-    # services:
-    #   redis:
-    #     image: redis
-    #     # Set health checks to wait until redis has started
-    #     options: >-
-    #       --health-cmd "redis-cli ping"
-    #       --health-interval 10s
-    #       --health-timeout 5s
-    #       --health-retries 5
-    #     ports:
-    #       - 6379:6379
+    container: node:12
+    timeout-minutes: 5
+    services:
+      redis:
+        image: redis
+        # Set health checks to wait until redis has started
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 12.x
-      - name: Start Redis
-        uses: supercharge/redis-github-action@1.1.0
-        with:
-          redis-version: 6
+      - name: Checkout
+        uses: actions/checkout@v2
       - name: Install dependencies
         run: yarn install --frozen-lockfile
         working-directory: ./backend
@@ -54,11 +49,14 @@ jobs:
       - name: Run tests
         run: yarn test
         working-directory: ./backend
+        env:
+          REDIS_URL: redis://redis:6379
 
   deploy-heroku:
     runs-on: ubuntu-latest
     if: "'refs/heads/master' == github.ref"
     needs: [test-frontend, test-backend]
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v2

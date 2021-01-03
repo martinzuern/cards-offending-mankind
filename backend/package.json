@@ -13,7 +13,7 @@
     "dev:debug": "nodemon --exec 'node -r ts-node/register --inspect-brk' server/index.ts | pino-pretty",
     "lint": "tsc --noEmit && eslint -c .eslintrc.js '{server, __tests__}/**/*.{js,ts,tsx}'",
     "lint:fix": "tsc --noEmit && eslint -c .eslintrc.js '{server, __tests__}/**/*.{js,ts,tsx}' --fix",
-    "test": "jest --forceExit",
+    "test": "jest",
     "test:watch": "jest --watch"
   },
   "dependencies": {
@@ -47,8 +47,8 @@
     "@types/express": "^4.17.6",
     "@types/jest": "^26.0.0",
     "@types/jsonwebtoken": "^8.3.9",
-    "@types/lodash": "^4.14.150",
-    "@types/node": "^14.14.14",
+    "@types/lodash": "^4.14.167",
+    "@types/node": "^14.14.19",
     "@types/node-fetch": "^2.5.7",
     "@types/pino": "^6.0.0",
     "@types/redis": "^2.8.18",
