@@ -18,9 +18,14 @@ export type GameTimeoutJob = {
 class TimeoutQueue {
   io?: socketIo.Server;
 
-  timeoutQueue: Queue.Queue<GameTimeoutJob>;
+  timeoutQueue?: Queue.Queue<GameTimeoutJob>;
 
-  constructor() {
+  static jobId(data: GameTimeoutJob): string {
+    const { gameId, roundIdx, eventName } = data;
+    return `${gameId}-${roundIdx}-${eventName}`;
+  }
+
+  async start(): Promise<void> {
     this.timeoutQueue = new Queue('games-to', process.env.REDIS_URL, {
       defaultJobOptions: {
         removeOnComplete: true,
@@ -28,11 +33,14 @@ class TimeoutQueue {
       },
     });
     this.timeoutQueue.process(this.processJob);
+    await this.timeoutQueue.isReady();
   }
 
-  static jobId(data: GameTimeoutJob): string {
-    const { gameId, roundIdx, eventName } = data;
-    return `${gameId}-${roundIdx}-${eventName}`;
+  async shutdown(): Promise<void> {
+    assert(this.timeoutQueue !== undefined, 'Queue is not set up');
+    const { timeoutQueue } = this;
+    this.timeoutQueue = undefined;
+    await timeoutQueue.close();
   }
 
   setSocketServer(io: socketIo.Server): void {
@@ -41,12 +49,14 @@ class TimeoutQueue {
 
   addJob(data: GameTimeoutJob, delay: number): Promise<Queue.Job<GameTimeoutJob>> {
     L.debug('Add job: %o', data);
+    assert(this.timeoutQueue !== undefined, 'Queue is not set up');
     assert(this.io !== undefined, 'SocketServer is not set, cannot add job');
     const jobId = TimeoutQueue.jobId(data);
     return this.timeoutQueue.add(data, { delay, jobId });
   }
 
   async clearJobsForGame(gameId: UUID): Promise<boolean> {
+    assert(this.timeoutQueue !== undefined, 'Queue is not set up');
     try {
       L.debug('Clear jobs for game: %o', gameId);
       await this.timeoutQueue.removeJobs(`${gameId}-*`);

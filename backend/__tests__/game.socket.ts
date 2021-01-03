@@ -6,10 +6,24 @@ import assert from 'assert';
 import { v4 as uuidv4 } from 'uuid';
 
 import Server from '../server';
+import { GameState } from '../../types';
 
-let socket: SocketIOClient.Socket;
 let httpServer: http.Server;
+let Teardown: () => Promise<void>;
+let socket: SocketIOClient.Socket;
 let httpServerUrl: URL;
+
+const promiseTimeout = function (ms, promise) {
+  // Create a promise that rejects in <ms> milliseconds
+  const timeout = new Promise((_, reject) => {
+    let id = setTimeout(() => {
+      clearTimeout(id);
+      reject('Timed out in ' + ms + 'ms.');
+    }, ms);
+  });
+
+  return Promise.race([promise, timeout]);
+};
 
 const postRequest = async (path, data): Promise<unknown> => {
   const res = await fetch(new URL(path, httpServerUrl), {
@@ -22,32 +36,52 @@ const postRequest = async (path, data): Promise<unknown> => {
   return json;
 };
 
-const createNewGame = async (data: {}): Promise<unknown> =>
-  postRequest('api/v1/games', { player: { nickname: 'foo' }, game: { ...data } });
-
-beforeAll(async (done) => {
-  httpServer = (await Server).server;
-  httpServer.listen(undefined, () => {
-    const addr = httpServer.address() as AddressInfo;
-    // Square brackets are used for IPv6
-    httpServerUrl = new URL(`http://[${addr.address}]:${addr.port}`);
-    done();
-  });
-});
-
-afterAll((done) => {
-  httpServer.close(() => done());
-});
-
-beforeEach((done) => {
-  socket = ioFront.connect(httpServerUrl.toString(), {
+const newSocket = async (): Promise<SocketIOClient.Socket> => {
+  const s = ioFront.connect(httpServerUrl.toString(), {
     reconnection: false,
     forceNew: true,
   });
-  socket.on('connect', () => {
-    expect(socket.connected).toBeTruthy();
+  return promiseTimeout(
+    300,
+    new Promise<SocketIOClient.Socket>((resolve, reject) => {
+      s.on('connect', () => {
+        expect(s.connected).toBeTruthy();
+        resolve(s);
+      });
+    })
+  );
+};
+
+const createNewGame = async (data: {}): Promise<GameState> =>
+  (postRequest('api/v1/games', {
+    player: { nickname: 'foo' },
+    game: { ...data },
+  }) as unknown) as GameState;
+
+const joinGame = async (createdGame: GameState, nickname = '') => {
+  nickname = nickname || uuidv4();
+  return postRequest(`/api/v1/games/${createdGame.game.id}/join`, {
+    nickname,
+  });
+};
+
+beforeAll(async (done) => {
+  const { server, closeServer } = await Server;
+  httpServer = server;
+  Teardown = closeServer;
+
+  httpServer.listen(undefined, () => {
+    const addr = httpServer.address() as AddressInfo;
+    httpServerUrl = new URL(`http://localhost:${addr.port}`);
     done();
   });
+});
+
+afterAll((done) => Teardown().then(done));
+
+beforeEach(async (done) => {
+  socket = await newSocket();
+  done();
 });
 
 afterEach((done) => {
@@ -106,32 +140,24 @@ describe('joining game', () => {
       });
   });
 
-  // it('error on locked user', (done) => {
-  //   const socket2 = ioFront(httpServerUrl.toString(), {
-  //     reconnection: false,
-  //     forceNew: true,
-  //     autoConnect: false,
-  //   });
-  //   socket2
-  //     .on('unauthorized', (error) => {
-  //       expect(error).toMatchSnapshot();
-  //       socket2.disconnect();
-  //       done();
-  //     })
-  //     .emit('authenticate', {
-  //       token: createdGame.player.token,
-  //     });
-
-  //   socket
-  //     .on('authenticated', () => {
-  //       setTimeout(() => {
-  //         socket2.open();
-  //       }, 300);
-  //     })
-  //     .emit('authenticate', {
-  //       token: createdGame.player.token,
-  //     });
-  // });
+  it('error on locked user', (done) => {
+    socket
+      .on('authenticated', async () => {
+        const socket2 = await newSocket();
+        socket2
+          .on('unauthorized', (error) => {
+            expect(error).toMatchSnapshot();
+            socket2.disconnect();
+            done();
+          })
+          .emit('authenticate', {
+            token: createdGame.player.token,
+          });
+      })
+      .emit('authenticate', {
+        token: createdGame.player.token,
+      });
+  });
 });
 
 describe('error starting game', () => {
@@ -164,30 +190,11 @@ describe('error starting game', () => {
     let socket3;
     let player3;
     beforeEach(async (done) => {
-      player2 = await postRequest(`/api/v1/games/${createdGame.game.id}/join`, {
-        nickname: uuidv4(),
-      });
-      socket2 = ioFront.connect(httpServerUrl.toString(), {
-        reconnection: false,
-        forceNew: true,
-      });
-      socket2.on('connect', () => {
-        expect(socket2.connected).toBeTruthy();
-        done();
-      });
-    });
-    beforeEach(async (done) => {
-      player3 = await postRequest(`/api/v1/games/${createdGame.game.id}/join`, {
-        nickname: uuidv4(),
-      });
-      socket3 = ioFront.connect(httpServerUrl.toString(), {
-        reconnection: false,
-        forceNew: true,
-      });
-      socket3.on('connect', () => {
-        expect(socket3.connected).toBeTruthy();
-        done();
-      });
+      player2 = await joinGame(createdGame);
+      socket2 = await newSocket();
+      player3 = await joinGame(createdGame);
+      socket3 = await newSocket();
+      done();
     });
 
     afterEach((done) => {
@@ -249,35 +256,18 @@ describe('perform game', () => {
   let player2;
   let socket3;
   let player3;
+
   beforeEach(async (done) => {
     createdGame = await createNewGame({ packs: [{ abbr: '10' }] });
     done();
   });
+
   beforeEach(async (done) => {
-    player2 = await postRequest(`/api/v1/games/${createdGame.game.id}/join`, {
-      nickname: 'foo2',
-    });
-    socket2 = ioFront.connect(httpServerUrl.toString(), {
-      reconnection: false,
-      forceNew: true,
-    });
-    socket2.on('connect', () => {
-      expect(socket2.connected).toBeTruthy();
-      done();
-    });
-  });
-  beforeEach(async (done) => {
-    player3 = await postRequest(`/api/v1/games/${createdGame.game.id}/join`, {
-      nickname: 'foo3',
-    });
-    socket3 = ioFront.connect(httpServerUrl.toString(), {
-      reconnection: false,
-      forceNew: true,
-    });
-    socket3.on('connect', () => {
-      expect(socket3.connected).toBeTruthy();
-      done();
-    });
+    player2 = await joinGame(createdGame, 'foo2');
+    socket2 = await newSocket();
+    player3 = await joinGame(createdGame, 'foo3');
+    socket3 = await newSocket();
+    done();
   });
 
   afterEach((done) => {
@@ -320,15 +310,16 @@ describe('perform game', () => {
         throw new Error(JSON.stringify(error));
       })
       .on('player_updated', (data) => {
-        if (playerUpdateCounter === 0 || !data.deck.length) {
+        if (playerUpdateCounter === 0) {
           expect(data).toMatchSnapshot({
             id: expect.any(String),
           });
         } else {
           expect(data).toMatchSnapshot({
             id: expect.any(String),
-            deck: Array(10).fill({ value: expect.any(String) }),
+            deck: expect.any(Array),
           });
+          expect(data.deck.length === 0 || data.deck.length >= 10).toBeTruthy();
           done();
         }
         playerUpdateCounter += 1;

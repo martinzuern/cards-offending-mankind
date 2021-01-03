@@ -5,3 +5,4 @@ module.exports = {
 };
 
 process.env.JWT_SECRET = 'secret'
+process.env.LOG_LEVEL = 'fatal'

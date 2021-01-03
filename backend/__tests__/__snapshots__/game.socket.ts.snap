@@ -87,6 +87,20 @@ Object {
 }
 `;
 
+exports[`joining game error on locked user 1`] = `
+Object {
+  "data": Object {
+    "code": "user-locked",
+    "message": "user-locked",
+    "type": "UnauthorizedError",
+  },
+  "inner": Object {
+    "message": "user-locked",
+  },
+  "message": "user-locked",
+}
+`;
+
 exports[`perform game works 1`] = `
 Object {
   "game": Object {
@@ -207,58 +221,7 @@ Object {
 
 exports[`perform game works 4`] = `
 Object {
-  "deck": Array [
-    Object {
-      "packAbbr": "10",
-      "type": "text",
-      "value": Any<String>,
-    },
-    Object {
-      "packAbbr": "10",
-      "type": "text",
-      "value": Any<String>,
-    },
-    Object {
-      "packAbbr": "10",
-      "type": "text",
-      "value": Any<String>,
-    },
-    Object {
-      "packAbbr": "10",
-      "type": "text",
-      "value": Any<String>,
-    },
-    Object {
-      "packAbbr": "10",
-      "type": "text",
-      "value": Any<String>,
-    },
-    Object {
-      "packAbbr": "10",
-      "type": "text",
-      "value": Any<String>,
-    },
-    Object {
-      "packAbbr": "10",
-      "type": "text",
-      "value": Any<String>,
-    },
-    Object {
-      "packAbbr": "10",
-      "type": "text",
-      "value": Any<String>,
-    },
-    Object {
-      "packAbbr": "10",
-      "type": "text",
-      "value": Any<String>,
-    },
-    Object {
-      "packAbbr": "10",
-      "type": "text",
-      "value": Any<String>,
-    },
-  ],
+  "deck": Any<Array>,
   "id": Any<String>,
   "isAI": false,
   "isActive": true,
