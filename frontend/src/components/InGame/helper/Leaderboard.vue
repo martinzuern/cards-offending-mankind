@@ -1,5 +1,5 @@
 <template>
-  <div class="leaderboard list-group">
+  <div class="leaderboard">
     <div
       v-for="p in players"
       :key="p.id"

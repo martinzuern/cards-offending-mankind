@@ -3,7 +3,7 @@
     <b-row class="justify-content-md-center">
       <b-col sm="12" lg="10" xl="8">
         <div class="ml-0 form-card-header w-100 mx-auto">
-          <div class="pt-3 mt-3 mr-3 card-back">
+          <div class="pt-3 mt-3 mr-3 cah-headline">
             Cards
             <br />
             Offending
@@ -29,6 +29,8 @@ export default Vue.extend({
 </script>
 
 <style lang="sass" scoped>
+@import '@/sass/_utilities.sass'
+
 .background-white
   background-color: white
   margin: 1rem -1.5rem -1.5rem
@@ -45,11 +47,6 @@ export default Vue.extend({
   font-weight: bold
   background-color: black
   color: white
-
-  .card-back
-    font-size: 2.5em
-    line-height: 1em
-    font-weight: 700
 
 a
   color: black
