@@ -263,7 +263,10 @@ export default Vue.extend({
       margin-top: #{$topAdjust}rem
 
     &:nth-child(#{$i}):hover
-      transform: translateY(-2rem) translateX(-1rem) rotate(#{$rotAngle}deg)
+      @if $i - 1 <= $card-count / 2
+        transform: translateY(-2rem) translateX(-1rem) rotate(#{$rotAngle}deg)
+      @else
+        transform: translateY(-2rem) rotate(#{$rotAngle}deg)
 
 @include media-breakpoint-up(md)
   .selected-card-wrapper
