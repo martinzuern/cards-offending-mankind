@@ -29,7 +29,7 @@ describe('GameService', () => {
     it('creates game with two packs and password', async (done) => {
       const gameState = await GameService.initGameState({
         password: GAME_PASSWORD,
-        packs: [{ abbr: '10' }, { abbr: '1' }],
+        packs: [{ abbr: 'Base-INTL' }, { abbr: 'absurd-box-expansion' }],
       });
       expect(gameState).toMatchSnapshot({
         game: {
@@ -157,8 +157,8 @@ describe('GameService', () => {
   describe('builds pile', () => {
     it('works', () => {
       const pile = GameService.buildPile(ukGameState.game);
-      expect(pile.prompts).toHaveLength(382);
-      expect(pile.responses).toHaveLength(1600);
+      expect(pile.prompts).toHaveLength(133);
+      expect(pile.responses).toHaveLength(763);
       expect({
         ...pile,
         prompts: expect.any(Array),
@@ -176,7 +176,7 @@ describe('GameService', () => {
   describe('start game', () => {
     it('works', async (done) => {
       const baseGameState = await GameService.initGameState({
-        packs: [{ abbr: '10' }],
+        packs: [{ abbr: 'Base-INTL' }],
       });
       baseGameState.players.push(
         _.omit(GameService.initPlayer('' as UUID, { nickname: 'foo1', isActive: true }), 'token'),
@@ -185,8 +185,8 @@ describe('GameService', () => {
       );
       const newGameState = GameService.startGame(baseGameState);
       expect(newGameState.players).toHaveLength(3);
-      expect(newGameState.piles.responses).toHaveLength(1270 - 20);
-      expect(newGameState.piles.prompts).toHaveLength(279 - 1);
+      expect(newGameState.piles.responses).toHaveLength(509 - 20);
+      expect(newGameState.piles.prompts).toHaveLength(89 - 1);
       const { judgeId } = newGameState.rounds[newGameState.rounds.length - 1];
       expect(newGameState.players.every((p) => p.id === judgeId || p.deck.length >= 10)).toBe(true);
       done();

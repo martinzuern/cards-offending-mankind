@@ -109,8 +109,8 @@ Object {
     "id": Any<String>,
     "packs": Array [
       Object {
-        "abbr": "10",
-        "name": "CAH Base Set",
+        "abbr": "Base-INTL",
+        "name": "Base Set (INTL Version)",
         "official": true,
       },
     ],
@@ -181,8 +181,8 @@ Object {
     "id": Any<String>,
     "packs": Array [
       Object {
-        "abbr": "10",
-        "name": "CAH Base Set",
+        "abbr": "Base-INTL",
+        "name": "Base Set (INTL Version)",
         "official": true,
       },
     ],
