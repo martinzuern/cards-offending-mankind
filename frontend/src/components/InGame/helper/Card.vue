@@ -51,20 +51,22 @@ export default Vue.extend({
   },
   computed: {
     text(): string {
-      return this.value.replaceAll('_', '______');
+      return this.isWhite ? this.value : this.value.replaceAll('_', '______');
     },
   },
   mounted() {
     const el = this.$refs.card as HTMLElement;
-    const fontRatio = this.turnedBackside ? 7 : 11;
+    const fontRatio = this.turnedBackside ? 7 : 9.5;
     this.resizeHandler = FlowType.getHandler(el, { fontRatio, heightRatio: 1.4 });
     window.addEventListener('resize', this.resizeHandler, false);
+    window.addEventListener('orientationchange', this.resizeHandler, false);
     // Calling twice due to nasty bug in the card fan
     this.$nextTick(() => this.resizeHandler());
     setTimeout(() => this.resizeHandler(), 400);
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.resizeHandler);
+    window.removeEventListener('orientationchange', this.resizeHandler);
   },
 });
 </script>
@@ -77,7 +79,6 @@ export default Vue.extend({
   border-radius: $border-radius
   box-shadow: $box-shadow-card
   margin: .5rem
-  hyphens: auto
   font-weight: bold
   word-wrap: break-word
   line-height: 1.2
