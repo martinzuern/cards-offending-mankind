@@ -22,6 +22,8 @@ import MarkdownIt from 'markdown-it';
 
 import { FlowType } from '@/helpers/FlowType';
 
+let md: MarkdownIt;
+
 export default Vue.extend({
   name: 'Card',
   props: {
@@ -47,7 +49,8 @@ export default Vue.extend({
   },
   computed: {
     htmlText(): string {
-      const res = new MarkdownIt({ typographer: true, html: true }).renderInline(this.value);
+      if (!md) md = new MarkdownIt({ typographer: true, html: true });
+      const res = md.renderInline(this.value);
       return this.isWhite ? res : res.replaceAll('_', '______');
     },
   },
