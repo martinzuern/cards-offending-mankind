@@ -25,7 +25,7 @@
       </b-col>
     </b-row>
 
-    <Card class="mx-auto mt-5 prompt" :is-white="false" :value="currentRound.prompt.value" />
+    <Card class="mx-auto mt-5 prompt" :card="currentRound.prompt" />
 
     <transition name="fade">
       <GamePlaying v-if="currentRound.status === 'created'" />

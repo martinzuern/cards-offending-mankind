@@ -18,11 +18,11 @@
               @click="selectSubmittedCard(submissionIndex)"
             >
               <div class="flip-card-inner">
-                <Card class="flip-card-front" :turned-backside="true" />
+                <Card class="flip-card-front" />
                 <Card
                   class="flip-card-back"
-                  :class="{ selected: submissionIndex === winnerSubmissionIndex || submission.pointsChange > 0 }"
-                  :value="card.value"
+                  :selected="submissionIndex === winnerSubmissionIndex || submission.pointsChange > 0"
+                  :card="card"
                 />
               </div>
             </div>

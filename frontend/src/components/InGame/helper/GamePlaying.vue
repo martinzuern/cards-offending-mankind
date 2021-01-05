@@ -7,7 +7,6 @@
         :key="i"
         class="submission-card"
         :class="{ visible: !!submissions[i - 1] }"
-        :turned-backside="true"
         :style="{ '--randVal': getRandomDegrees(i), 'z-index': i }"
       />
     </div>
@@ -29,7 +28,7 @@
         :key="card.value"
         class="selected-card"
         :selected="true"
-        :value="card.value"
+        :card="card"
         @click="clickToggleCard(card)"
       />
     </div>
@@ -39,7 +38,7 @@
         v-for="card in notSelectedCards"
         :key="card.value"
         class="in-fan-card"
-        :value="card.value"
+        :card="card"
         @click="clickToggleCard(card)"
       />
     </div>

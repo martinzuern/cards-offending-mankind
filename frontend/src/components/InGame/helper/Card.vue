@@ -17,40 +17,40 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import Vue, { PropType } from 'vue';
 import MarkdownIt from 'markdown-it';
 
 import { FlowType } from '@/helpers/FlowType';
+import { PromptCard, ResponseCard } from '@/types';
 
 let md: MarkdownIt;
 
 export default Vue.extend({
   name: 'Card',
   props: {
-    turnedBackside: {
-      type: Boolean,
-      default: false,
-    },
-    isWhite: {
-      type: Boolean,
-      default: true,
-    },
     selected: {
       type: Boolean,
       default: false,
     },
-    value: {
-      type: String,
-      default: '',
+    card: {
+      type: Object as PropType<PromptCard | ResponseCard>,
+      default: {},
     },
   },
   data() {
     return { resizeHandler: (undefined as unknown) as () => void | undefined };
   },
   computed: {
+    isWhite(): boolean {
+      return (this.card as PromptCard).pick === undefined;
+    },
+    turnedBackside(): boolean {
+      return this.card.value === undefined;
+    },
     htmlText(): string {
+      if (!this.card.value) return '';
       if (!md) md = new MarkdownIt({ typographer: true, html: true });
-      const res = md.renderInline(this.value);
+      const res = md.renderInline(this.card.value);
       return this.isWhite ? res : res.replaceAll('_', '______');
     },
   },
