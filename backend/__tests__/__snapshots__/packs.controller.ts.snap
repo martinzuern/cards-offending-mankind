@@ -2,10 +2,10 @@
 
 exports[`Packs should get all packs 1`] = `
 Object {
-  "abbr": "10",
-  "name": "CAH Base Set",
+  "abbr": "Base-INTL",
+  "name": "Base Set (INTL Version)",
   "official": true,
-  "promptsCount": 282,
-  "responsesCount": 1275,
+  "promptsCount": 89,
+  "responsesCount": 510,
 }
 `;

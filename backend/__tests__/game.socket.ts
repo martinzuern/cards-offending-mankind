@@ -258,7 +258,7 @@ describe('perform game', () => {
   let player3;
 
   beforeEach(async (done) => {
-    createdGame = await createNewGame({ packs: [{ abbr: '10' }] });
+    createdGame = await createNewGame({ packs: [{ abbr: 'Base-INTL' }] });
     done();
   });
 

@@ -42,6 +42,7 @@
             <template slot="option" slot-scope="props">
               {{ props.option.name }}
               <small class="mt-1">
+                <b-icon v-if="!props.option.official" icon="people-fill" />
                 {{ props.option.promptsCount }} prompts / {{ props.option.responsesCount }} responses
               </small>
             </template>
@@ -233,6 +234,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import Multiselect from 'vue-multiselect';
+import { sortBy } from 'lodash';
 
 import 'vue-multiselect/dist/vue-multiselect.min.css';
 
@@ -252,9 +254,9 @@ export default Vue.extend({
       onlyOffical: true,
       game: {
         timeouts: {
-          playing: 120,
-          revealing: 60,
-          judging: 120,
+          playing: 180,
+          revealing: 90,
+          judging: 90,
           betweenRounds: 30,
         },
         winnerPoints: false,
@@ -286,8 +288,9 @@ export default Vue.extend({
       return this.loading || this.packs.length === 0;
     },
     filteredPacks(): PackInformation[] {
-      if (!this.onlyOffical) return this.packs;
-      return this.packs.filter((p) => p.official);
+      let packs = this.packs;
+      if (this.onlyOffical) packs = packs.filter((p) => p.official);
+      return sortBy(packs, [(p) => !p.abbr.startsWith('Base'), (p) => !p.official, (p) => p.name]);
     },
     validationPacks(): boolean {
       const prompts = (this.game.packs as PackInformation[])
@@ -300,7 +303,7 @@ export default Vue.extend({
     },
   },
   mounted() {
-    store.dispatch.fetchPacks();
+    store.dispatch.fetchPacks().then(() => (this.game.packs = this.packs.filter((p) => p.abbr === 'Base-US')));
   },
   methods: {
     onSubmit(): void {

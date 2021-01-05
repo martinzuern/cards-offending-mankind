@@ -27,15 +27,22 @@ export class FlowType {
   static getHandler(el: HTMLElement, options: FlowTypeOptions): () => void {
     const { maximum = 9999, minimum = 1, maxFont = 9999, minFont = 1, fontRatio = 35, heightRatio } = options;
 
+    const isOverflown = () => el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth;
+
     const fn = () => {
       const elw = el.clientWidth;
       const width = elw > maximum ? maximum : elw < minimum ? minimum : elw;
       const fontBase = width / fontRatio;
-      const fontSize = fontBase > maxFont ? maxFont : fontBase < minFont ? minFont : fontBase;
+      let fontSize = fontBase > maxFont ? maxFont : fontBase < minFont ? minFont : fontBase;
       el.style.fontSize = fontSize + 'px';
 
       if (heightRatio) {
         el.style.height = elw * heightRatio + 'px';
+      }
+
+      while (isOverflown() && fontSize > minFont) {
+        fontSize--;
+        el.style.fontSize = fontSize + 'px';
       }
     };
 

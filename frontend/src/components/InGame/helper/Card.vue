@@ -11,17 +11,23 @@
     @click="$emit('click')"
   >
     <span v-if="turnedBackside">Cards<br />Offending<br />Mankind</span>
-    <span v-else>{{ value }}</span>
+    <span v-else>
+      <VueMarkdown :source="text" :linkify="false" :task-lists="false" :toc="false" />
+    </span>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
+import VueMarkdown from 'vue-markdown';
 
 import { FlowType } from '@/helpers/FlowType';
 
 export default Vue.extend({
   name: 'Card',
+  components: {
+    VueMarkdown,
+  },
   props: {
     turnedBackside: {
       type: Boolean,
@@ -43,17 +49,24 @@ export default Vue.extend({
   data() {
     return { resizeHandler: (undefined as unknown) as () => void | undefined };
   },
+  computed: {
+    text(): string {
+      return this.isWhite ? this.value : this.value.replaceAll('_', '______');
+    },
+  },
   mounted() {
     const el = this.$refs.card as HTMLElement;
-    const fontRatio = this.turnedBackside ? 7 : 10;
+    const fontRatio = this.turnedBackside ? 7 : 9.5;
     this.resizeHandler = FlowType.getHandler(el, { fontRatio, heightRatio: 1.4 });
     window.addEventListener('resize', this.resizeHandler, false);
+    window.addEventListener('orientationchange', this.resizeHandler, false);
     // Calling twice due to nasty bug in the card fan
     this.$nextTick(() => this.resizeHandler());
     setTimeout(() => this.resizeHandler(), 400);
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.resizeHandler);
+    window.removeEventListener('orientationchange', this.resizeHandler);
   },
 });
 </script>
@@ -66,9 +79,7 @@ export default Vue.extend({
   border-radius: $border-radius
   box-shadow: $box-shadow-card
   margin: .5rem
-  hyphens: auto
   font-weight: bold
-  white-space: pre-line
   word-wrap: break-word
   line-height: 1.2
 
