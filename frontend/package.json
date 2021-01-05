@@ -7,6 +7,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build --modern",
+    "build:report": "vue-cli-service build --modern --report",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint",
     "lint:type": "vue-type-check --workspace . --srcDir ./src"
