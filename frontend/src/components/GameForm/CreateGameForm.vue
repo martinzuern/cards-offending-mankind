@@ -323,7 +323,7 @@ export default Vue.extend({
           if (gameId) this.$router.push({ name: 'Game', params: { gameId } });
         })
         .catch((err: Error) => {
-          console.error(err);
+          Vue.$log.error('Error while createGame.', err);
           this.errors.push(err);
         });
     },
