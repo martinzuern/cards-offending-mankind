@@ -35,7 +35,10 @@ export default class ExpressServer {
     app.use(
       helmet({
         contentSecurityPolicy: {
-          reportOnly: true,
+          directives: {
+            ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+            'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+          },
         },
       })
     );
@@ -82,6 +85,8 @@ export default class ExpressServer {
       const ioAdapter = redisAdapter(process.env.REDIS_URL);
       io.adapter(ioAdapter);
       this.sockets(io);
+      // https://socket.io/blog/socket-io-2-4-0/
+      if (env === 'development') io.origins(['http://localhost', 'http://localhost:8080']);
 
       const closeServer = async () => {
         l.warn('Closing server ...');
