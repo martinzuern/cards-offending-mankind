@@ -12,13 +12,22 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import { sortBy } from 'lodash';
 
+import { OtherPlayer } from '@/types';
+import store from '@/store';
 import Leaderboard from './helper/Leaderboard.vue';
 
 export default Vue.extend({
   name: 'GameEnded',
   components: {
     Leaderboard,
+  },
+  computed: {
+    podiumPlayers(): OtherPlayer[] {
+      const playersByPoints = sortBy(store.state.gameState.players, ['points']);
+      return playersByPoints.slice(0, 3);
+    },
   },
 });
 </script>
