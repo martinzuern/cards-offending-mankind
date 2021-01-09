@@ -3,8 +3,8 @@
     <div
       v-for="p in players"
       :key="p.id"
-      class="list-group-item d-flex justify-content-between align-items-center"
-      :class="{ 'list-group-item-light': p.id != player.id }"
+      class="d-flex justify-content-between align-items-center mb-1"
+      :class="{ 'text-muted': p.id != player.id }"
     >
       <strong>
         {{ p.isAI ? '🤖' : '' }}
@@ -38,10 +38,3 @@ export default Vue.extend({
   },
 });
 </script>
-
-<style lang="sass" scoped>
-.leaderboard
-  .list-group-item
-    strong
-      padding-right: 1.5rem
-</style>
