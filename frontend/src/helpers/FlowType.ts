@@ -21,11 +21,20 @@ export type FlowTypeOptions = {
   minFont?: number;
   fontRatio?: number;
   heightRatio?: number;
+  paddingRatio?: number;
 };
 
 export class FlowType {
   static getHandler(el: HTMLElement, options: FlowTypeOptions): () => void {
-    const { maximum = 9999, minimum = 1, maxFont = 9999, minFont = 1, fontRatio = 35, heightRatio } = options;
+    const {
+      maximum = 9999,
+      minimum = 1,
+      maxFont = 9999,
+      minFont = 1,
+      fontRatio = 35,
+      heightRatio,
+      paddingRatio,
+    } = options;
 
     const isOverflown = () => el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth;
 
@@ -36,9 +45,8 @@ export class FlowType {
       let fontSize = fontBase > maxFont ? maxFont : fontBase < minFont ? minFont : fontBase;
       el.style.fontSize = fontSize + 'px';
 
-      if (heightRatio) {
-        el.style.height = elw * heightRatio + 'px';
-      }
+      if (heightRatio) el.style.height = elw * heightRatio + 'px';
+      if (paddingRatio) el.style.padding = elw * paddingRatio + 'px';
 
       while (isOverflown() && fontSize > minFont) {
         fontSize--;
