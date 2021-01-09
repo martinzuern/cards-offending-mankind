@@ -4,7 +4,12 @@
       <h2 class="mt-5">🏁 Game over</h2>
       <!-- add cah headline -->
       <h6>Here is the final result.</h6>
-      ### podium space (card stack?)
+      ### podium space (card stack?) ### what if two people have same amount of points?
+      <div v-for="{ nickname, points } in podiumPlayers" :key="nickname" class="podium-position">
+        <div class="bar"></div>
+        {{ nickname }}
+        {{ points }}
+      </div>
       <Leaderboard class="mt-4" />
     </div>
   </div>
