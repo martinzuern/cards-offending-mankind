@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="mt-4">
     <h2>Legal Notice</h2>
     <p>For inquiries, please contact <a href="mailto:cards@martinzuern.de">cards@martinzuern.de</a>.</p>
 
@@ -118,13 +118,20 @@
 
     <h6>Consent</h6>
     <p>By using our website, you hereby consent to our Privacy Policy and agree to its terms.</p>
+
+    <!-- GitHub icon -->
+    <GitHubCorners repo="martinzuern/cards-offending-mankind" />
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
+import GitHubCorners from '@/components/GitHubCorners.vue';
 
 export default Vue.extend({
   name: 'Legal',
+  components: {
+    GitHubCorners,
+  },
 });
 </script>
