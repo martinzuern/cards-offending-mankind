@@ -4,15 +4,14 @@ import CardDecksRaw from 'json-against-humanity/cah-all-compact.json';
 import { Deck, PackInformation } from '../../root-types';
 
 export const cardDecks: Record<string, Deck> = CardDecksRaw.packs.reduce((acc, pack) => {
-  const { abbr, name, official, white, black } = pack;
+  const { abbr, white, black, ...packInformation } = pack;
   const prompts = black.map((i) => CardDecksRaw.black[i]);
   const responses = white.map((i) => ({ text: CardDecksRaw.white[i] }));
   return {
     ...acc,
     [abbr]: {
       abbr,
-      name,
-      official,
+      ...packInformation,
       prompts,
       responses,
     },

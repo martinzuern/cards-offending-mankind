@@ -12,6 +12,8 @@ import store from './store';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 
+import 'line-awesome/dist/line-awesome/css/line-awesome.css';
+
 const isProduction = process.env.NODE_ENV === 'production';
 
 Vue.use(BootstrapVue);
