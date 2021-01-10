@@ -54,6 +54,12 @@ export default Vue.extend({
       return this.isWhite ? res : res.replaceAll('_', '______');
     },
   },
+  watch: {
+    card: function (newCard: PromptCard | ResponseCard, oldCard: PromptCard | ResponseCard) {
+      if (oldCard.value === newCard.value) return;
+      this.resizeHandler();
+    },
+  },
   mounted() {
     const el = this.$refs.card as HTMLElement;
     const fontRatio = this.turnedBackside ? 7 : this.isWhite ? 9.5 : 10.5;
