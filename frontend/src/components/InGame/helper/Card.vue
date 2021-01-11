@@ -104,7 +104,10 @@ export default Vue.extend({
   line-height: 1.2
 
   .card-pack
-    font-size: 75%
+    span
+      font-size: 70%
+    i
+      font-size: 80%
 
   &.black-card
     background-color: black
