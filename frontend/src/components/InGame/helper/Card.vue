@@ -11,17 +11,28 @@
     @click="$emit('click')"
   >
     <span v-if="turnedBackside">Cards<br />Offending<br />Mankind</span>
-    <!-- eslint-disable-next-line vue/no-v-html -->
-    <span v-else v-html="htmlText"></span>
+    <div v-else class="h-100 d-flex flex-column justify-content-between">
+      <!-- eslint-disable-next-line vue/no-v-html -->
+      <span class="card-content" v-html="htmlText"></span>
+      <div class="card-pack pt-2" :title="cardPack.name">
+        <i v-if="(cardPack.icon || '').startsWith('la')" :class="`las ${cardPack.icon}`"></i>
+        <span v-else-if="cardPack.icon" class="px-1 border rounded-lg">
+          {{ cardPack.icon }}
+        </span>
+        <i v-else class="las la-stop"></i>
+      </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue, { PropType } from 'vue';
+import assert from 'assert';
 import MarkdownIt from 'markdown-it';
 
 import { FlowType } from '@/helpers/FlowType';
-import { PromptCard, ResponseCard } from '@/types';
+import { Pack, PromptCard, ResponseCard } from '@/types';
+import store from '@/store';
 
 let md: MarkdownIt;
 
@@ -47,6 +58,12 @@ export default Vue.extend({
     turnedBackside(): boolean {
       return this.card.value === undefined;
     },
+    cardPack(): Pack {
+      assert(store.state.gameState?.game);
+      const pack = store.state.gameState?.game.packs.find((p) => p.abbr === this.card.packAbbr);
+      assert(pack);
+      return pack;
+    },
     htmlText(): string {
       if (!this.card.value) return '';
       if (!md) md = new MarkdownIt({ typographer: true, html: true });
@@ -55,8 +72,7 @@ export default Vue.extend({
     },
   },
   watch: {
-    card: function (newCard: PromptCard | ResponseCard, oldCard: PromptCard | ResponseCard) {
-      if (oldCard.value === newCard.value) return;
+    htmlText: function () {
       this.resizeHandler();
     },
   },
@@ -87,10 +103,19 @@ export default Vue.extend({
   margin: .5rem
   line-height: 1.2
 
+  .card-pack
+    span
+      font-size: 70%
+    i
+      font-size: 80%
+
   &.black-card
     background-color: black
     color: white
     font-weight: 650
+
+    .card-pack .border
+      border-color: white
 
   &.white-card
     transition: all .2s ease-out, font-size 0
@@ -98,10 +123,17 @@ export default Vue.extend({
     background-color: white
     border: 1px solid black
     font-weight: 550
+
+    .card-pack .border
+      border-color: black
+
     &.selected
       background-color: blue
       color: white
       box-shadow: 0 0 9px 1px blue
+
+      .card-pack .border
+        border-color: white
 
   &.turned-card
     line-height: 1

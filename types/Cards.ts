@@ -2,6 +2,8 @@ export interface Pack {
   abbr: string;
   name: string;
   official: boolean;
+  icon?: string;
+  description?: string;
 }
 
 export interface PackInformation extends Pack {

@@ -4243,9 +4243,9 @@ jsesc@^2.5.1:
   resolved "https://registry.yarnpkg.com/jsesc/-/jsesc-2.5.2.tgz#80564d2e483dacf6e8ef209650a67df3f0c283a4"
   integrity sha512-OYu7XEzjkCQ3C5Ps3QIZsQfNpqoJyZZA99wd9aWd05NCtC5pWOkShK2mkL6HXQR6/Cy2lbNdPlZBpuQHXE63gA==
 
-json-against-humanity@martinzuern/json-against-humanity#v2.1.0:
-  version "2.1.0"
-  resolved "https://codeload.github.com/martinzuern/json-against-humanity/tar.gz/e40e7652780b8903eb76c567be09f8990197e6ee"
+json-against-humanity@martinzuern/json-against-humanity#v2.2.0:
+  version "2.2.0"
+  resolved "https://codeload.github.com/martinzuern/json-against-humanity/tar.gz/1a99c94644bdb6f96a9520a32003702b4425e765"
 
 json-buffer@3.0.0:
   version "3.0.0"
