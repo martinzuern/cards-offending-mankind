@@ -10,6 +10,8 @@
 
     <footer class="py-2 mt-5 bg-light bg-gradient text-black-50 w-100">
       <b-container class="text-center">
+        <small><router-link to="legal">Legal & Privacy</router-link></small>
+        <small>&nbsp;|&nbsp;</small>
         <small>
           Contains content from
           <a href="https://cardsagainsthumanity.com" target="_blank">Cards Against Humanity®</a>
