@@ -110,6 +110,8 @@ Object {
     "packs": Array [
       Object {
         "abbr": "Base-INTL",
+        "description": "",
+        "icon": "",
         "name": "Base Set (INTL Version)",
         "official": true,
       },
@@ -182,6 +184,8 @@ Object {
     "packs": Array [
       Object {
         "abbr": "Base-INTL",
+        "description": "",
+        "icon": "",
         "name": "Base Set (INTL Version)",
         "official": true,
       },
