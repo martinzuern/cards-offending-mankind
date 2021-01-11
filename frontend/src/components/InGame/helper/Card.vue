@@ -15,7 +15,7 @@
       <!-- eslint-disable-next-line vue/no-v-html -->
       <span class="card-content" v-html="htmlText"></span>
       <div class="card-pack pt-2" :title="cardPack.name">
-        <i v-if="cardPack.icon.startsWith('la')" :class="`las ${cardPack.icon}`"></i>
+        <i v-if="(cardPack.icon || '').startsWith('la')" :class="`las ${cardPack.icon}`"></i>
         <span v-else-if="cardPack.icon" class="px-1 border rounded-lg">
           {{ cardPack.icon }}
         </span>
