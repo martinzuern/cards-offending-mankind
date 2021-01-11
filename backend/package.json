@@ -50,7 +50,7 @@
     "@types/lodash": "^4.14.167",
     "@types/node": "^14.14.19",
     "@types/node-fetch": "^2.5.7",
-    "@types/pino": "^6.0.0",
+    "@types/pino": "^6.3.5",
     "@types/redis": "^2.8.18",
     "@types/redlock": "^4.0.1",
     "@types/socket.io": "^2.1.4",
