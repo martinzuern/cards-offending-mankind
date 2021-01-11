@@ -32,7 +32,7 @@
     "json-against-humanity": "martinzuern/json-against-humanity#v2.2.0",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.19",
-    "pino": "^6.3.2",
+    "pino": "^6.10.0",
     "redis": "^3.0.2",
     "redlock": "^4.1.0",
     "serialize-error": "^7.0.1",
