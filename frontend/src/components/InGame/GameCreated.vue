@@ -73,6 +73,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import assert from 'assert';
+import type { Socket } from 'socket.io-client';
 
 import { Player, OtherPlayer, Game } from '@/types';
 import store from '@/store';
@@ -95,7 +96,7 @@ export default Vue.extend({
     },
     socket(): SocketEmitter {
       assert(store.state.socket);
-      return new SocketEmitter(store.state.socket);
+      return new SocketEmitter(store.state.socket as Socket);
     },
     gameUrl(): string {
       return location.toString();

@@ -44,6 +44,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import assert from 'assert';
+import type { Socket } from 'socket.io-client';
 
 import { OtherPlayer, Player, Game, Round, RoundSubmission } from '@/types';
 import store from '@/store';
@@ -78,7 +79,7 @@ export default Vue.extend({
     },
     socket(): SocketEmitter {
       assert(store.state.socket);
-      return new SocketEmitter(store.state.socket);
+      return new SocketEmitter(store.state.socket as Socket);
     },
     roundIndex(): number {
       return store.getters.currentRoundIndex;

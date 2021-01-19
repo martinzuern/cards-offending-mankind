@@ -84,6 +84,7 @@ import Vue from 'vue';
 import assert from 'assert';
 import { includes, random } from 'lodash';
 import pluralize from 'pluralize';
+import type { Socket } from 'socket.io-client';
 
 import { Player, Round, ResponseCard, Game, RoundSubmission } from '@/types';
 import store from '@/store';
@@ -123,7 +124,7 @@ export default Vue.extend({
     },
     socket(): SocketEmitter {
       assert(store.state.socket);
-      return new SocketEmitter(store.state.socket);
+      return new SocketEmitter(store.state.socket as Socket);
     },
     roundIndex(): number {
       return store.getters.currentRoundIndex;

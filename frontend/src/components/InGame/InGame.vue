@@ -16,10 +16,9 @@
 </template>
 
 <script lang="ts">
-/* global SocketIOClient */
-
 import Vue from 'vue';
-import io from 'socket.io-client';
+import { io } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
 
 import { Player, Game, Round, OtherPlayer, MessageRoundUpdated, GameState } from '@/types';
 import store from '@/store';
@@ -60,8 +59,8 @@ export default Vue.extend({
     player(): Player | undefined {
       return store.state.player;
     },
-    socket(): SocketIOClient.Socket | undefined {
-      return store.state.socket;
+    socket(): Socket | undefined {
+      return store.state.socket as Socket | undefined;
     },
     isStoreDefined(): boolean {
       return !!this.game && !!this.players && !!this.rounds && !!this.player && !!this.socket;
