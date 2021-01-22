@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@sentry/node": "^6.0.0",
+    "@thream/socketio-jwt": "^1.1.0",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "bull": "^3.14.0",
@@ -38,7 +39,6 @@
     "serialize-error": "^8.0.0",
     "socket.io": "^3.1.0",
     "socket.io-redis": "^6.0.1",
-    "socketio-jwt": "^4.6.2",
     "uuid": "^8.0.0"
   },
   "devDependencies": {

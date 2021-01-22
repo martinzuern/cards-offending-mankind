@@ -1,5 +1,5 @@
 import assert from 'assert';
-import socketIo from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import _ from 'lodash';
 
 import {
@@ -26,8 +26,8 @@ import GameService from '../../../services/game.service';
 // eslint-disable-next-line import/no-cycle
 import queue from './queue';
 
-export type JwtAuthenticatedSocket = SocketIO.Socket & {
-  decoded_token: PlayerJWT;
+export type JwtAuthenticatedSocket = Socket & {
+  decodedToken: PlayerJWT;
 };
 
 const updateRound = async (
@@ -58,9 +58,9 @@ export default class Controller {
 
   gameId: UUID;
 
-  io: socketIo.Server;
+  io: Server;
 
-  constructor(io: socketIo.Server, gameId: UUID, playerId: UUID) {
+  constructor(io: Server, gameId: UUID, playerId: UUID) {
     this.io = io;
     this.playerId = playerId;
     this.gameId = gameId;
@@ -71,31 +71,29 @@ export default class Controller {
   }
 
   static async validateJwt(
-    decoded: PlayerJWT,
-    onSuccess: () => void,
-    onError: (err: string, code: string) => void
+    socket: JwtAuthenticatedSocket,
+    next: (err?: Error) => void
   ): Promise<unknown> {
-    const { id: playerId, gameId } = decoded;
+    const { id: playerId, gameId } = socket.decodedToken;
     L.info(`Player ${playerId} wants to connect to game ${gameId}.`);
 
     try {
       const gameState = await DBService.getGame(gameId);
       assert(gameState.players.some((el) => el.id === playerId));
     } catch (error) {
-      return onError(error.message, 'unkown');
+      return next(new Error('Player not found.'));
     }
 
     if (await DBService.setUserLock(playerId, true)) {
-      return onSuccess();
+      return next();
     }
 
     L.warn(`Player ${playerId} is already locked.`);
-    return onError('user-locked', 'user-locked');
+    return next(new Error('User locked.'));
   }
 
   static async onDisconnect(socket: JwtAuthenticatedSocket): Promise<void> {
-    if (!socket.decoded_token) return;
-    const { id: playerId, gameId } = socket.decoded_token;
+    const { id: playerId, gameId } = socket.decodedToken;
     L.info(`Player ${playerId} disconnected.`);
 
     await DBService.updateGame(gameId, async (fullGameState) => {
@@ -110,7 +108,7 @@ export default class Controller {
   }
 
   static async sendUpdated(
-    io: socketIo.Server | socketIo.Socket,
+    io: Server | Socket,
     gameId: UUID,
     information: Array<'gamestate' | 'player' | 'round'>
   ): Promise<void> {

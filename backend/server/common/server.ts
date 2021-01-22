@@ -4,8 +4,8 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import http from 'http';
 import os from 'os';
-import socketIo from 'socket.io';
-import redisAdapter from 'socket.io-redis';
+import { Server } from 'socket.io';
+import { createAdapter } from 'socket.io-redis';
 import helmet from 'helmet';
 import * as Sentry from '@sentry/node';
 import compression from 'compression';
@@ -29,7 +29,7 @@ const publicDir = path.resolve(__dirname, '..', '..', 'public');
 export default class ExpressServer {
   private routes: (app: Application) => void;
 
-  private sockets: (io: socketIo.Server) => void;
+  private sockets: (io: Server) => void;
 
   constructor() {
     app.use(
@@ -54,7 +54,7 @@ export default class ExpressServer {
     return this;
   }
 
-  socket(sockets: (io: socketIo.Server) => void): ExpressServer {
+  socket(sockets: (io: Server) => void): ExpressServer {
     this.sockets = sockets;
     return this;
   }
@@ -81,17 +81,20 @@ export default class ExpressServer {
 
       const server = http.createServer(app);
 
-      const io = socketIo(server);
-      const ioAdapter = redisAdapter(process.env.REDIS_URL);
+      const devCorsOpts = {
+        origin: ['http://localhost', 'http://localhost:8080'],
+      };
+      const io = new Server(server, {
+        cors: env !== 'development' ? undefined : devCorsOpts,
+      });
+      const ioAdapter = createAdapter(process.env.REDIS_URL);
       io.adapter(ioAdapter);
       this.sockets(io);
-      // https://socket.io/blog/socket-io-2-4-0/
-      if (env === 'development') io.origins(['http://localhost', 'http://localhost:8080']);
 
       const closeServer = async () => {
         l.warn('Closing server ...');
         // let clients disconnect
-        Object.values(io.sockets.connected).forEach((e) => e.disconnect(true));
+        io.sockets.sockets.forEach((e) => e.disconnect(true));
         server.close();
         await new Promise((resolve) => setTimeout(resolve, 500));
         await ioAdapter.pubClient.quit();

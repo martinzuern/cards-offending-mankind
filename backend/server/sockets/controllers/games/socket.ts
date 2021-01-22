@@ -1,5 +1,5 @@
 import socketIo from 'socket.io';
-import socketioJwt from 'socketio-jwt';
+import { authorize } from '@thream/socketio-jwt';
 import _ from 'lodash';
 
 import queue from './queue';
@@ -11,13 +11,14 @@ import L from '../../../common/logger';
 
 const { JWT_SECRET } = process.env;
 
-const auth = socketioJwt.authorize({ secret: JWT_SECRET, additional_auth: Controller.validateJwt });
-
 export default function sockets(io: socketIo.Server): void {
+  io.use(authorize({ secret: JWT_SECRET }));
+  io.use(Controller.validateJwt);
+
   queue.setSocketServer(io);
 
-  io.on('connection', auth).on('authenticated', async (socket: JwtAuthenticatedSocket) => {
-    const { id: playerId, gameId } = socket.decoded_token;
+  io.on('connection', async (socket: JwtAuthenticatedSocket) => {
+    const { id: playerId, gameId } = socket.decodedToken;
 
     // make sure we keep the user lock
     socket.conn.on('packet', (packet) => {
