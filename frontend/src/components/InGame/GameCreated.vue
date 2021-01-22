@@ -29,6 +29,7 @@
       >
         Start Game
       </button>
+      <p v-else class="text-center font-weight-bold py-4">Waiting for the host to start the game ...</p>
 
       <h3 class="pt-5 cah-headline color-black">Rules 👩🏻‍⚖️</h3>
       <div class="text-muted mt-3">
