@@ -89,7 +89,7 @@ export default class Controller {
     }
 
     L.warn(`Player ${playerId} is already locked.`);
-    return next(new Error('User locked.'));
+    return next(new Error('Player is already active.'));
   }
 
   static async onDisconnect(socket: JwtAuthenticatedSocket): Promise<void> {
