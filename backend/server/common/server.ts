@@ -6,6 +6,7 @@ import http from 'http';
 import os from 'os';
 import { Server } from 'socket.io';
 import { createAdapter } from 'socket.io-redis';
+import { RedisClient } from 'redis';
 import helmet from 'helmet';
 import * as Sentry from '@sentry/node';
 import compression from 'compression';
@@ -32,6 +33,8 @@ export default class ExpressServer {
   private sockets: (io: Server) => void;
 
   constructor() {
+    app.use(Sentry.Handlers.requestHandler());
+
     app.use(
       helmet({
         contentSecurityPolicy: {
@@ -87,8 +90,9 @@ export default class ExpressServer {
       const io = new Server(server, {
         cors: env !== 'development' ? undefined : devCorsOpts,
       });
-      const ioAdapter = createAdapter(process.env.REDIS_URL);
-      io.adapter(ioAdapter);
+      const pubClient = new RedisClient({ url: process.env.REDIS_URL });
+      const subClient = pubClient.duplicate();
+      io.adapter(createAdapter({ pubClient, subClient }));
       this.sockets(io);
 
       const closeServer = async () => {
@@ -97,8 +101,8 @@ export default class ExpressServer {
         io.sockets.sockets.forEach((e) => e.disconnect(true));
         server.close();
         await new Promise((resolve) => setTimeout(resolve, 500));
-        await ioAdapter.pubClient.quit();
-        await ioAdapter.subClient.quit();
+        await pubClient.quit();
+        await subClient.quit();
         await TimeoutQueue.shutdown();
         await DBService.shutdown();
         l.warn('Teardown completed.');

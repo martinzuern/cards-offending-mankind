@@ -54,9 +54,10 @@ Object {
 
 exports[`Game with password join barfs if no password given 1`] = `
 Object {
+  "errorCode": null,
   "errors": Array [
     Object {
-      "message": "Error: Game password not provided.",
+      "message": "Game password not provided.",
     },
   ],
 }
@@ -64,9 +65,10 @@ Object {
 
 exports[`Game with password join barfs if wrong password given 1`] = `
 Object {
+  "errorCode": null,
   "errors": Array [
     Object {
-      "message": "Error: Game password incorrect",
+      "message": "Game password incorrect",
     },
   ],
 }
@@ -74,6 +76,7 @@ Object {
 
 exports[`Game without password create should return error if missing params 1`] = `
 Object {
+  "errorCode": null,
   "errors": Array [
     Object {
       "errorCode": "required.openapi.validation",
@@ -128,6 +131,7 @@ Object {
 
 exports[`Game without password get renders 400 if not valid uuidv4 1`] = `
 Object {
+  "errorCode": null,
   "errors": Array [
     Object {
       "errorCode": "format.openapi.validation",
@@ -140,6 +144,7 @@ Object {
 
 exports[`Game without password get renders 404 if not found 1`] = `
 Object {
+  "errorCode": null,
   "errors": Array [
     Object {
       "message": "Resource not found.",
@@ -165,9 +170,10 @@ Object {
 
 exports[`Game without password join barfs if nickname already in use 1`] = `
 Object {
+  "errorCode": null,
   "errors": Array [
     Object {
-      "message": "Error: Nickname already taken",
+      "message": "Nickname already taken",
     },
   ],
 }
@@ -175,6 +181,7 @@ Object {
 
 exports[`Game without password join barfs if no nickname given 1`] = `
 Object {
+  "errorCode": null,
   "errors": Array [
     Object {
       "errorCode": "required.openapi.validation",

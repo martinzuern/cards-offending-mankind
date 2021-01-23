@@ -100,7 +100,7 @@ describe('Game without password', () => {
         .post(`/api/v1/games/${createdGame.game.id}/join`)
         .send({ nickname: 'foo' })
         .expect('Content-Type', /json/)
-        // .expect(400)
+        .expect(400)
         .expect((r) => {
           expect(r.body).toMatchSnapshot();
         })
@@ -169,7 +169,7 @@ describe('Game with password', () => {
         .post(`/api/v1/games/${createdGame.game.id}/join`)
         .send({ nickname: 'foo2' })
         .expect('Content-Type', /json/)
-        // .expect(400)
+        .expect(403)
         .expect((r) => {
           expect(r.body).toMatchSnapshot();
         })
@@ -180,7 +180,7 @@ describe('Game with password', () => {
         .post(`/api/v1/games/${createdGame.game.id}/join`)
         .send({ nickname: 'foo2', password: 'wrong' })
         .expect('Content-Type', /json/)
-        // .expect(400)
+        .expect(403)
         .expect((r) => {
           expect(r.body).toMatchSnapshot();
         })
