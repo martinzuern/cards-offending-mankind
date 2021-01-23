@@ -27,8 +27,8 @@ export default class DBService {
     const { client, redlock } = this;
     this.client = undefined;
     this.redlock = undefined;
-    await client.quit();
-    await redlock.quit();
+    await client?.quit();
+    await redlock?.quit();
   }
 
   static async setUserLock(id: string, create = false): Promise<boolean> {

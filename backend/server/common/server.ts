@@ -10,6 +10,7 @@ import { RedisClient } from 'redis';
 import helmet from 'helmet';
 import * as Sentry from '@sentry/node';
 import compression from 'compression';
+import _ from 'lodash';
 
 import l from './logger';
 import errorHandler from '../api/middlewares/error.handler';
@@ -95,21 +96,20 @@ export default class ExpressServer {
       io.adapter(createAdapter({ pubClient, subClient }));
       this.sockets(io);
 
-      const closeServer = async () => {
+      const closeServer = _.once(async () => {
         l.warn('Closing server ...');
-        // let clients disconnect
         io.sockets.sockets.forEach((e) => e.disconnect(true));
-        server.close();
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise((resolve) => server.close(resolve));
+        l.warn('Closing DB connections ...');
         await pubClient.quit();
         await subClient.quit();
         await TimeoutQueue.shutdown();
         await DBService.shutdown();
         l.warn('Teardown completed.');
-      };
+      });
 
-      process.on('SIGTERM', closeServer);
-
+      ['SIGINT', 'SIGTERM'].forEach((event) => process.on(event, closeServer));
+      
       if (env !== 'test') {
         server.listen(port, (): void =>
           l.info(`up and running in ${env} @: ${os.hostname()} on port: ${port}}`)
