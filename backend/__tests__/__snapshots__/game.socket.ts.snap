@@ -59,123 +59,13 @@ Object {
 }
 `;
 
-exports[`joining game error jwt malformed 1`] = `
-Object {
-  "data": Object {
-    "code": "invalid_token",
-    "message": "jwt malformed",
-    "type": "UnauthorizedError",
-  },
-  "inner": Object {
-    "message": "jwt malformed",
-  },
-  "message": "jwt malformed",
-}
-`;
+exports[`joining game error jwt malformed 1`] = `[Error: Unauthorized: Token is missing or invalid Bearer]`;
 
-exports[`joining game error jwt not valid 1`] = `
-Object {
-  "data": Object {
-    "code": "invalid_token",
-    "message": "invalid signature",
-    "type": "UnauthorizedError",
-  },
-  "inner": Object {
-    "message": "invalid signature",
-  },
-  "message": "invalid signature",
-}
-`;
+exports[`joining game error jwt not valid 1`] = `[Error: Unauthorized: Token is missing or invalid Bearer]`;
 
-exports[`joining game error on locked user 1`] = `
-Object {
-  "data": Object {
-    "code": "user-locked",
-    "message": "user-locked",
-    "type": "UnauthorizedError",
-  },
-  "inner": Object {
-    "message": "user-locked",
-  },
-  "message": "user-locked",
-}
-`;
+exports[`joining game error on locked user 1`] = `[Error: Player is already active.]`;
 
 exports[`perform game works 1`] = `
-Object {
-  "game": Object {
-    "handSize": 10,
-    "hasPassword": false,
-    "id": Any<String>,
-    "packs": Array [
-      Object {
-        "abbr": "Base-INTL",
-        "description": "",
-        "icon": "",
-        "name": "Base Set (INTL Version)",
-        "official": true,
-      },
-    ],
-    "specialRules": Object {
-      "aiPlayerCount": 0,
-      "allowDiscarding": Object {
-        "enabled": false,
-        "penalty": 0,
-      },
-      "pickExtra": false,
-    },
-    "status": "created",
-    "timeouts": Object {
-      "betweenRounds": 30,
-      "judging": 120,
-      "playing": 120,
-      "revealing": 60,
-    },
-    "winnerPoints": 20,
-  },
-  "players": Array [
-    Object {
-      "id": Any<String>,
-      "isAI": false,
-      "isActive": true,
-      "isHost": true,
-      "nickname": "foo",
-      "points": 0,
-    },
-    Object {
-      "id": Any<String>,
-      "isAI": false,
-      "isActive": true,
-      "isHost": false,
-      "nickname": "foo2",
-      "points": 0,
-    },
-    Object {
-      "id": Any<String>,
-      "isAI": false,
-      "isActive": true,
-      "isHost": false,
-      "nickname": "foo3",
-      "points": 0,
-    },
-  ],
-  "rounds": Array [],
-}
-`;
-
-exports[`perform game works 2`] = `
-Object {
-  "deck": Array [],
-  "id": Any<String>,
-  "isAI": false,
-  "isActive": true,
-  "isHost": true,
-  "nickname": "foo",
-  "points": 0,
-}
-`;
-
-exports[`perform game works 3`] = `
 Object {
   "game": Object {
     "handSize": 10,
@@ -223,7 +113,7 @@ Object {
 }
 `;
 
-exports[`perform game works 4`] = `
+exports[`perform game works 2`] = `
 Object {
   "deck": Any<Array>,
   "id": Any<String>,
