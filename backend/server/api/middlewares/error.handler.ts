@@ -8,7 +8,7 @@ export default function errorHandler(
   next: NextFunction
 ): void {
   if (res.headersSent) return next(err);
-  const errorCode = res['sentry'] || null;
+  const errorCode = (res as Response & { sentry?: string }).sentry || null;
   const errors = (err as ValidationError).errors || [{ message: err.message }];
   res.status((err as ValidationError | HttpError).status || 500).json({ errors, errorCode });
   return undefined;

@@ -75,7 +75,7 @@ export default class ExpressServer {
 
       // Serving vue.js
       app.use(express.static(publicDir));
-      app.get('*', (_, res) => {
+      app.get('*', (_req, res) => {
         res.sendFile(path.resolve(publicDir, 'index.html'));
       });
 
@@ -109,7 +109,7 @@ export default class ExpressServer {
       });
 
       ['SIGINT', 'SIGTERM'].forEach((event) => process.on(event, closeServer));
-      
+
       if (env !== 'test') {
         server.listen(port, (): void =>
           l.info(`up and running in ${env} @: ${os.hostname()} on port: ${port}}`)
