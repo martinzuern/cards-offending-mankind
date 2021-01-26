@@ -47,7 +47,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      error: undefined as unknown,
+      error: undefined as { message: string } | undefined,
     };
   },
   computed: {
