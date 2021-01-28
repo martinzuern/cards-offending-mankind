@@ -24,7 +24,6 @@ const { exit } = process;
 const env = process.env.NODE_ENV || 'development';
 
 Sentry.init({ dsn: process.env.SENTRY_DSN, release: process.env.SHA });
-app.use(Sentry.Handlers.requestHandler());
 
 const publicDir = path.resolve(__dirname, '..', '..', 'public');
 
