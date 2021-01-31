@@ -11,6 +11,7 @@ import helmet from 'helmet';
 import * as Sentry from '@sentry/node';
 import compression from 'compression';
 import _ from 'lodash';
+import assert from 'assert';
 
 import l from './logger';
 import errorHandler from '../api/middlewares/error.handler';
@@ -18,6 +19,8 @@ import errorHandler from '../api/middlewares/error.handler';
 import installValidator from './openapi';
 import TimeoutQueue from '../sockets/controllers/games/queue';
 import DBService from '../services/db.service';
+
+assert(process.env.REDIS_URL, 'REDIS URL must be set');
 
 const app = express();
 const { exit } = process;
@@ -110,6 +113,7 @@ export default class ExpressServer {
       ['SIGINT', 'SIGTERM'].forEach((event) => process.on(event, closeServer));
 
       if (env !== 'test') {
+        assert(port > 0, 'Port must be set');
         server.listen(port, (): void =>
           l.info(`up and running in ${env} @: ${os.hostname()} on port: ${port}}`)
         );
