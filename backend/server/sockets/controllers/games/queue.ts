@@ -39,7 +39,7 @@ class TimeoutQueue {
   async shutdown(): Promise<void> {
     const { timeoutQueue } = this;
     this.timeoutQueue = undefined;
-    await timeoutQueue?.close();
+    await timeoutQueue?.close(true);
   }
 
   setSocketServer(io: socketIo.Server): void {

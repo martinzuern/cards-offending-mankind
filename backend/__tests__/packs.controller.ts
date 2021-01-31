@@ -12,7 +12,7 @@ beforeAll(async (done) => {
   done();
 });
 
-afterAll((done) => Teardown().then(done));
+afterAll((done) => Teardown().then(done), 90000);
 
 describe('Packs', () => {
   it('should get all packs', (done) =>

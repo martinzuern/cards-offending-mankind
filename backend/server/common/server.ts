@@ -6,7 +6,7 @@ import http from 'http';
 import os from 'os';
 import { Server } from 'socket.io';
 import { createAdapter } from 'socket.io-redis';
-import { RedisClient } from 'redis';
+import { createClient } from 'redis';
 import helmet from 'helmet';
 import * as Sentry from '@sentry/node';
 import compression from 'compression';
@@ -19,8 +19,6 @@ import errorHandler from '../api/middlewares/error.handler';
 import installValidator from './openapi';
 import TimeoutQueue from '../sockets/controllers/games/queue';
 import DBService from '../services/db.service';
-
-assert(process.env.REDIS_URL, 'REDIS URL must be set');
 
 const app = express();
 const { exit } = process;
@@ -93,7 +91,7 @@ export default class ExpressServer {
       const io = new Server(server, {
         cors: env !== 'development' ? undefined : devCorsOpts,
       });
-      const pubClient = new RedisClient({ url: process.env.REDIS_URL });
+      const pubClient = createClient({ url: process.env.REDIS_URL });
       const subClient = pubClient.duplicate();
       io.adapter(createAdapter({ pubClient, subClient }));
       this.sockets(io);
@@ -103,9 +101,11 @@ export default class ExpressServer {
         io.sockets.sockets.forEach((e) => e.disconnect(true));
         await new Promise((resolve) => server.close(resolve));
         l.warn('Closing DB connections ...');
-        await pubClient.quit();
-        await subClient.quit();
         await TimeoutQueue.shutdown();
+        await Promise.all([
+          new Promise((resolve) => subClient.quit(resolve)),
+          new Promise((resolve) => pubClient.quit(resolve)),
+        ]);
         await DBService.shutdown();
         l.warn('Teardown completed.');
       });

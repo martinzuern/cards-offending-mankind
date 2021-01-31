@@ -277,5 +277,5 @@ describe('perform game', () => {
         done();
       })
       .emit('start_game');
-  });
+  }, 30000);
 });

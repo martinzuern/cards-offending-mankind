@@ -13,7 +13,7 @@ beforeAll(async (done) => {
   done();
 });
 
-afterAll((done) => Teardown().then(() => done()));
+afterAll((done) => Teardown().then(() => done()), 90000);
 
 describe('Game without password', () => {
   let createdGame;
