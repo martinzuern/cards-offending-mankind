@@ -6,7 +6,7 @@ import assert from 'assert';
 import { v4 as uuidv4 } from 'uuid';
 
 import Server from '../server';
-import { GameState } from '../../types';
+import { GameState, Player } from '../../types';
 
 let httpServer: http.Server;
 let Teardown: () => Promise<void>;
@@ -244,6 +244,8 @@ describe('perform game', () => {
 
   it('works', async (done) => {
     socket = await newSocket(createdGame.player.token);
+    let latestGameState: GameState = {} as GameState;
+    let latestPlayer: Player = {} as Player;
     socket
       .on('connect_error', (error) => {
         throw new Error(JSON.stringify(error));
@@ -252,30 +254,37 @@ describe('perform game', () => {
         throw new Error(JSON.stringify(error));
       })
       .on('gamestate_updated', (data) => {
-        expect(data).toMatchSnapshot({
-          game: {
-            id: expect.any(String),
-          },
-          players: expect.any(Array),
-          rounds: [
-            {
-              judgeId: expect.any(String),
-              prompt: expect.any(Object),
-              timeouts: {
-                playing: expect.any(String),
-              },
-            },
-          ],
-        });
+        latestGameState = data;
       })
       .on('player_updated', (data) => {
-        expect(data).toMatchSnapshot({
-          id: expect.any(String),
-          deck: expect.any(Array),
-        });
-        expect(data.deck.length === 0 || data.deck.length >= 10).toBeTruthy();
-        done();
+        latestPlayer = data;
       })
       .emit('start_game');
+
+    setTimeout(() => {
+      expect(latestGameState).toMatchSnapshot({
+        game: {
+          id: expect.any(String),
+        },
+        players: expect.any(Array),
+        rounds: [
+          {
+            judgeId: expect.any(String),
+            prompt: expect.any(Object),
+            timeouts: {
+              playing: expect.any(String),
+            },
+          },
+        ],
+      });
+      expect(latestPlayer).toMatchSnapshot({
+        id: expect.any(String),
+        deck: expect.any(Array),
+      });
+      expect(
+        latestPlayer.deck.length >= 10 || latestGameState.rounds[-1].judgeId === latestPlayer.id
+      ).toBeTruthy();
+      done();
+    }, 3000);
   }, 30000);
 });
