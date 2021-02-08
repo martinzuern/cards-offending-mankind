@@ -3,6 +3,10 @@ info:
   title: backend
   description: Cards-Offending-Mankind Backend
   version: 1.0.0
+  license:
+    name: MIT
+  contact:
+    url: 'https://www.mankind.cards/legal'
 servers:
   - url: /api/v1
 tags:
@@ -40,7 +44,7 @@ paths:
           description: Return the API specification
           content: {}
       operationId: get-openapi-spec
-      description: ''
+      description: Return OpenAPI Spec.
       summary: OpenAPI specification
   /games:
     post:
@@ -62,7 +66,7 @@ paths:
                   - game
                   - player
         '400':
-          description: Bad Request
+          $ref: '#/components/responses/Error'
       description: Creates a new Game.
       tags:
         - Games
@@ -110,10 +114,12 @@ paths:
                 required:
                   - game
               examples: {}
+        '400':
+          $ref: '#/components/responses/Error'
         '404':
-          description: Not Found
+          $ref: '#/components/responses/Error'
       operationId: get-games-gameId
-      description: ''
+      description: Get a Game by it's ID.
   '/games/{GameID}/join':
     parameters:
       - schema:
@@ -138,9 +144,11 @@ paths:
                 required:
                   - player
         '400':
-          description: Bad Request
+          $ref: '#/components/responses/Error'
         '403':
-          description: Forbidden
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
       tags:
         - Games
       requestBody:
@@ -157,6 +165,7 @@ paths:
               required:
                 - nickname
         description: ''
+      description: Create a new Player for a Game.
 components:
   schemas:
     Player:
@@ -347,3 +356,33 @@ components:
               type: integer
             responsesCount:
               type: integer
+  responses:
+    Error:
+      description: Error response.
+      content:
+        application/json:
+          schema:
+            description: ''
+            type: object
+            properties:
+              errorCode:
+                type: string
+                nullable: true
+              errors:
+                type: array
+                uniqueItems: true
+                minItems: 1
+                items:
+                  type: object
+                  properties:
+                    errorCode:
+                      type: string
+                    message:
+                      type: string
+                      minLength: 1
+                    path:
+                      type: string
+                  required:
+                    - message
+            required:
+              - errors

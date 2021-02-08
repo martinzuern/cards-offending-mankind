@@ -43,14 +43,10 @@ export default class Controller {
     let newPlayer: PlayerWithToken;
     await DBService.updateGame(id, async (gameState) => {
       await GameService.validateGamePassword(gameState.game, password);
-      assert(
-        GameService.isGameJoinable(gameState.game),
-        new HttpError('Players can only join in status "created".', 400)
-      );
-      assert(
-        gameState.players.every((p) => p.nickname !== nickname),
-        new HttpError('Nickname already taken', 400)
-      );
+      if (!GameService.isGameJoinable(gameState.game))
+        throw new HttpError('Players can only join in status "created".', 400);
+      if (gameState.players.some((p) => p.nickname === nickname))
+        throw new HttpError('Nickname already taken', 400);
       newPlayer = GameService.initPlayer(id as UUID, { nickname });
       gameState.players.push(_.omit(newPlayer, ['token']));
       return gameState;

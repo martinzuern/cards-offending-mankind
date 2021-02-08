@@ -12,11 +12,11 @@ export default function wrapAsync(
       const msg = { message: err.message, type: err.name };
       L.warn(
         'Game %s - Player %s - Error: %o',
-        socket.decoded_token.gameId,
-        socket.decoded_token.id,
+        socket.decodedToken.gameId,
+        socket.decodedToken.id,
         msg
       );
       L.error(err);
-      socket.error(msg);
+      socket.emit('exception', msg);
     });
 }

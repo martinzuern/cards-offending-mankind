@@ -242,10 +242,9 @@ export default class GameService {
 
   static async validateGamePassword(game: InternalGame, password: string): Promise<boolean> {
     if (!game.hasPassword) return true;
-
-    assert(_.isString(password), new HttpError('Game password not provided.', 403));
+    if (!_.isString(password)) throw new HttpError('Game password not provided.', 403);
     const valid = await bcrypt.compare(password, game.password);
-    assert(valid === true, new HttpError('Game password incorrect', 403));
+    if (valid !== true) throw new HttpError('Game password incorrect', 403);
     return valid;
   }
 

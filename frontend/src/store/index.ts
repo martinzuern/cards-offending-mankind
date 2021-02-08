@@ -1,4 +1,4 @@
-import 'socket.io-client';
+import type { Socket } from 'socket.io-client';
 
 import Vue from 'vue';
 import Vuex from 'vuex';
@@ -26,7 +26,7 @@ export interface State {
   tokens: Record<string, string>;
   gameState?: Partial<GameState>;
   player?: Player;
-  socket?: SocketIOClient.Socket;
+  socket?: Socket;
 }
 
 Vue.use(Vuex);

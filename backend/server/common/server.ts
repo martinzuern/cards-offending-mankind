@@ -4,11 +4,14 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import http from 'http';
 import os from 'os';
-import socketIo from 'socket.io';
-import redisAdapter from 'socket.io-redis';
+import { Server } from 'socket.io';
+import { createAdapter } from 'socket.io-redis';
+import { createClient } from 'redis';
 import helmet from 'helmet';
 import * as Sentry from '@sentry/node';
 import compression from 'compression';
+import _ from 'lodash';
+import assert from 'assert';
 
 import l from './logger';
 import errorHandler from '../api/middlewares/error.handler';
@@ -22,16 +25,17 @@ const { exit } = process;
 const env = process.env.NODE_ENV || 'development';
 
 Sentry.init({ dsn: process.env.SENTRY_DSN, release: process.env.SHA });
-app.use(Sentry.Handlers.requestHandler());
 
 const publicDir = path.resolve(__dirname, '..', '..', 'public');
 
 export default class ExpressServer {
   private routes: (app: Application) => void;
 
-  private sockets: (io: socketIo.Server) => void;
+  private sockets: (io: Server) => void;
 
   constructor() {
+    app.use(Sentry.Handlers.requestHandler());
+
     app.use(
       helmet({
         contentSecurityPolicy: {
@@ -54,7 +58,7 @@ export default class ExpressServer {
     return this;
   }
 
-  socket(sockets: (io: socketIo.Server) => void): ExpressServer {
+  socket(sockets: (io: Server) => void): ExpressServer {
     this.sockets = sockets;
     return this;
   }
@@ -71,7 +75,7 @@ export default class ExpressServer {
 
       // Serving vue.js
       app.use(express.static(publicDir));
-      app.get('*', (_, res) => {
+      app.get('*', (_req, res) => {
         res.sendFile(path.resolve(publicDir, 'index.html'));
       });
 
@@ -81,29 +85,35 @@ export default class ExpressServer {
 
       const server = http.createServer(app);
 
-      const io = socketIo(server);
-      const ioAdapter = redisAdapter(process.env.REDIS_URL);
-      io.adapter(ioAdapter);
+      const devCorsOpts = {
+        origin: ['http://localhost', 'http://localhost:8080'],
+      };
+      const io = new Server(server, {
+        cors: env !== 'development' ? undefined : devCorsOpts,
+      });
+      const pubClient = createClient({ url: process.env.REDIS_URL });
+      const subClient = pubClient.duplicate();
+      io.adapter(createAdapter({ pubClient, subClient }));
       this.sockets(io);
-      // https://socket.io/blog/socket-io-2-4-0/
-      if (env === 'development') io.origins(['http://localhost', 'http://localhost:8080']);
 
-      const closeServer = async () => {
+      const closeServer = _.once(async () => {
         l.warn('Closing server ...');
-        // let clients disconnect
-        Object.values(io.sockets.connected).forEach((e) => e.disconnect(true));
-        server.close();
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        await ioAdapter.pubClient.quit();
-        await ioAdapter.subClient.quit();
+        io.sockets.sockets.forEach((e) => e.disconnect(true));
+        await new Promise((resolve) => server.close(resolve));
+        l.warn('Closing DB connections ...');
         await TimeoutQueue.shutdown();
+        await Promise.all([
+          new Promise((resolve) => subClient.quit(resolve)),
+          new Promise((resolve) => pubClient.quit(resolve)),
+        ]);
         await DBService.shutdown();
         l.warn('Teardown completed.');
-      };
+      });
 
-      process.on('SIGTERM', closeServer);
+      ['SIGINT', 'SIGTERM'].forEach((event) => process.on(event, closeServer));
 
       if (env !== 'test') {
+        assert(port > 0, 'Port must be set');
         server.listen(port, (): void =>
           l.info(`up and running in ${env} @: ${os.hostname()} on port: ${port}}`)
         );

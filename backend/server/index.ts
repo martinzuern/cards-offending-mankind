@@ -6,6 +6,7 @@ import routes from './routes';
 import sockets from './sockets';
 
 const port = parseInt(process.env.PORT, 10);
+
 const startServer = (): Promise<{
   app: Application;
   server: ServerType;

@@ -1,11 +1,16 @@
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
+import type { ValidationError } from 'express-openapi-validator/dist/framework/types';
 
-export default function errorHandler(err, _: Request, res: Response, next: NextFunction): void {
-  if (res.headersSent) {
-    return next(err);
-  }
-  const errors = err.errors || [{ message: err.message }];
-  res.status(err.status || 500).json({ errors });
+export default function errorHandler(
+  err: Error | HttpError | ValidationError,
+  _: Request,
+  res: Response,
+  next: NextFunction
+): void {
+  if (res.headersSent) return next(err);
+  const errorCode = (res as Response & { sentry?: string }).sentry || null;
+  const errors = (err as ValidationError).errors || [{ message: err.message }];
+  res.status((err as ValidationError | HttpError).status || 500).json({ errors, errorCode });
   return undefined;
 }
 

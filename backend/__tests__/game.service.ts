@@ -90,15 +90,13 @@ describe('GameService', () => {
         try {
           await GameService.validateGamePassword(ukGameState.game, undefined);
         } catch (error) {
-          expect(error).toMatchInlineSnapshot(
-            `[AssertionError: Error: Game password not provided.]`
-          );
+          expect(error).toMatchInlineSnapshot(`[Error: Game password not provided.]`);
         }
 
         try {
           await GameService.validateGamePassword(ukGameState.game, '');
         } catch (error) {
-          expect(error).toMatchInlineSnapshot(`[AssertionError: Error: Game password incorrect]`);
+          expect(error).toMatchInlineSnapshot(`[Error: Game password incorrect]`);
         }
         done();
       });
@@ -107,17 +105,13 @@ describe('GameService', () => {
         try {
           await GameService.validateGamePassword(ukGameState.game, (true as unknown) as string);
         } catch (error) {
-          expect(error).toMatchInlineSnapshot(
-            `[AssertionError: Error: Game password not provided.]`
-          );
+          expect(error).toMatchInlineSnapshot(`[Error: Game password not provided.]`);
         }
 
         try {
           await GameService.validateGamePassword(ukGameState.game, (22 as unknown) as string);
         } catch (error) {
-          expect(error).toMatchInlineSnapshot(
-            `[AssertionError: Error: Game password not provided.]`
-          );
+          expect(error).toMatchInlineSnapshot(`[Error: Game password not provided.]`);
         }
         done();
       });
@@ -126,7 +120,7 @@ describe('GameService', () => {
         try {
           await GameService.validateGamePassword(ukGameState.game, 'foo');
         } catch (error) {
-          expect(error).toMatchInlineSnapshot(`[AssertionError: Error: Game password incorrect]`);
+          expect(error).toMatchInlineSnapshot(`[Error: Game password incorrect]`);
         }
         done();
       });

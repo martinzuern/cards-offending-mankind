@@ -1,9 +1,10 @@
 import { MessageChooseWinner, MessageDiscardPrompt, MessagePickCards, MessageRevealSubmission } from '@/types';
+import type { Socket } from 'socket.io-client';
 
 export default class SocketEmitter {
-  socket: SocketIOClient.Socket;
+  socket: Socket;
 
-  constructor(socket: SocketIOClient.Socket) {
+  constructor(socket: Socket) {
     this.socket = socket;
   }
 

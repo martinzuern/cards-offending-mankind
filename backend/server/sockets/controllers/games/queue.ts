@@ -37,10 +37,9 @@ class TimeoutQueue {
   }
 
   async shutdown(): Promise<void> {
-    assert(this.timeoutQueue !== undefined, 'Queue is not set up');
     const { timeoutQueue } = this;
     this.timeoutQueue = undefined;
-    await timeoutQueue.close();
+    await timeoutQueue?.close(true);
   }
 
   setSocketServer(io: socketIo.Server): void {
