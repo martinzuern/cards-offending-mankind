@@ -38,7 +38,7 @@ const postRequest = async (path, data): Promise<unknown> => {
 
 const newSocket = async (token: string): Promise<Socket> => {
   const s = ioFront(httpServerUrl.toString(), {
-    extraHeaders: { Authorization: `Bearer ${token}` },
+    auth: { token: `Bearer ${token}` },
     reconnection: false,
     forceNew: true,
   });
@@ -94,7 +94,7 @@ describe('joining game', () => {
   it('error jwt malformed', async (done) => {
     let token = 'this-aint-work';
     socket = ioFront(httpServerUrl.toString(), {
-      extraHeaders: { Authorization: `Bearer ${token}` },
+      auth: { token: `Bearer ${token}` },
       reconnection: false,
       forceNew: true,
     });
@@ -108,7 +108,7 @@ describe('joining game', () => {
     let token =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFmZGIxNzE4LWIyOTAtNDY4Yy1hZjc2LTk5MWE0ZTU5NGEwYiIsImdhbWVJZCI6ImM2NTZlOTUxLWQzMDQtNDZhYS1hZDE3LWIwN2MyMzk4NWQxNiIsImlhdCI6MTU4OTkyMzA1MSwiZXhwIjoxNTkwMDA5NDUxfQ.R-5Q0kACeySzySOh3rFyyzM43JoghbTaeHijy9X4DUI';
     socket = ioFront(httpServerUrl.toString(), {
-      extraHeaders: { Authorization: `Bearer ${token}` },
+      auth: { token: `Bearer ${token}` },
       reconnection: false,
       forceNew: true,
     });
@@ -140,7 +140,7 @@ describe('joining game', () => {
   it('error on locked user', async (done) => {
     socket = await newSocket(createdGame.player.token);
     const socket2 = ioFront(httpServerUrl.toString(), {
-      extraHeaders: { Authorization: `Bearer ${createdGame.player.token}` },
+      auth: { token: `Bearer ${createdGame.player.token}` },
       reconnection: false,
       forceNew: true,
     });
