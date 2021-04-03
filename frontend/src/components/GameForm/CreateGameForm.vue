@@ -304,6 +304,17 @@ export default Vue.extend({
   },
   mounted() {
     store.dispatch.fetchPacks().then(() => (this.game.packs = this.packs.filter((p) => p.abbr === 'Base-US')));
+    if (localStorage.nickname) {
+      this.player.nickname = localStorage.nickname;
+    }
+  },
+  watch: {
+    player: {
+      handler(player: CreatePlayer) {
+        localStorage.nickname = player.nickname;
+      },
+      deep: true,
+    },
   },
   methods: {
     onSubmit(): void {
