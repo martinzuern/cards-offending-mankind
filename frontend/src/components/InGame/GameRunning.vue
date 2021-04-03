@@ -8,7 +8,7 @@
         <Countdown />
       </b-col>
       <b-col cols="6" md="auto" order="2" order-md="3" class="text-right">
-        <b-button id="popover-leaderboard" variant="outline-secondary" class="d-flex align-items-center">
+        <b-button id="popover-leaderboard" variant="outline-secondary" class="d-flex align-items-center float-right">
           🏅
           <span class="d-none d-lg-block ml-1">Leaderboard</span>
         </b-button>

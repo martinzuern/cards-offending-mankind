@@ -6,7 +6,7 @@
       class="d-flex justify-content-between align-items-center mb-1"
       :class="{ 'text-muted': p.id != player.id }"
     >
-      <strong>
+      <strong class="leaderboard-nickname">
         {{ p.isAI ? '🤖' : '' }}
         {{ p.nickname }}
         <i v-if="!p.isActive">(inactive)</i>
@@ -38,3 +38,8 @@ export default Vue.extend({
   },
 });
 </script>
+
+<style lang="sass" scoped>
+.leaderboard-nickname
+  padding-right: 1rem
+</style>
