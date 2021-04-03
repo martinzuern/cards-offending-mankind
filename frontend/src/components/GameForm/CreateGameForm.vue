@@ -302,19 +302,18 @@ export default Vue.extend({
       return this.game.packs.length > 0 && prompts >= 25 && responses >= 50;
     },
   },
-  mounted() {
-    store.dispatch.fetchPacks().then(() => (this.game.packs = this.packs.filter((p) => p.abbr === 'Base-US')));
-    if (localStorage.nickname) {
-      this.player.nickname = localStorage.nickname;
-    }
-  },
   watch: {
     player: {
       handler(player: CreatePlayer) {
         localStorage.nickname = player.nickname;
       },
-      deep: true,
     },
+  },
+  mounted() {
+    store.dispatch.fetchPacks().then(() => (this.game.packs = this.packs.filter((p) => p.abbr === 'Base-US')));
+    if (localStorage.nickname) {
+      this.player.nickname = localStorage.nickname;
+    }
   },
   methods: {
     onSubmit(): void {
