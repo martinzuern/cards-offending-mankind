@@ -61,9 +61,12 @@
     "node-sass": "^5.0.0",
     "prettier": "^2.0.5",
     "sass-loader": "^10.1.1",
-    "typescript": "^3.9.7",
+    "typescript": "^3.9.9",
     "vue-template-compiler": "^2.6.11",
     "vue-type-check": "^1.0.0"
+  },
+  "resolutions": {
+    "vue-language-server/**/typescript": "^3.9.9"
   },
   "license": "MIT"
 }
