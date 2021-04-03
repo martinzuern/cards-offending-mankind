@@ -22,7 +22,7 @@ export default function sockets(io: socketIo.Server): void {
 
     // make sure we keep the user lock
     socket.conn.on('packet', (packet) => {
-      if (packet.type === 'ping') {
+      if (packet.type === 'pong') {
         DBService.setUserLock(playerId);
       }
     });
