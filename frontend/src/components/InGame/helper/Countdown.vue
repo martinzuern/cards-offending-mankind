@@ -2,7 +2,7 @@
   <b-progress v-if="totalSeconds > 0 && remainingSeconds >= 0" :max="totalSeconds" height="1.5rem">
     <b-progress-bar :value="remainingSeconds" variant="secondary">
       <span :class="`${remainingSeconds / totalSeconds > 0.5 ? 'countdown-left' : 'countdown-right'}`">
-        {{ Math.round(remainingSeconds) }} seconds remaining
+        {{ remainingHumanize }} remaining
       </span>
     </b-progress-bar>
   </b-progress>
@@ -46,6 +46,13 @@ export default Vue.extend({
       if (!this.currentRoundTimeouts || !this.currentTimeoutKey) return -1;
       const end = this.currentRoundTimeouts[this.currentTimeoutKey] as Date;
       return (end.getTime() - this.now.getTime()) / 1000;
+    },
+    remainingHumanize(): string {
+      if (this.remainingSeconds < 1) return 'less than a second';
+      const mins = Math.floor(this.remainingSeconds / 60);
+      const secs = Math.floor(this.remainingSeconds % 60);
+      if (mins > 0) return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      return `${secs} seconds`;
     },
   },
   mounted() {

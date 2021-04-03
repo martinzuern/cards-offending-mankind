@@ -69,8 +69,18 @@ export default Vue.extend({
     };
   },
   computed: {},
+  watch: {
+    player: {
+      handler(player: CreatePlayer) {
+        localStorage.nickname = player.nickname;
+      },
+    },
+  },
   mounted() {
     this.fetchGame();
+    if (localStorage.nickname) {
+      this.player.nickname = localStorage.nickname;
+    }
   },
   methods: {
     async fetchGame(): Promise<void> {
