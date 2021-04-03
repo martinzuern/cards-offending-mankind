@@ -14,7 +14,7 @@
     <div v-else class="h-100 d-flex flex-column justify-content-between">
       <!-- eslint-disable-next-line vue/no-v-html -->
       <span class="card-content" v-html="htmlText"></span>
-      <div class="card-pack pt-2" :title="cardPack.name">
+      <div v-if="!!cardPack" class="card-pack pt-2" :title="cardPack.name">
         <i v-if="(cardPack.icon || '').startsWith('la')" :class="`las ${cardPack.icon}`"></i>
         <span v-else-if="cardPack.icon" class="px-1 border rounded-lg">
           {{ cardPack.icon }}
@@ -45,7 +45,11 @@ export default Vue.extend({
     },
     card: {
       type: Object as PropType<PromptCard | ResponseCard>,
-      default: {},
+      default: () => ({
+        type: undefined,
+        value: undefined,
+        packAbbr: undefined,
+      }),
     },
   },
   data() {
@@ -58,7 +62,8 @@ export default Vue.extend({
     turnedBackside(): boolean {
       return this.card.value === undefined;
     },
-    cardPack(): Pack {
+    cardPack(): Pack | undefined {
+      if (!this.card.value) return undefined;
       assert(store.state.gameState?.game);
       const pack = store.state.gameState?.game.packs.find((p) => p.abbr === this.card.packAbbr);
       assert(pack);
