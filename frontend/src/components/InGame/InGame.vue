@@ -81,7 +81,7 @@ export default Vue.extend({
       Vue.$log.debug('Initializing Socket');
       const baseURL = new URL(process.env.VUE_APP_BACKEND_URL || window.location.origin).toString();
       try {
-        const socket = io(baseURL, { extraHeaders: { Authorization: `Bearer ${this.token}` } });
+        const socket = io(baseURL, { auth: { token: `Bearer ${this.token}` } });
         socket
           .on('gamestate_updated', (data: GameState) => {
             Vue.$log.debug('Socket event: gamestate_updated');

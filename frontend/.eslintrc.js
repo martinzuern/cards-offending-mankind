@@ -5,12 +5,11 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
     '@vue/standard',
     'plugin:vue/recommended',
     '@vue/typescript',
     '@vue/prettier',
-    'prettier/@typescript-eslint',
+    'plugin:prettier/recommended',
   ],
   parserOptions: {
     ecmaVersion: 2020,
