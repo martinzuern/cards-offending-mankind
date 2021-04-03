@@ -1,6 +1,13 @@
 <template>
   <div v-if="isJudge || hasSubmitted" class="waiting-for-submission">
-    <h6 class="mt-5 text-center">Waiting for other players to submit ...</h6>
+    <h6 class="mt-5 text-center">
+      <span v-if="unsubmittedPlayers.length > 1">
+        Waiting for {{ unsubmittedPlayers.length }} players to submit ...
+      </span>
+      <span v-if="unsubmittedPlayers.length === 1">
+        Waiting for <b-badge pill variant="dark">{{ unsubmittedPlayers[0].nickname }}</b-badge> to submit ...
+      </span>
+    </h6>
     <div class="d-flex flex-nowrap justify-content-center pb-4 submission-wrap">
       <Card
         v-for="i in playerCount - 1"
@@ -86,7 +93,7 @@ import { includes, random } from 'lodash';
 import pluralize from 'pluralize';
 import type { Socket } from 'socket.io-client';
 
-import { Player, Round, ResponseCard, Game, RoundSubmission } from '@/types';
+import { Player, Round, ResponseCard, Game, RoundSubmission, OtherPlayer } from '@/types';
 import store from '@/store';
 import SocketEmitter from '@/helpers/SocketEmitter';
 
@@ -137,6 +144,11 @@ export default Vue.extend({
     },
     hasSubmitted(): boolean {
       return this.submitted || this.submissions.some((s) => s.playerId === this.player.id);
+    },
+    unsubmittedPlayers(): OtherPlayer[] {
+      assert(store.state.gameState?.players);
+      const p = store.state.gameState.players.filter((p) => p.isActive && p.id !== this.currentRound.judgeId);
+      return p.filter((p) => !this.submissions.some((s) => s.playerId === p.id));
     },
     notSelectedCards(): ResponseCard[] {
       const selectedValues = this.selectedCards.map(({ value }) => value);
