@@ -285,6 +285,6 @@ describe('perform game', () => {
         latestPlayer.deck.length >= 10 || latestGameState.rounds[-1].judgeId === latestPlayer.id
       ).toBeTruthy();
       done();
-    }, 5000);
+    }, 7500);
   }, 30000);
 });

@@ -151,8 +151,8 @@ describe('GameService', () => {
   describe('builds pile', () => {
     it('works', () => {
       const pile = GameService.buildPile(ukGameState.game);
-      expect(pile.prompts).toHaveLength(133);
-      expect(pile.responses).toHaveLength(763);
+      expect(pile.prompts).toHaveLength(135);
+      expect(pile.responses).toHaveLength(765);
       expect({
         ...pile,
         prompts: expect.any(Array),
@@ -179,8 +179,8 @@ describe('GameService', () => {
       );
       const newGameState = GameService.startGame(baseGameState);
       expect(newGameState.players).toHaveLength(3);
-      expect(newGameState.piles.responses).toHaveLength(509 - 20);
-      expect(newGameState.piles.prompts).toHaveLength(89 - 1);
+      expect(newGameState.piles.responses).toHaveLength(510 - 20);
+      expect(newGameState.piles.prompts).toHaveLength(90 - 1);
       const { judgeId } = newGameState.rounds[newGameState.rounds.length - 1];
       expect(newGameState.players.every((p) => p.id === judgeId || p.deck.length >= 10)).toBe(true);
       done();
