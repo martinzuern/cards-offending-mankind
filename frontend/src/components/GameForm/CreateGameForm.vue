@@ -305,10 +305,8 @@ export default Vue.extend({
     },
   },
   watch: {
-    player: {
-      handler(player: CreatePlayer) {
-        localStorage.nickname = player.nickname;
-      },
+    'player.nickname': function (nickname: string) {
+      localStorage.nickname = nickname;
     },
   },
   mounted() {
