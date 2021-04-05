@@ -25,10 +25,13 @@
 import Vue from 'vue';
 import assert from 'assert';
 import { groupBy } from 'lodash';
+import VueConfetti from 'vue-confetti';
 
 import { OtherPlayer } from '@/types';
 import store from '@/store';
 import Leaderboard from './helper/Leaderboard.vue';
+
+Vue.use(VueConfetti);
 
 export default Vue.extend({
   name: 'GameEnded',
@@ -44,6 +47,10 @@ export default Vue.extend({
         .fill(0)
         .map((_val, i) => playersByPoints[topPoints[i]] || []);
     },
+  },
+  mounted() {
+    // @ts-ignore
+    this.$confetti.start({ particlesPerFrame: 0.25 });
   },
 });
 </script>
