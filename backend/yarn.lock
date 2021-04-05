@@ -2722,10 +2722,10 @@ expect@^26.6.2:
     jest-message-util "^26.6.2"
     jest-regex-util "^26.0.0"
 
-express-openapi-validator@^4.12.6:
-  version "4.12.6"
-  resolved "https://registry.yarnpkg.com/express-openapi-validator/-/express-openapi-validator-4.12.6.tgz#0738a0f7b8fb643839dd8c4a5f95809cb2d51f08"
-  integrity sha512-F8m1Kp2zNhwGq2a/cu5PJgZkIQs5WyH68nSxH0uIOoHmDF8PPixp2xEtuQVtj/XQeAtBT7Em+7q7GT7ASGjXzg==
+express-openapi-validator@^4.12.7:
+  version "4.12.7"
+  resolved "https://registry.yarnpkg.com/express-openapi-validator/-/express-openapi-validator-4.12.7.tgz#af7635d5c1890aa749d12bbfa786700e99eb33fa"
+  integrity sha512-W9IWH7P3L/2NYubhpfXbT2lt1i+U7ZMmAt/UDLn5xDfMYxl7zlXo7LtjcO0hOItYGicFLgQleBsw9cNHDZBkug==
   dependencies:
     "@types/multer" "^1.4.5"
     ajv "^6.12.6"
@@ -4240,9 +4240,9 @@ jsesc@^2.5.1:
   resolved "https://registry.yarnpkg.com/jsesc/-/jsesc-2.5.2.tgz#80564d2e483dacf6e8ef209650a67df3f0c283a4"
   integrity sha512-OYu7XEzjkCQ3C5Ps3QIZsQfNpqoJyZZA99wd9aWd05NCtC5pWOkShK2mkL6HXQR6/Cy2lbNdPlZBpuQHXE63gA==
 
-json-against-humanity@martinzuern/json-against-humanity#v2.2.0:
-  version "2.2.0"
-  resolved "https://codeload.github.com/martinzuern/json-against-humanity/tar.gz/1a99c94644bdb6f96a9520a32003702b4425e765"
+json-against-humanity@martinzuern/json-against-humanity:
+  version "2.2.1"
+  resolved "https://codeload.github.com/martinzuern/json-against-humanity/tar.gz/1adc81c8c62ca459d9443f3b3cc250e4fbebc046"
 
 json-buffer@3.0.0:
   version "3.0.0"

@@ -42,6 +42,8 @@ export default class ExpressServer {
           directives: {
             ...helmet.contentSecurityPolicy.getDefaultDirectives(),
             'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+            'connect-src': ["'self'", '*.sentry.io'],
+            'report-uri': [process.env.SENTRY_CSP_REPORT_URI],
           },
         },
       })
@@ -91,7 +93,7 @@ export default class ExpressServer {
       const io = new Server(server, {
         cors: env !== 'development' ? undefined : devCorsOpts,
       });
-      const pubClient = createClient({ url: process.env.REDIS_URL });
+      const pubClient = createClient({ url: process.env.REDIS_TLS_URL || process.env.REDIS_URL });
       const subClient = pubClient.duplicate();
       io.adapter(createAdapter({ pubClient, subClient }));
       this.sockets(io);

@@ -22,12 +22,13 @@
 
       <button
         v-if="player.isHost"
-        class="btn d-block w-50 btn-lg mx-auto my-5"
+        class="btn d-block w-50 btn-lg mx-auto my-5 btn-start-game"
         :class="canStartGame ? 'btn-success' : 'btn-secondary'"
         :disabled="!canStartGame"
         @click="startGame"
       >
-        Start Game
+        <span v-if="canStartGame">Start Game</span>
+        <span v-else>You need at least 3 players (2+ humans) to start the game</span>
       </button>
       <p v-else class="text-center font-weight-bold py-4">Waiting for the host to start the game ...</p>
 
@@ -129,4 +130,9 @@ export default Vue.extend({
 
 <style lang="sass" scoped>
 @import '@/sass/_utilities.sass'
+
+.btn-start-game
+  &:disabled
+    line-height: 130%
+    font-size: 95%
 </style>
