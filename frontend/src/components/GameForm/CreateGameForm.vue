@@ -222,10 +222,12 @@
           </b-col>
         </b-row>
 
-        <b-button type="submit" variant="success" size="sm" class="mt-3">
-          <b-icon icon="check" class="mr-1" />
-          Create a new game
-        </b-button>
+        <b-form-group description="You need at least 3 players (2+ humans) to start the game.">
+          <b-button type="submit" variant="success" size="sm" class="mt-3">
+            <b-icon icon="check" class="mr-1" />
+            Create a new game
+          </b-button>
+        </b-form-group>
       </b-form>
     </template>
   </GameForm>
