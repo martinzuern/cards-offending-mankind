@@ -26,7 +26,7 @@ class TimeoutQueue {
   }
 
   async start(): Promise<void> {
-    this.timeoutQueue = new Queue('games-to', process.env.REDIS_TLS_URL || process.env.REDIS_URL, {
+    this.timeoutQueue = new Queue('games-to', process.env.REDIS_URL, {
       defaultJobOptions: {
         removeOnComplete: true,
         removeOnFail: 10,

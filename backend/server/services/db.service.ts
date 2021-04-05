@@ -17,9 +17,7 @@ export default class DBService {
 
   static start(): Promise<void> {
     L.info('Starting DB Server');
-    this.client = createNodeRedisClient({
-      url: process.env.REDIS_TLS_URL || process.env.REDIS_URL,
-    });
+    this.client = createNodeRedisClient({ url: process.env.REDIS_URL });
     this.redlock = new Redlock([this.client.nodeRedis]);
     return new Promise((resolve) => this.client.nodeRedis.on('ready', resolve));
   }
