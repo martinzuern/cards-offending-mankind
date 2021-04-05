@@ -38,6 +38,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Install Codecov
+        run: yarn global add codecov
       - name: Install dependencies
         run: yarn install --frozen-lockfile
         working-directory: ./backend
@@ -49,6 +51,10 @@ jobs:
         working-directory: ./backend
         env:
           REDIS_URL: redis://redis:6379
+      - name: Submit to Codecov
+        run: codecov -F backend
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   deploy-heroku:
     runs-on: ubuntu-latest
