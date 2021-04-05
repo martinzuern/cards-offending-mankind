@@ -149,6 +149,30 @@ export default class GameService {
     );
   }
 
+  static validateEnoughPacks(gameState: InternalGameState, extraPlayers = 0): boolean {
+    const pileCountPrompt =
+      gameState.piles.prompts.length + gameState.piles.discardedPrompts.length;
+    const pileCountResponse =
+      gameState.piles.responses.length + gameState.piles.discardedResponses.length;
+
+    if (pileCountPrompt <= 2) return false;
+
+    const activeHumanPlayersCount =
+      extraPlayers + gameState.players.filter((player) => player.isActive && !player.isAI).length;
+    const aiPlayersCount = gameState.players.filter((player) => player.isAI).length;
+
+    const maxHandSize =
+      gameState.game.handSize +
+      Math.max(
+        ...gameState.piles.prompts.map((p) => p.draw),
+        ...gameState.piles.discardedPrompts.map((p) => p.draw)
+      ) -
+      1;
+    const minPileCount = activeHumanPlayersCount * maxHandSize + aiPlayersCount;
+
+    return pileCountResponse > minPileCount;
+  }
+
   static startGame(gameState: InternalGameState): InternalGameState {
     const newGameState = _.cloneDeep(gameState);
     assert(this.isGameJoinable(newGameState.game), 'Game has wrong status.');
@@ -160,14 +184,7 @@ export default class GameService {
     assert(activeHumanPlayers.length + aiPlayers.length >= 3, 'There are not enough players.');
 
     newGameState.piles = GameService.buildPile(newGameState.game);
-    assert(newGameState.piles.prompts.length > 1, 'There are not enough packs.');
-    const maxHandSize =
-      newGameState.game.handSize + Math.max(...newGameState.piles.prompts.map((p) => p.draw)) - 1;
-    assert(
-      newGameState.piles.responses.length >
-        activeHumanPlayers.length * maxHandSize + aiPlayers.length,
-      'There are not enough packs.'
-    );
+    assert(this.validateEnoughPacks(newGameState), 'There are not enough packs.');
 
     newGameState.players = _.shuffle(newGameState.players);
     newGameState.game.status = GameStatus.Running;
@@ -500,7 +517,7 @@ export default class GameService {
   }
 
   static isGameJoinable(game: InternalGame): boolean {
-    return game.status === GameStatus.Created;
+    return game.status === GameStatus.Created || game.status === GameStatus.Running;
   }
 
   static isGameRunning(game: InternalGame): boolean {

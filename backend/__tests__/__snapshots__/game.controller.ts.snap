@@ -173,7 +173,7 @@ Object {
   "errorCode": null,
   "errors": Array [
     Object {
-      "message": "Nickname already taken",
+      "message": "Nickname already taken.",
     },
   ],
 }

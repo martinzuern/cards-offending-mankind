@@ -12,7 +12,10 @@
 
     <template v-else>
       <template v-if="alerts.length > 0">
-        <b-alert v-for="alert in alerts" :key="alert" class="my-3" variant="warning" show> {{ alert }} </b-alert>
+        <b-alert v-for="alert in alerts" :key="alert" class="my-3" variant="warning" show dismissible>
+          <b-icon icon="info-circle" class="mr-1" />
+          {{ alert }}
+        </b-alert>
       </template>
 
       <b-form @submit.prevent="onSubmit">
@@ -86,8 +89,9 @@ export default Vue.extend({
     async fetchGame(): Promise<void> {
       try {
         const response = await axios.get<MessageGetGame>(`/games/${this.gameId}`);
-        if (response.data.game.status !== 'created')
-          this.errors.push('You cannot join this game as it has already started.');
+        if (response.data.game.status === 'running') this.alerts.push('This game has already started.');
+        if (response.data.game.status === 'ended')
+          this.errors.push('You cannot join this game as it has already ended.');
         this.game = response.data.game;
       } catch (err) {
         if ([404, 400].includes(err?.response?.status)) this.errors.push('Game not found');

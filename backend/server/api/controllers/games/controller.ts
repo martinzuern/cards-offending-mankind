@@ -44,9 +44,14 @@ export default class Controller {
     await DBService.updateGame(id, async (gameState) => {
       await GameService.validateGamePassword(gameState.game, password);
       if (!GameService.isGameJoinable(gameState.game))
-        throw new HttpError('Players can only join in status "created".', 400);
+        throw new HttpError('Players cannot join if game has ended.', 400);
       if (gameState.players.some((p) => p.nickname === nickname))
-        throw new HttpError('Nickname already taken', 400);
+        throw new HttpError('Nickname already taken.', 400);
+      if (
+        GameService.isGameRunning(gameState.game) &&
+        !GameService.validateEnoughPacks(gameState, 1)
+      )
+        throw new HttpError('There are not enough packs for an extra player.', 400);
       newPlayer = GameService.initPlayer(id as UUID, { nickname });
       gameState.players.push(_.omit(newPlayer, ['token']));
       return gameState;
