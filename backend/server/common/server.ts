@@ -42,6 +42,8 @@ export default class ExpressServer {
           directives: {
             ...helmet.contentSecurityPolicy.getDefaultDirectives(),
             'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+            'connect-src': ["'self'", '*.sentry.io'],
+            'report-uri': [process.env.SENTRY_CSP_REPORT_URI],
           },
         },
       })
