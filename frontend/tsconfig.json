@@ -27,6 +27,7 @@
     ]
   },
   "include": [
+    "vue-confetti.d.ts",
     "typings.d.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
