@@ -1,7 +1,6 @@
 import express, { Application } from 'express';
 import path from 'path';
 import cors from 'cors';
-import bodyParser from 'body-parser';
 import http from 'http';
 import os from 'os';
 import { Server } from 'socket.io';
@@ -49,7 +48,7 @@ export default class ExpressServer {
       })
     );
     app.use(compression());
-    app.use(bodyParser.json({ limit: process.env.REQUEST_LIMIT || '100kb' }));
+    app.use(express.json({ limit: process.env.REQUEST_LIMIT || '100kb' }));
 
     // We don't need CORS in prod, as we serve the frontend directly
     if (env !== 'production') app.use(cors());

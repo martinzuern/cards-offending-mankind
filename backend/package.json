@@ -20,7 +20,6 @@
     "@sentry/node": "^6.2.5",
     "@thream/socketio-jwt": "^2.1.0",
     "bcrypt": "^5.0.1",
-    "body-parser": "^1.19.0",
     "bull": "^3.22.0",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.5",
