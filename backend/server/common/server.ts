@@ -1,7 +1,6 @@
 import express, { Application } from 'express';
 import path from 'path';
 import cors from 'cors';
-import bodyParser from 'body-parser';
 import http from 'http';
 import os from 'os';
 import { Server } from 'socket.io';
@@ -42,14 +41,22 @@ export default class ExpressServer {
           directives: {
             ...helmet.contentSecurityPolicy.getDefaultDirectives(),
             'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-            'connect-src': ["'self'", '*.sentry.io'],
+            'connect-src': [
+              "'self'",
+              '*.sentry.io',
+              // Safari doesn't allow using wss:// origins as 'self' from
+              // an https:// page, so we have to translate explicitly for
+              // it.
+              'ws:',
+              'wss:',
+            ],
             'report-uri': [process.env.SENTRY_CSP_REPORT_URI],
           },
         },
       })
     );
     app.use(compression());
-    app.use(bodyParser.json({ limit: process.env.REQUEST_LIMIT || '100kb' }));
+    app.use(express.json({ limit: process.env.REQUEST_LIMIT || '100kb' }));
 
     // We don't need CORS in prod, as we serve the frontend directly
     if (env !== 'production') app.use(cors());
