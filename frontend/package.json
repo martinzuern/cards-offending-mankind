@@ -40,7 +40,7 @@
     "@types/pluralize": "^0.0.29",
     "@types/punycode": "^2.1.0",
     "@types/socket.io-client": "^1.4.36",
-    "@typescript-eslint/eslint-plugin": "^4.20.0",
+    "@typescript-eslint/eslint-plugin": "^4.21.0",
     "@typescript-eslint/parser": "^4.20.0",
     "@vue/cli-plugin-babel": "^4.5.12",
     "@vue/cli-plugin-eslint": "~4.5.12",
