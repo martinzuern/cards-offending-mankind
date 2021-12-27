@@ -1,7 +1,6 @@
-import { createNodeRedisClient } from 'handy-redis';
+import Redis from 'ioredis';
 import Redlock from 'redlock';
 import assert from 'assert';
-import type { WrappedNodeRedisClient } from 'handy-redis';
 import { InternalGameState } from '../../root-types';
 
 import L from '../common/logger';
@@ -11,15 +10,15 @@ const LOCK_TIMEOUT = 3000;
 const GAME_EXPIRATION = 60 * 60 * 24; // 24 hrs
 
 export default class DBService {
-  static client?: WrappedNodeRedisClient;
+  static client?: Redis.Redis;
 
   static redlock?: Redlock;
 
   static start(): Promise<void> {
     L.info('Starting DB Server');
-    this.client = createNodeRedisClient({ url: process.env.REDIS_URL });
-    this.redlock = new Redlock([this.client.nodeRedis]);
-    return new Promise((resolve) => this.client.nodeRedis.on('ready', resolve));
+    this.client = new Redis(process.env.REDIS_URL);
+    this.redlock = new Redlock([this.client]);
+    return new Promise((resolve) => this.client.on('ready', resolve));
   }
 
   static async shutdown(): Promise<void> {
@@ -82,7 +81,7 @@ export default class DBService {
   ): Promise<void> {
     L.info(`Requesting lock for game with id ${id}`);
     assert(this.client !== undefined, 'DB Connection is not established.');
-    const lock = await this.redlock.lock(`lock:game:${id}`, LOCK_TIMEOUT);
+    const lock = await this.redlock.acquire([`lock:game:${id}`], LOCK_TIMEOUT);
     L.info(`Holding lock for game with id ${id}`);
 
     try {
@@ -95,7 +94,7 @@ export default class DBService {
       L.error(`while update game with id ${id} "${error.message}"`);
       throw error;
     } finally {
-      await lock.unlock();
+      await lock.release();
       L.info(`Released lock for game with id ${id}`);
     }
   }

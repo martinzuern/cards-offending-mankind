@@ -1,7 +1,7 @@
 import assert from 'assert';
 import socketIo from 'socket.io';
 import Queue from 'bull';
-import Sentry from '@sentry/node';
+import * as Sentry from '@sentry/node';
 import { serializeError } from 'serialize-error';
 
 import L from '../../../common/logger';

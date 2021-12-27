@@ -7,7 +7,7 @@ import { Server } from 'socket.io';
 import { createAdapter } from 'socket.io-redis';
 import { createClient } from 'redis';
 import helmet from 'helmet';
-import Sentry from '@sentry/node';
+import * as Sentry from '@sentry/node';
 import compression from 'compression';
 import _ from 'lodash';
 import assert from 'assert';
