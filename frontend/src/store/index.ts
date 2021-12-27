@@ -50,7 +50,10 @@ const { store, rootActionContext, moduleActionContext, rootGetterContext, module
   getters: {
     currentRound: (state): Round | undefined => last(state.gameState?.rounds),
     currentRoundIndex: (state): number => (state.gameState?.rounds?.length || 1) - 1,
-    tokenForGame: (state) => (id: UUID): string | undefined => get(state.tokens, id),
+    tokenForGame:
+      (state) =>
+      (id: UUID): string | undefined =>
+        get(state.tokens, id),
   },
   mutations: {
     initializeStore(state): void {
@@ -119,7 +122,6 @@ export { rootActionContext, moduleActionContext, rootGetterContext, moduleGetter
 // The following lines enable types in the injected store '$store'.
 export type AppStore = typeof store;
 declare module 'vuex' {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface Store<S> {
     direct: AppStore;
   }
