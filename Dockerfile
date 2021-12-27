@@ -5,7 +5,7 @@
 #  |_|   |_|   \___/ |_||_|  \__| \___| |_||_| \__,_|
 ###################### Frontend ######################                                                  
 
-FROM node:12 as build_frontent
+FROM node:16 as build_frontent
 
 ARG COMMIT_SHA='unkown'
 ENV VUE_APP_SHA=$COMMIT_SHA
@@ -45,7 +45,7 @@ RUN ls -laR ./dist
 #  |___/ \__,_| \__| |_\_\ \___| |_||_| \__,_|
 ################### Backend ###################
 
-FROM node:12 as build_backend
+FROM node:16 as build_backend
 
 # Type folder needed for typescript compilation
 WORKDIR /opt/types
@@ -76,7 +76,7 @@ RUN ls -laR ./dist
 #  |_|   |_| |_||_| \__,_| |_|   |___/  \_,_| |_| |_| \__,_|
 ######################## Final Build ########################
 
-FROM node:12
+FROM node:16
 
 ARG COMMIT_SHA='unkown'
 ENV SHA=$COMMIT_SHA

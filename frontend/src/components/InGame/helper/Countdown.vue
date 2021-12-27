@@ -28,7 +28,7 @@ export default Vue.extend({
       return store.state.gameState?.game?.timeouts;
     },
     currentRoundTimeouts(): Record<keyof Game['timeouts'], Date> | undefined {
-      const timeouts = (store.getters.currentRound?.timeouts as unknown) as Game['timeouts'];
+      const timeouts = store.getters.currentRound?.timeouts as unknown as Game['timeouts'];
       if (!timeouts) return undefined;
       return mapValues(timeouts, (x) => new Date(x));
     },

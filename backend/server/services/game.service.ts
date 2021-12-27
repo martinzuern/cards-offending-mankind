@@ -363,7 +363,7 @@ export default class GameService {
     const myPlayer = _.find(newGameState.players, {
       id: playerId,
       isActive: true,
-    }) as InternalPlayer;
+    });
     assert(myPlayer, 'Could not find player.');
 
     const cards = discardedCards.map((card) => {
@@ -400,7 +400,7 @@ export default class GameService {
     const myPlayer = _.find(newGameState.players, {
       id: playerId,
       isActive: true,
-    }) as InternalPlayer;
+    });
     assert(myPlayer, 'Could not find player.');
 
     if (!newGameState.piles.prompts.length)

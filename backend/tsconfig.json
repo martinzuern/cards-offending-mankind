@@ -2,7 +2,7 @@
   "compileOnSave": false,
   "compilerOptions": {
     "target": "es6",
-    "module": "commonjs",
+    "module": "CommonJS",
     "esModuleInterop": true,
     "sourceMap": true,
     "resolveJsonModule": true,

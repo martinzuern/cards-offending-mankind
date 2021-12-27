@@ -33,7 +33,7 @@ export default class ExpressServer {
   private sockets: (io: Server) => void;
 
   constructor() {
-    app.use(Sentry.Handlers.requestHandler());
+    app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
 
     app.use(
       helmet({
@@ -53,10 +53,10 @@ export default class ExpressServer {
             'report-uri': [process.env.SENTRY_CSP_REPORT_URI],
           },
         },
-      })
+      }) as express.RequestHandler
     );
     app.use(compression());
-    app.use(express.json({ limit: process.env.REQUEST_LIMIT || '100kb' }));
+    app.use(express.json({ limit: process.env.REQUEST_LIMIT || '100kb' }) as express.RequestHandler);
 
     // We don't need CORS in prod, as we serve the frontend directly
     if (env !== 'production') app.use(cors());
@@ -89,7 +89,7 @@ export default class ExpressServer {
       });
 
       // Error handler
-      app.use(Sentry.Handlers.errorHandler());
+      app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
       app.use(errorHandler);
 
       const server = http.createServer(app);
@@ -112,8 +112,8 @@ export default class ExpressServer {
         l.warn('Closing DB connections ...');
         await TimeoutQueue.shutdown();
         await Promise.all([
-          new Promise((resolve) => subClient.quit(resolve)),
-          new Promise((resolve) => pubClient.quit(resolve)),
+          subClient.quit(),
+          pubClient.quit(),
         ]);
         await DBService.shutdown();
         l.warn('Teardown completed.');

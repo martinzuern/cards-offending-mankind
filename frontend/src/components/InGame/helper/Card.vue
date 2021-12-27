@@ -53,7 +53,7 @@ export default Vue.extend({
     },
   },
   data() {
-    return { resizeHandler: (undefined as unknown) as () => void | undefined };
+    return { resizeHandler: undefined as unknown as () => void | undefined };
   },
   computed: {
     isWhite(): boolean {

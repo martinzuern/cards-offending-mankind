@@ -19,7 +19,8 @@ module.exports = {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-empty': ['error', { allowEmptyCatch: true }],
-    '@typescript-eslint/no-unused-vars': 'error',
+    '@typescript-eslint/no-unused-vars': 'warn',
+    'vue/multi-word-component-names': 'warn',
   },
   overrides: [
     {

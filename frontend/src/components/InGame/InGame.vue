@@ -107,7 +107,7 @@ export default Vue.extend({
           });
         store.commit.setSocket(socket);
       } catch (error) {
-        this.error = error;
+        this.error = error as Error;
       }
     },
     closeSocket(): void {
