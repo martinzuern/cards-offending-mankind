@@ -91,7 +91,7 @@ export default Vue.extend({
         if (response.data.game.status === 'ended')
           this.errors.push('You cannot join this game as it has already ended.');
         this.game = response.data.game;
-      } catch (err) {
+      } catch (err: any) {
         if ([404, 400].includes(err?.response?.status)) this.errors.push('Game not found');
         else this.errors.push(err.toString());
       }

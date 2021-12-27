@@ -19,7 +19,7 @@ import {
   MessagePlayerJoined,
   GameState,
 } from '@/types';
-import axios from '@/helpers/api.ts';
+import axios from '@/helpers/api';
 
 export interface State {
   packs: PackInformation[];
