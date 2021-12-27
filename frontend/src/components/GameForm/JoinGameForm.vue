@@ -47,6 +47,7 @@ import GameForm from './GameForm.vue';
 import { Game, CreatePlayer, MessageGetGame, MessageJoinGame, UUID } from '@/types';
 import axios from '@/helpers/api';
 import store from '@/store';
+import { AxiosError } from 'axios';
 
 export default Vue.extend({
   name: 'JoinGameForm',
@@ -91,9 +92,9 @@ export default Vue.extend({
         if (response.data.game.status === 'ended')
           this.errors.push('You cannot join this game as it has already ended.');
         this.game = response.data.game;
-      } catch (err: any) {
-        if ([404, 400].includes(err?.response?.status)) this.errors.push('Game not found');
-        else this.errors.push(err.toString());
+      } catch (err) {
+        if ([404, 400].includes((err as AxiosError)?.response?.status || -1)) this.errors.push('Game not found');
+        else this.errors.push((err as Error).toString());
       }
     },
     onSubmit(): void {
