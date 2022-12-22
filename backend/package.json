@@ -30,7 +30,7 @@
     "handy-redis": "^2.1.0",
     "helmet": "^4.4.1",
     "json-against-humanity": "martinzuern/json-against-humanity",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "lodash": "^4.17.21",
     "pino": "^6.11.2",
     "redis": "^3.1.0",
